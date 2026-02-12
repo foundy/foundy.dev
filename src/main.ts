@@ -1,6 +1,7 @@
 import './style.css';
 
 interface Status {
+  identity: string;
   focus: string;
   experiment: string;
   updatedAt: string;
@@ -22,7 +23,7 @@ function formatDate(dateStr: string): string {
 
 function spawnParticles(card: HTMLElement): void {
   const rect = card.getBoundingClientRect();
-  const count = 8 + Math.floor(Math.random() * 5); // 8–12 particles
+  const count = 10 + Math.floor(Math.random() * 5); // 10–15 particles
 
   for (let i = 0; i < count; i++) {
     const particle = document.createElement('span');
@@ -40,12 +41,12 @@ function spawnParticles(card: HTMLElement): void {
 
     // Random outward direction
     const angle = Math.atan2(y - rect.height / 2, x - rect.width / 2) + (Math.random() - 0.5) * 0.8;
-    const distance = 30 + Math.random() * 50;
+    const distance = 40 + Math.random() * 60;
     const dx = Math.cos(angle) * distance;
     const dy = Math.sin(angle) * distance;
     const size = 2 + Math.random() * 2.5;
-    const duration = 0.4 + Math.random() * 0.35;
-    const delay = Math.random() * 0.15;
+    const duration = 0.5 + Math.random() * 0.4;
+    const delay = Math.random() * 0.1;
 
     particle.style.cssText = `
       left: ${x}px;
@@ -76,6 +77,10 @@ function render(status: Status): void {
       <div class="detail">
         <div class="detail-inner">
           <div class="detail-divider"></div>
+          <div class="detail-row">
+            <span class="detail-label">origin</span>
+            <span class="detail-value">${status.identity}</span>
+          </div>
           <div class="detail-row">
             <span class="detail-label">focus</span>
             <span class="detail-value">${status.focus}</span>
