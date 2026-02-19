@@ -101,7 +101,8 @@ body::before {
   z-index: -2;
 }
 
-.card:hover {
+.card:hover,
+.card.expanded {
   transform: scale(1.025) translateY(-2px);
   border-color: rgba(167, 139, 250, 0.18);
   box-shadow:
@@ -110,13 +111,15 @@ body::before {
     0 0 0 1px rgba(167, 139, 250, 0.06);
 }
 
-.card:hover::before {
+.card:hover::before,
+.card.expanded::before {
   background: radial-gradient(ellipse at 50% 0%,
       var(--glow-hover),
       transparent 70%);
 }
 
-.card:hover::after {
+.card:hover::after,
+.card.expanded::after {
   opacity: 1;
 }
 
@@ -184,7 +187,8 @@ body::before {
   overflow: hidden;
 }
 
-.card:hover .detail {
+.card:hover .detail,
+.card.expanded .detail {
   grid-template-rows: 1fr;
   opacity: 1;
   margin-top: 1.5rem;
@@ -198,7 +202,8 @@ body::before {
   transition: width 0.4s var(--ease) 0.15s;
 }
 
-.card:hover .detail-divider {
+.card:hover .detail-divider,
+.card.expanded .detail-divider {
   width: 48px;
 }
 
@@ -215,21 +220,25 @@ body::before {
     transform 0.35s var(--ease);
 }
 
-.card:hover .detail-row {
+.card:hover .detail-row,
+.card.expanded .detail-row {
   opacity: 1;
   transform: translateY(0);
 }
 
 /* Staggered fade-in for each row */
-.card:hover .detail-row:nth-child(2) {
+.card:hover .detail-row:nth-child(2),
+.card.expanded .detail-row:nth-child(2) {
   transition-delay: 0.08s;
 }
 
-.card:hover .detail-row:nth-child(3) {
+.card:hover .detail-row:nth-child(3),
+.card.expanded .detail-row:nth-child(3) {
   transition-delay: 0.16s;
 }
 
-.card:hover .detail-row:nth-child(4) {
+.card:hover .detail-row:nth-child(4),
+.card.expanded .detail-row:nth-child(4) {
   transition-delay: 0.24s;
 }
 
@@ -282,31 +291,49 @@ body::before {
     width: calc(100vw - 2rem);
     max-width: 400px;
     padding: 2rem 1.5rem;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .statement {
     font-size: 0.95rem;
   }
 
-  /* Always show detail on touch devices */
-  .detail {
-    grid-template-rows: 1fr;
-    opacity: 1;
-    margin-top: 1.5rem;
-  }
-
-  .detail-divider {
-    width: 48px;
-  }
-
-  .detail-row {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* Disable hover scale on touch */
+  /* Disable hover-based expansion on touch devices */
   .card:hover {
     transform: none;
+    border-color: var(--card-border);
+    box-shadow: none;
+  }
+
+  .card:hover::before {
+    background: radial-gradient(ellipse at 50% 0%,
+        var(--glow),
+        transparent 70%);
+  }
+
+  .card:hover::after {
+    opacity: 0;
+  }
+
+  .card:hover .detail {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    margin-top: 0;
+  }
+
+  .card:hover .detail-row {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  .card:hover .detail-divider {
+    width: 32px;
+  }
+
+  /* Touch-toggle: .expanded class drives expansion on mobile */
+  .card.expanded {
+    transform: scale(1.015) translateY(-1px);
   }
 }
 

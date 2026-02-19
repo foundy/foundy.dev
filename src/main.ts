@@ -99,7 +99,19 @@ function render(status: Status): void {
   `;
 
   const card = app.querySelector<HTMLDivElement>('.card')!;
-  card.addEventListener('mouseenter', () => spawnParticles(card));
+  const isTouchDevice = window.matchMedia('(hover: none)').matches;
+
+  if (isTouchDevice) {
+    card.addEventListener('click', () => {
+      const willExpand = !card.classList.contains('expanded');
+      card.classList.toggle('expanded');
+      if (willExpand) {
+        spawnParticles(card);
+      }
+    });
+  } else {
+    card.addEventListener('mouseenter', () => spawnParticles(card));
+  }
 }
 
 loadStatus().then(render);
