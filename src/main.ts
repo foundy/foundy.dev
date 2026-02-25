@@ -102,11 +102,22 @@ function render(status: Status): void {
   const isTouchDevice = window.matchMedia('(hover: none)').matches;
 
   if (isTouchDevice) {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (event) => {
+      event.stopPropagation();
       const willExpand = !card.classList.contains('expanded');
-      card.classList.toggle('expanded');
+      card.classList.add('expanded');
       if (willExpand) {
         spawnParticles(card);
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+      if (!card.contains(target)) {
+        card.classList.remove('expanded');
       }
     });
   } else {

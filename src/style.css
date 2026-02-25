@@ -300,34 +300,34 @@ body::before {
   }
 
   /* Disable hover-based expansion on touch devices */
-  .card:hover {
+  .card:hover:not(.expanded) {
     transform: none;
     border-color: var(--card-border);
     box-shadow: none;
   }
 
-  .card:hover::before {
+  .card:hover:not(.expanded)::before {
     background: radial-gradient(ellipse at 50% 0%,
         var(--glow),
         transparent 70%);
   }
 
-  .card:hover::after {
+  .card:hover:not(.expanded)::after {
     opacity: 0;
   }
 
-  .card:hover .detail {
+  .card:hover:not(.expanded) .detail {
     grid-template-rows: 0fr;
     opacity: 0;
     margin-top: 0;
   }
 
-  .card:hover .detail-row {
+  .card:hover:not(.expanded) .detail-row {
     opacity: 0;
     transform: translateY(4px);
   }
 
-  .card:hover .detail-divider {
+  .card:hover:not(.expanded) .detail-divider {
     width: 32px;
   }
 
