@@ -1,0 +1,36 @@
+{
+  "identity": "foundy",
+  "tagline": "I build systems.\nNow I build with AI.",
+  "nodes": [
+    {
+      "id": "foundy-dev",
+      "title": "foundy.dev",
+      "description": "Personal constellation site",
+      "tech": ["TypeScript", "Vite"],
+      "ai": "Claude",
+      "status": "live",
+      "url": "https://foundy.dev",
+      "date": "2026-02"
+    },
+    {
+      "id": "ai-code-review",
+      "title": "AI Code Review",
+      "description": "LLM-driven code review pipeline",
+      "tech": ["Python", "OpenAI API"],
+      "ai": "GPT-4o",
+      "status": "experiment",
+      "connections": ["foundy-dev"],
+      "date": "2026-02"
+    },
+    {
+      "id": "vibe-ui",
+      "title": "Vibe UI",
+      "description": "Component library built entirely with AI",
+      "tech": ["React", "Tailwind"],
+      "ai": "Claude",
+      "status": "building",
+      "connections": ["foundy-dev", "ai-code-review"],
+      "date": "2026-03"
+    }
+  ]
+}
