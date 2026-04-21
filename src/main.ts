@@ -39,7 +39,7 @@ interface Signal {
 
 const SPRING_K = 0.085;
 const DAMPING = 0.74;
-const PUSH = 380;
+const PUSH = 160;
 const FLOAT = { x: 6, y: 11 };
 const SIG_INTERVAL = 2400;
 
@@ -314,7 +314,7 @@ async function main() {
       pushNode(node.id, tx, ty);
       burstSignals(node.id);
       spawnParticles(scene, p.x, p.y, col(node.ai));
-      showDetail(panel, node);
+      setTimeout(() => showDetail(panel, node), 420);
     };
 
     el.addEventListener('click', e => {

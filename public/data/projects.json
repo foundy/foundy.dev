@@ -5,7 +5,7 @@
     {
       "id": "env-ai",
       "title": "AI Dev Environment",
-      "description": "개발 환경 전체를 AI로 구성 및 검증. dotfiles, shell config, 툴체인을 Claude Code로 관리하고 자동화된 check 스크립트로 상태를 추적.",
+      "description": "Entire dev setup managed by Claude Code — dotfiles, shell, toolchain, all verified by a check script.",
       "tech": ["Claude Code", "zsh", "Homebrew", "bash"],
       "ai": "Claude",
       "status": "live",
@@ -15,7 +15,7 @@
     {
       "id": "remote-ai",
       "title": "Remote AI Agent",
-      "description": "Discord를 통해 원격으로 AI에게 작업을 위임. Claude 에이전트가 터미널에서 실행 중이고, 메시지를 받아 코드 수정·분석·검색까지 비동기로 처리.",
+      "description": "Delegate tasks to Claude via Discord. The agent runs in the terminal and handles code edits, analysis, and search asynchronously.",
       "tech": ["Claude Code", "Discord MCP", "MCP Server"],
       "ai": "Claude",
       "status": "live",
@@ -25,7 +25,7 @@
     {
       "id": "company-analysis",
       "title": "AI Codebase Analysis",
-      "description": "회사 프론트엔드 프로젝트를 AI로 분석하고 기능 개발에 적용. 레거시 코드 파악부터 PR 리뷰, 리팩토링 계획까지 AI 주도로 진행.",
+      "description": "AI-driven analysis of the company frontend — from legacy code understanding to PR reviews and refactor planning.",
       "tech": ["Claude", "Cursor", "TypeScript", "React"],
       "ai": "Claude",
       "status": "building",
@@ -35,7 +35,7 @@
     {
       "id": "ai-scheduling",
       "title": "AI Scheduling",
-      "description": "Google Calendar와 AI를 연동해 일정을 자동으로 조율. 의도 기반으로 요청하면 슬롯 탐색부터 이벤트 생성까지 에이전트가 처리.",
+      "description": "Intent-based scheduling with Google Calendar. The agent finds open slots and creates events on request.",
       "tech": ["Gemini", "Google Calendar API", "MCP"],
       "ai": "Gemini",
       "status": "experiment",
@@ -45,7 +45,7 @@
     {
       "id": "game-ai",
       "title": "Game AI Analyzer",
-      "description": "게임 플레이 데이터와 패턴을 AI로 분석하는 도구. 전략 최적화, 메타 분석, 상대 패턴 인식을 AI 모델로 처리.",
+      "description": "Analyzes gameplay data to surface strategy insights, meta trends, and opponent patterns.",
       "tech": ["OpenAI", "ChatGPT", "Python"],
       "ai": "OpenAI",
       "status": "experiment",
