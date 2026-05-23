@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.7 Safe Tap Scrim Fix</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.5-appstore-close-flow.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+
+  function inject(){
+    var doc=frame.contentDocument;
+    if(!doc)return;
+
+    if(!doc.getElementById('v20-0-7-safe-style')){
+      var style=doc.createElement('style');
+      style.id='v20-0-7-safe-style';
+      style.textContent=[
+        '.scrim:not(.visible){background:rgba(247,241,232,0)!important;pointer-events:none!important;}',
+        '.card.promoted:not(.pulling):not(.deck-frame){transform-origin:top left!important;}',
+        '.card.promoted.pulling{transform-origin:center top!important;}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+
+    function isDetailOpen(){
+      return !!doc.querySelector('.card.promoted') || !!doc.querySelector('.app.detail-open');
+    }
+
+    function getIdleActiveCard(){
+      var cards=[].slice.call(doc.querySelectorAll('.deck .card'));
+      if(!cards.length)return null;
+      var active=null;
+      var maxZ=-Infinity;
+      cards.forEach(function(card){
+        var z=parseInt(card.style.zIndex || getComputedStyle(card).zIndex || '0',10) || 0;
+        if(z>maxZ){maxZ=z;active=card;}
+      });
+      return active;
+    }
+
+    function patchDeckPointerTargets(){
+      if(isDetailOpen())return;
+      var active=getIdleActiveCard();
+      doc.querySelectorAll('.deck .card').forEach(function(card){
+        card.style.pointerEvents = card===active ? 'auto' : 'none';
+      });
+    }
+
+    function clearPullArtifacts(){
+      var scrim=doc.getElementById('scrim');
+      if(scrim && !scrim.classList.contains('visible')){
+        scrim.style.background='';
+        scrim.style.transition='';
+      }
+      doc.querySelectorAll('.card.promoted:not(.pulling):not(.deck-frame)').forEach(function(card){
+        card.style.transformOrigin='top left';
+      });
+    }
+
+    function patch(){
+      patchDeckPointerTargets();
+      clearPullArtifacts();
+    }
+
+    if(!doc.__v2007SafePatch){
+      doc.__v2007SafePatch=true;
+      doc.addEventListener('touchend',function(){
+        setTimeout(patch,0);
+        setTimeout(patch,280);
+        setTimeout(patch,560);
+      },true);
+      doc.addEventListener('pointerup',function(){
+        setTimeout(patch,0);
+        setTimeout(patch,260);
+      },false);
+      new MutationObserver(function(){setTimeout(patch,0)}).observe(doc.documentElement,{attributes:true,subtree:true,attributeFilter:['class','style']});
+    }
+
+    patch();
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,300);
+})();
+</script>
+</body>
+</html>
