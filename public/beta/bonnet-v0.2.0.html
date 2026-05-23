@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Bonnet Beta v0.2.0</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/beta/bonnet-v0.1.0.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+  var data={
+    'Ivory Crochet Bonnet':{tone:'beige',name:'Ivory Crochet Bonnet',front:'/beta/assets/bonnet-beige-front.webp',right:'/beta/assets/bonnet-beige-right.webp',left:'/beta/assets/bonnet-beige-left.webp',back:'/beta/assets/bonnet-beige-back.webp',lead:'A soft ivory bonnet made for quiet everyday moments.',rightText:'The side line keeps the shape gentle around the face.',leftText:'Handmade stitches give each piece a calm, warm texture.',backText:'The back view shows the rounded shape and neat finish.'},
+    'Red Crochet Bonnet':{tone:'red',name:'Red Crochet Bonnet',front:'/beta/assets/bonnet-red-front.webp',right:'/beta/assets/bonnet-red-right.webp',left:'/beta/assets/bonnet-red-left.webp',back:'/beta/assets/bonnet-red-back.webp',lead:'A vivid red bonnet that adds a small point of charm.',rightText:'From the side, the color frames the face clearly.',leftText:'The knitted texture keeps the bright color feeling soft.',backText:'The back shape stays simple, round, and tidy.'},
+    'Blue Crochet Bonnet':{tone:'skyblue',name:'Sky Blue Crochet Bonnet',front:'/beta/assets/bonnet-skyblue-front.webp',right:'/beta/assets/bonnet-skyblue-right.webp',left:'/beta/assets/bonnet-skyblue-left.webp',back:'/beta/assets/bonnet-skyblue-back.webp',lead:'A sky blue bonnet with a clean and airy mood.',rightText:'The side silhouette makes the light color feel delicate.',leftText:'The handmade surface adds softness to the cool tone.',backText:'The back view completes the calm rounded look.'},
+    'Green Crochet Bonnet':{tone:'green',name:'Green Crochet Bonnet',front:'/beta/assets/bonnet-green-front.webp',right:'/beta/assets/bonnet-green-right.webp',left:'/beta/assets/bonnet-green-left.webp',back:'/beta/assets/bonnet-green-back.webp',lead:'A fresh green bonnet with a natural handmade feel.',rightText:'The side view shows a neat shape without looking stiff.',leftText:'Each stitch gives the color a soft, organic texture.',backText:'The back finish keeps the overall shape balanced.'},
+    'Yellow Crochet Bonnet':{tone:'yellow',name:'Yellow Crochet Bonnet',front:'/beta/assets/bonnet-yellow-front.webp',right:'/beta/assets/bonnet-yellow-right.webp',left:'/beta/assets/bonnet-yellow-left.webp',back:'/beta/assets/bonnet-yellow-back.webp',lead:'A warm yellow bonnet made for a bright little detail.',rightText:'The side angle shows the bonnet wrapping gently around the head.',leftText:'The handmade texture keeps the yellow tone warm, not sharp.',backText:'The back view highlights the soft round volume.'}
+  };
+
+  Object.keys(data).forEach(function(key){['front','right','left','back'].forEach(function(k){var img=new Image();img.src=data[key][k];});});
+
+  function getDeepDoc(){
+    var doc=frame.contentDocument;
+    var guard=0;
+    while(doc&&guard<10){
+      var inner=doc.querySelector('iframe');
+      if(!inner||!inner.contentDocument)break;
+      doc=inner.contentDocument;
+      guard++;
+    }
+    return doc;
+  }
+
+  function injectStyle(doc){
+    if(doc.getElementById('beta-v0-2-0-style'))return;
+    var style=doc.createElement('style');
+    style.id='beta-v0-2-0-style';
+    style.textContent=[
+      'header{padding-top:2px!important}',
+      '.brand-logo{text-align:center;line-height:1;margin:0 auto 4px;}',
+      '.brand-title{font-family:"Snell Roundhand","Brush Script MT","Segoe Script",cursive;font-size:38px;font-weight:500;letter-spacing:-.04em;color:#2a211b;}',
+      '.brand-sub{margin-top:8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:11px;font-weight:800;letter-spacing:.22em;color:rgba(42,33,27,.58);}',
+      '.brand-sub .ver{letter-spacing:0;font-weight:700;color:rgba(42,33,27,.42);margin-left:6px;}',
+      '.controls{min-height:46px!important;gap:16px!important;transform:translateY(-18px);}',
+      '.btn{min-width:46px!important;width:46px!important;height:46px!important;padding:0!important;border-radius:999px!important;font-size:24px!important;line-height:46px!important;display:inline-grid!important;place-items:center!important;background:rgba(255,255,255,.78)!important;color:#2a211b!important;border:1px solid rgba(42,33,27,.1)!important;box-shadow:0 10px 24px rgba(42,33,27,.10)!important;}',
+      '.btn.primary{background:#2a211b!important;color:#fff!important;}',
+      '.pager{transform:translateY(-18px);}',
+      '.status{display:none!important;}',
+      '.detail-story-image{width:100%;display:block;border-radius:24px;margin:24px 0 14px;box-shadow:0 14px 36px rgba(42,33,27,.10);}',
+      '.detail-body .story-copy{font-size:15px!important;line-height:1.65!important;color:rgba(42,33,27,.72)!important;margin:0 0 12px!important;}',
+      '.detail-body .story-kicker{font-size:11px;font-weight:900;letter-spacing:.18em;color:rgba(42,33,27,.42);margin:24px 0 8px;text-transform:uppercase;}',
+      '.card.promoted.closing .detail-hero,.card.promoted.deck-frame .detail-hero{height:100%!important;min-height:0!important;}',
+      '.card.promoted.closing .hero,.card.promoted.deck-frame .hero{inset:0!important;}'
+    ].join('\n');
+    doc.head.appendChild(style);
+  }
+
+  function patchHeader(doc){
+    var header=doc.querySelector('header');
+    if(!header||header.__betaV020Header)return;
+    header.__betaV020Header=true;
+    header.innerHTML='<div class="brand-logo"><div class="brand-title">Baby Bonnet</div><div class="brand-sub">HANDMADE <span class="ver">(v0.2.0)</span></div></div>';
+  }
+
+  function patchControls(doc){
+    var prev=doc.getElementById('prevBtn');
+    var next=doc.getElementById('nextBtn');
+    if(prev)prev.textContent='‹';
+    if(next)next.textContent='›';
+  }
+
+  function patchImages(doc){
+    doc.querySelectorAll('img.product-img').forEach(function(img){
+      var key=img.getAttribute('alt')||'';
+      var item=data[key];
+      if(!item)return;
+      if(img.getAttribute('src')!==item.front)img.setAttribute('src',item.front);
+    });
+  }
+
+  function patchDetail(doc){
+    var promoted=doc.querySelector('.card.promoted');
+    if(!promoted)return;
+    var title=promoted.querySelector('.copy h2');
+    var key=title?title.textContent:'';
+    var item=data[key];
+    if(!item)return;
+    var body=promoted.querySelector('.detail-body');
+    if(!body||body.__betaV020Story)return;
+    body.__betaV020Story=true;
+    body.innerHTML='<h3>'+item.name+'</h3><p class="story-copy">'+item.lead+'</p><div class="story-kicker">Side view</div><img class="detail-story-image" src="'+item.right+'" alt="'+item.name+' right view"><p class="story-copy">'+item.rightText+'</p><div class="story-kicker">Handmade detail</div><img class="detail-story-image" src="'+item.left+'" alt="'+item.name+' left view"><p class="story-copy">'+item.leftText+'</p><div class="story-kicker">Back finish</div><img class="detail-story-image" src="'+item.back+'" alt="'+item.name+' back view"><p class="story-copy">'+item.backText+'</p>';
+  }
+
+  function tick(){
+    var doc=getDeepDoc();
+    if(!doc)return;
+    injectStyle(doc);
+    patchHeader(doc);
+    patchControls(doc);
+    patchImages(doc);
+    patchDetail(doc);
+  }
+
+  frame.addEventListener('load',tick);
+  setInterval(tick,120);
+})();
+</script>
+</body>
+</html>
