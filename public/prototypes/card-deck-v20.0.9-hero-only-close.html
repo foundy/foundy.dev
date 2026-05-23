@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.9 Hero Only Close</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.7-safe-tap-scrim-fix.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+
+  function inject(){
+    var doc=frame.contentDocument;
+    if(!doc)return;
+
+    if(!doc.getElementById('v20-0-9-style')){
+      var style=doc.createElement('style');
+      style.id='v20-0-9-style';
+      style.textContent='.card.promoted.hero-only-close .detail-scroll{height:100%!important;overflow:hidden!important}.card.promoted.hero-only-close .detail-hero{height:100%!important;min-height:0!important}.card.promoted.hero-only-close .detail-body{display:none!important}.card.promoted.hero-only-close .copy h2{font-size:30px!important;line-height:1.02!important;letter-spacing:-.06em!important}.card.promoted.hero-only-close .copy p{font-size:13px!important;line-height:1.42!important}.card.promoted.hero-only-close .copy{left:24px!important;right:24px!important;bottom:24px!important}.scrim:not(.visible){background:rgba(247,241,232,0)!important;pointer-events:none!important}';
+      doc.head.appendChild(style);
+    }
+
+    function makeHeroOnly(card){
+      if(!card || card.__heroOnlyClose)return;
+      var hero=card.querySelector('.detail-hero');
+      if(!hero)return;
+      var rect=card.getBoundingClientRect();
+      var scroll=doc.createElement('div');
+      scroll.className='detail-scroll';
+      scroll.appendChild(hero.cloneNode(true));
+      card.__heroOnlyClose=true;
+      card.classList.add('hero-only-close');
+      card.style.transition='none';
+      card.style.width=rect.width+'px';
+      card.style.height=rect.height+'px';
+      card.style.transform='translate3d('+rect.left+'px,'+rect.top+'px,0) scale(1,1)';
+      while(card.firstChild) card.removeChild(card.firstChild);
+      card.appendChild(scroll);
+      card.offsetHeight;
+    }
+
+    function patchCloseButton(){
+      var btn=doc.getElementById('closeBtn');
+      if(!btn || btn.__heroOnlyClosePatch)return;
+      btn.__heroOnlyClosePatch=true;
+      btn.addEventListener('click',function(){
+        makeHeroOnly(doc.querySelector('.card.promoted'));
+      },true);
+    }
+
+    if(!doc.__heroOnlyCloseObserver){
+      doc.__heroOnlyCloseObserver=new MutationObserver(function(){
+        doc.querySelectorAll('.card.promoted.closing:not(.hero-only-close)').forEach(makeHeroOnly);
+      });
+      doc.__heroOnlyCloseObserver.observe(doc.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+    }
+
+    patchCloseButton();
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,300);
+})();
+</script>
+</body>
+</html>
