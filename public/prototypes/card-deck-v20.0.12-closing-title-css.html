@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.12 Closing Title CSS Fix</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.7-safe-tap-scrim-fix.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+
+  function getDeepDoc(){
+    var doc=frame.contentDocument;
+    var guard=0;
+    while(doc && guard<5){
+      var inner=doc.querySelector('iframe');
+      if(!inner || !inner.contentDocument) break;
+      doc=inner.contentDocument;
+      guard++;
+    }
+    return doc;
+  }
+
+  function inject(){
+    var doc=getDeepDoc();
+    if(!doc)return;
+
+    if(!doc.getElementById('v20-0-12-title-css-style')){
+      var style=doc.createElement('style');
+      style.id='v20-0-12-title-css-style';
+      style.textContent=[
+        '.card.promoted.deck-frame .detail-hero .copy h2,',
+        '.card.promoted.closing .detail-hero .copy h2{',
+        '  font-size:30px!important;',
+        '  line-height:1.02!important;',
+        '  letter-spacing:-.06em!important;',
+        '  transition:none!important;',
+        '}',
+        '.card.promoted.deck-frame .detail-hero .copy p,',
+        '.card.promoted.closing .detail-hero .copy p{',
+        '  font-size:13px!important;',
+        '  line-height:1.42!important;',
+        '  transition:none!important;',
+        '}',
+        '.card.promoted.deck-frame .detail-hero .copy,',
+        '.card.promoted.closing .detail-hero .copy{',
+        '  left:24px!important;',
+        '  right:24px!important;',
+        '  bottom:24px!important;',
+        '}',
+        '.scrim:not(.visible){',
+        '  background:rgba(247,241,232,0)!important;',
+        '  pointer-events:none!important;',
+        '}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,300);
+})();
+</script>
+</body>
+</html>
