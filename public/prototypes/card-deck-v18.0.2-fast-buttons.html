@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v18.0.2 Fast Buttons</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;touch-action:manipulation;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v18-pointer-gesture-fix.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+  var lastParentTouchEnd=0;
+
+  function isFastClickAllowed(target){
+    return !!(target && target.closest && target.closest('button,.btn,.controls,label,[role="button"],a'));
+  }
+
+  document.addEventListener('touchend',function(e){
+    if(isFastClickAllowed(e.target)) return;
+    var now=Date.now();
+    if(now-lastParentTouchEnd<350){
+      e.preventDefault();
+    }
+    lastParentTouchEnd=now;
+  },{capture:true,passive:false});
+
+  function inject(){
+    var doc=frame.contentDocument;
+    if(!doc)return;
+
+    var meta=doc.querySelector('meta[name="viewport"]');
+    if(!meta){
+      meta=doc.createElement('meta');
+      meta.name='viewport';
+      doc.head.appendChild(meta);
+    }
+    meta.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');
+
+    if(!doc.getElementById('v18-0-2-fast-buttons-style')){
+      var style=doc.createElement('style');
+      style.id='v18-0-2-fast-buttons-style';
+      style.textContent=[
+        'html,body{touch-action:manipulation!important;overscroll-behavior:none!important;-webkit-text-size-adjust:100%!important;}',
+        'button,.btn,.controls,.controls *{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;}',
+        '.app,header,.pager{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;}',
+        '.deck,.stage,.card{touch-action:none!important;}',
+        '.detail-scroll{touch-action:pan-y!important;}',
+        '*{-webkit-touch-callout:none;}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+
+    if(!doc.__v1802FastButtons){
+      doc.__v1802FastButtons=true;
+      var lastTouchEnd=0;
+
+      doc.addEventListener('touchend',function(e){
+        if(isFastClickAllowed(e.target)){
+          return;
+        }
+        var now=Date.now();
+        if(now-lastTouchEnd<350){
+          e.preventDefault();
+        }
+        lastTouchEnd=now;
+      },{capture:true,passive:false});
+
+      doc.addEventListener('gesturestart',function(e){e.preventDefault();},{capture:true,passive:false});
+      doc.addEventListener('gesturechange',function(e){e.preventDefault();},{capture:true,passive:false});
+      doc.addEventListener('gestureend',function(e){e.preventDefault();},{capture:true,passive:false});
+    }
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,500);
+})();
+</script>
+</body>
+</html>
