@@ -47,6 +47,8 @@ export interface HeroStats {
   frameMs: { n: number; p50: number; p90: number; p95: number; period: number };
   contextLosses: number;
   readyMs: number;
+  /** pointer force applied in the last ~0.6 s: 0 none, ~0.35 hover, 1 drag */
+  force: number;
 }
 
 export interface HeroHandle {
@@ -76,6 +78,8 @@ export async function mountHero(canvas: HTMLCanvasElement, options: HeroOptions)
   let dpr = 1;
   let idleUntil = 0;
   let lastFrame = -1;
+  let lastForce = 0;
+  let lastForceAt = -1e9;
   let readyMs = 0;
   const tierChanges: HeroStats['tierChanges'] = [];
 
@@ -181,7 +185,11 @@ export async function mountHero(canvas: HTMLCanvasElement, options: HeroOptions)
     frame(now) {
       const dt = clock.tick(now);
       const f = force(dt);
-      if (f.active > 0) idleUntil = Math.max(idleUntil, now + IDLE_MS);
+      if (f.active > 0) {
+        idleUntil = Math.max(idleUntil, now + IDLE_MS);
+        lastForce = f.active;
+        lastForceAt = now;
+      }
       pipeline.frame({ dt, time: clock.time, force: f });
       if (lastFrame >= 0 && now - lastFrame < 250) quality.push(now - lastFrame, now);
       lastFrame = now;
@@ -244,6 +252,7 @@ export async function mountHero(canvas: HTMLCanvasElement, options: HeroOptions)
         frameMs: quality.summary(),
         contextLosses: losses,
         readyMs,
+        force: performance.now() - lastForceAt < 600 ? lastForce : 0,
       };
     },
     dispose() {

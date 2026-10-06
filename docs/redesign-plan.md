@@ -133,6 +133,8 @@ Android는 실기기 테스트에서 빠지므로 품질 등급의 보수적 기
 
 **3단계 완료 노트 (구현 끝, 실기기 확인 대기).** raw WebGL2 ink 히어로를 `src/gl/`에 정식 구현했다. SDF는 `npm run bake:sdf`로 빌드타임 베이크(`public/gl/wordmark-sdf.png`, 커밋됨), 포스터 SVG는 같은 외곽선을 `<path>`로 그려 포스터↔캔버스가 모든 브라우저에서 정렬된다(정지 상태 평균 절대 차이 약 3/255). 홈의 렌더 블로킹 JS는 0, 초기 스크립트 1.6 KB gz, 히어로 청크 8.2 KB gz(지연 로드, 목표 15 KB). 품질 등급은 프레임 시간 기반 자동 조절, `?gl=none|webgl2` `?hud=1` `?stage=` `?tier=` 플래그 유지. Chromium/WebKit/Firefox 자동 검증(`scripts/hero/verify.mjs`) 통과. **남은 것:** iPhone Safari 실기기 확인(`docs/spike/device-checklist.md` 0절), 그 결과로 §6의 모바일 프레임/발열 기준 확정, 케이스 스터디의 mock 수치 교체. 상세 수치와 한계는 PR 본문 참고.
 
+**4단계 완료 노트 (구현 끝, 실기기 확인 대기).** Inspect 공통 코어(`src/lib/inspect/`: `registerInspectable`, 전역 상태, 이벤트, 제네릭 stages 패널)와 히어로 단계 해부를 구현했다. 토글 버튼은 정적 HTML이고 Inspect 청크는 첫 활성화(클릭/`I`) 또는 버튼 hover/focus 시 prefetch로 지연 로드된다(청크 약 3.6 KB gz, 예산 10 KB). 슬라이더 4단계(SDF/Warp/Flow/Ink) + 이전/다음 + 쉬운 영문 해설(aria-live는 이 영역 하나) + 개발자용 Details(tier, 시뮬 그리드, DPR, frame ms, 텍스처 포맷, 포인터 힘; 4회/초 이하, 낭독 안 함). 단계 전환은 연속 블렌딩 대신 140 ms 디핑 크로스페이드(마지막 스크럽 우선), reduced-motion에서는 즉시. Flow 단계는 셰이더 내 화살표 격자가 속도장을 보여주며 잉크는 계속 인터랙티브. GL이 없거나 reduced-motion이면 사전 렌더 정지 이미지(`public/gl/stages/*.webp`, 라이트/다크 8장, 각 50 KB 이하)를 포스터 위에 교체한다. 자동 검증: `scripts/inspect/verify.mjs`(Chromium/WebKit/Firefox 각 77~81개 체크), 스크린샷 `docs/screenshots/phase-4/`. **남은 것:** 카피 톤·시각 취향·iPhone 실기기 확인, 연속 블렌딩(스크럽 float) 여부 결정.
+
 **총 예상: 6~8주.** 범위를 줄여야 하면 빼는 순서: P2 → Lab 변수 조절 → 카드 Inspect(케이스 스터디 글로 대체).
 
 ## 8. 초안 대비 주요 변경

@@ -1,0 +1,213 @@
+/* Inspect: blueprint look. Imported by the Inspect chunk (runtime.ts); Astro folds it into the page CSS. Thin blue lines and
+   mono labels, tasteful: a column grid behind the page, bounds on headings under the pointer, a frame around the
+   hero, and the panel under it. Colours come from the --bp-* tokens, so dark mode follows. */
+
+body[data-inspect='on']::before {
+  content: '';
+  position: fixed;
+  inset-block: 0;
+  left: 50%;
+  width: min(var(--page-max), calc(100% - 2 * var(--gutter)));
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.2;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--bp-line-on-paper) 0 1px,
+    transparent 1px calc((100% - 11 * var(--col-gap)) / 12 + var(--col-gap))
+  );
+}
+
+body[data-inspect='on'] :is(h1, h2, h3, .statement, .lede):hover {
+  outline: 1px dashed var(--bp-line-on-paper);
+  outline-offset: 6px;
+}
+
+body[data-inspect='on'] .poster .stage {
+  outline: 1px solid var(--bp-line-on-paper);
+  outline-offset: 12px;
+}
+body[data-inspect='on'] .poster :is(.caption .mono, .inspect-head) {
+  color: var(--bp-line-on-paper);
+}
+
+/* the canvas dips instead of fading slowly while stages change */
+body[data-inspect='on'] .poster .hero-gl {
+  transition-duration: 140ms;
+}
+
+/* static stills used when GL is not running */
+.inspect-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  display: block;
+  opacity: 0;
+  background: var(--paper);
+  transition: opacity 140ms ease-out;
+  pointer-events: none;
+  user-select: none;
+}
+.inspect-still.in {
+  opacity: 1;
+}
+
+.inspect-panel {
+  margin-top: var(--space-l);
+  padding: var(--space-s);
+  border: 1px solid var(--bp-line-on-paper);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--bp-line-on-paper) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--bp-line-on-paper) 7%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+  display: grid;
+  gap: var(--space-s);
+}
+.inspect-head {
+  margin: 0;
+}
+.inspect-panel :focus-visible {
+  outline-color: var(--bp-line-on-paper);
+}
+/* wide screens: explanation on the left, developer numbers on the right, so hero + panel fit one screen */
+@media (min-width: 56rem) {
+  .inspect-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--space-l);
+    align-items: start;
+    margin-top: var(--space-m);
+  }
+  .inspect-head,
+  .inspect-controls {
+    grid-column: 1 / -1;
+  }
+}
+
+.inspect-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-xs);
+  align-items: start;
+}
+.inspect-step {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--bp-line-on-paper);
+  background: var(--paper);
+  color: var(--bp-line-on-paper);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+.inspect-step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.inspect-track {
+  min-width: 0;
+}
+.inspect-range {
+  display: block;
+  width: 100%;
+  height: 2.75rem;
+  margin: 0;
+  background: transparent;
+  accent-color: var(--bp-line-on-paper);
+  cursor: pointer;
+}
+.inspect-stops {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  margin: -0.25rem 0 0;
+  padding: 0;
+}
+.inspect-stop {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  width: 100%;
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+.inspect-n {
+  font-size: var(--step--2);
+  opacity: 0.8;
+}
+.inspect-stop[data-on] {
+  color: var(--bp-line-on-paper);
+  font-weight: 700;
+}
+
+.inspect-explain {
+  max-width: 44rem;
+}
+.inspect-title {
+  margin: 0 0 var(--space-3xs);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--bp-line-on-paper);
+  font-weight: 700;
+}
+.inspect-body {
+  margin: 0;
+  font-size: var(--step-1);
+  line-height: 1.35;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.inspect-details summary {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--bp-line-on-paper);
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+.inspect-dl {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3xs);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+.inspect-dl > div {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 11rem) 1fr;
+  gap: var(--space-xs);
+  padding-block: var(--space-3xs);
+  border-top: 1px solid color-mix(in srgb, var(--bp-line-on-paper) 35%, transparent);
+}
+.inspect-dl dt {
+  color: var(--ink-muted);
+}
+.inspect-dl dd {
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 30rem) {
+  .inspect-dl > div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .inspect-stop {
+    font-size: var(--step--2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inspect-still,
+  body[data-inspect='on'] .poster .hero-gl {
+    transition: none;
+  }
+}

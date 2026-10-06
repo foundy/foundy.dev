@@ -11,6 +11,7 @@
  *            ?tier=low|mid|high   ?t=<seconds> (freeze the shader clock)
  * With ?hud=1 the handle is exposed as window.__hero and timing marks are written (hero:chunk, hero:ready).
  */
+import { bridge } from '../lib/inspect/bridge';
 import type { HeroHandle } from './hero';
 
 declare global {
@@ -47,6 +48,7 @@ export function bootHero() {
     let hero: HeroHandle | undefined;
     let canvas: HTMLCanvasElement | undefined;
     const teardown = () => {
+      bridge.setHero(undefined);
       hero?.dispose();
       canvas?.remove();
       poster.classList.remove('gl-on', 'gl-instant', 'gl-done');
@@ -79,6 +81,7 @@ export function bootHero() {
         onFirstInteract: () => poster.classList.add('gl-instant'),
       });
       performance.mark('hero:ready');
+      bridge.setHero(hero);
       if (params.get('hud') === '1') window.__hero = hero;
 
       // two frames so the first image is really on screen before the poster lets go
