@@ -9,6 +9,12 @@ const work = defineCollection({
     summary: z.string(),
     order: z.number(),
     year: z.number(),
+    role: z.string(),
+    stack: z.array(z.string()),
+    /** Short line for the work index (falls back to summary). */
+    kicker: z.string().optional(),
+    /** MOCK: true while the entry holds placeholder copy and numbers. */
+    mock: z.boolean().default(false),
   }),
 });
 

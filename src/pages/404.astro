@@ -2,9 +2,25 @@
 import Base from '../layouts/Base.astro';
 ---
 
-<Base title="Not found">
-  <main>
-    <h1>404</h1>
-    <p>Nothing here. <a href="/">Back to foundy</a></p>
+<Base title="Not found" description="This page does not exist.">
+  <main id="main" class="wrap">
+    <p class="label">Error 404</p>
+    <h1>Nothing is printed here.</h1>
+    <p><a href="/">Back to the front page</a></p>
   </main>
 </Base>
+
+<style>
+  main {
+    display: grid;
+    gap: var(--space-m);
+    padding-block: var(--space-2xl);
+  }
+  h1 {
+    font-size: var(--step-5);
+    line-height: 0.96;
+    letter-spacing: -0.045em;
+    font-weight: 750;
+    max-width: 14ch;
+  }
+</style>

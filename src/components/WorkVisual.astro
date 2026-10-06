@@ -1,0 +1,257 @@
+---
+/**
+ * Static SVG compositions for the two case studies. No raster, no external
+ * images. Rendered on the index (large) and in the case study header, and
+ * shares a view-transition-name between the two via the `vtName` prop.
+ */
+interface Props {
+  slug: string;
+  vtName?: string;
+}
+const { slug, vtName } = Astro.props;
+
+const W = 800;
+const H = 500;
+
+/* ---------- hero-shader: four stage panels ---------- */
+const panelW = 172;
+const panelH = 300;
+const panelY = 70;
+const gap = (W - 4 * panelW - 2 * 24) / 3;
+const px = (i: number) => 24 + i * (panelW + gap);
+
+// 1. SDF contours: concentric rounded rects (a blob around a stem)
+const contours = Array.from({ length: 9 }, (_, i) => {
+  const d = i * 9;
+  return { x: 40 + 10 - d, y: 48 - d, w: 92 + 2 * d - 20, h: 200 + 2 * d - 40, r: 22 + d };
+});
+
+// 2. Domain warp: horizontal rules displaced by a wave
+const warpLines = Array.from({ length: 22 }, (_, i) => {
+  const y = 18 + i * 12.5;
+  let d = '';
+  for (let x = 0; x <= panelW; x += 6) {
+    const dy = Math.sin(x * 0.045 + i * 0.35) * 7 + Math.sin(x * 0.11 - i * 0.2) * 2.5;
+    d += `${x === 0 ? 'M' : 'L'}${x} ${(y + dy).toFixed(1)}`;
+  }
+  return d;
+});
+
+// 3. Flow field: integrate streamlines through a smooth angle field
+const angle = (x: number, y: number) =>
+  Math.sin(x * 0.028 + 1.3) * 1.4 + Math.cos(y * 0.022 - 0.4) * 1.2 + (x - y) * 0.004;
+const streams: string[] = [];
+for (let sy = 14; sy < panelH - 10; sy += 22) {
+  for (let sx = 10; sx < panelW; sx += 58) {
+    let x = sx + ((sy / 22) % 2) * 20;
+    let y = sy;
+    let d = `M${x.toFixed(1)} ${y.toFixed(1)}`;
+    for (let k = 0; k < 14; k++) {
+      const a = angle(x, y);
+      x += Math.cos(a) * 5.5;
+      y += Math.sin(a) * 5.5;
+      if (x < 0 || x > panelW || y < 0 || y > panelH) break;
+      d += `L${x.toFixed(1)} ${y.toFixed(1)}`;
+    }
+    streams.push(d);
+  }
+}
+
+// 4. Composite: ink strokes drawn with a filter
+
+const stages = [
+  ['01', 'SDF'],
+  ['02', 'Warp'],
+  ['03', 'Flow'],
+  ['04', 'Ink'],
+];
+const id = (n: string) => `wv-${slug}-${n}`;
+---
+
+<figure class="visual" style={vtName ? `view-transition-name: ${vtName}` : undefined}>
+  {
+    slug === 'hero-shader' && (
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Four panels showing the hero pipeline: signed distance contours, domain warp lines, flow field streamlines, and the finished ink composite.">
+        <defs>
+          <filter id={id('ink')} x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+        <rect class="bg" width={W} height={H} />
+        {stages.map(([n, label], i) => (
+          <g transform={`translate(${px(i)} ${panelY})`}>
+            <rect class="panel" width={panelW} height={panelH} />
+            <clipPath id={id(`c${i}`)}>
+              <rect width={panelW} height={panelH} />
+            </clipPath>
+            <g clip-path={`url(#${id(`c${i}`)})`}>
+              {i === 0 && (
+                <g class="bp" transform="translate(20 26)">
+                  {contours.map((c) => (
+                    <rect x={c.x - 10} y={c.y - 10} width={Math.max(c.w, 2)} height={Math.max(c.h, 2)} rx={c.r} />
+                  ))}
+                </g>
+              )}
+              {i === 1 && (
+                <g class="line">
+                  {warpLines.map((d) => (
+                    <path d={d} />
+                  ))}
+                </g>
+              )}
+              {i === 2 && (
+                <g class="line flow">
+                  {streams.map((d) => (
+                    <path d={d} />
+                  ))}
+                </g>
+              )}
+              {i === 3 && (
+                <g filter={`url(#${id('ink')})`} class="inkfill">
+                  <path d="M60 252 V104 C60 58 96 38 138 52" fill="none" stroke-width="30" stroke-linecap="round" />
+                  <rect x="34" y="118" width="88" height="26" rx="4" stroke="none" />
+                  <circle cx="112" cy="214" r="21" stroke="none" />
+                </g>
+              )}
+            </g>
+            <text class="cap" x="0" y={panelH + 22}>{n}</text>
+            <text class="cap strong" x="26" y={panelH + 22}>{label}</text>
+          </g>
+        ))}
+        {[0, 1, 2].map((i) => (
+          <path class="arrow" d={`M${px(i) + panelW + 4} ${panelY + panelH / 2} h${gap - 8} m-5 -4 l5 4 l-5 4`} />
+        ))}
+        <text class="cap" x="24" y="42">Hero pipeline</text>
+        <text class="cap" x={W - 24} y="42" text-anchor="end">4 stages / 1 image</text>
+      </svg>
+    )
+  }
+  {
+    slug === 'card-study' && (
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="A deck of three cards on the left and an expanded hero card on the right, with a downward dashed pull gesture and a close threshold line.">
+        <rect class="bg" width={W} height={H} />
+        {/* deck */}
+        <g class="card">
+          <rect x="60" y="150" width="210" height="270" rx="14" class="c3" />
+          <rect x="44" y="130" width="210" height="270" rx="14" class="c2" />
+          <rect x="28" y="110" width="210" height="270" rx="14" class="c1" />
+          <path class="bp" d="M52 150h120M52 172h160M52 194h90" />
+          <rect x="52" y="320" width="62" height="22" rx="11" class="pill" />
+        </g>
+        <text class="cap" x="28" y="446">deck</text>
+
+        {/* hero card */}
+        <g class="card">
+          <rect x="330" y="70" width="430" height="330" rx="18" class="c1" />
+          <rect x="330" y="70" width="430" height="150" rx="18" class="hero" />
+          <path class="bp" d="M360 262h250M360 288h330M360 314h200" />
+        </g>
+        <text class="cap" x="330" y="446">hero</text>
+
+        {/* threshold + pull trajectory */}
+        <path class="thresh" d="M310 330h470" />
+        <text class="cap accent" x="780" y="322" text-anchor="end">close threshold</text>
+        <path class="trail" d="M545 150 C 545 190, 552 250, 548 346" />
+        <circle class="dot" cx="548" cy="346" r="7" />
+        <path class="trail solid" d="M538 106 v22 m-6 -8 l6 8 l6 -8" />
+        <text class="cap strong" x="574" y="372">v12 &middot; 1.8 px/ms</text>
+        <text class="cap" x="574" y="390">92 px travel &rarr; close</text>
+      </svg>
+    )
+  }
+</figure>
+
+<style>
+  .visual {
+    margin: 0;
+    width: 100%;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 8 / 5;
+    border: 1px solid var(--rule);
+  }
+  .bg {
+    fill: var(--paper-sunk);
+  }
+  .panel {
+    fill: var(--paper);
+    stroke: var(--rule);
+  }
+  .bp rect,
+  .bp,
+  .bp path {
+    fill: none;
+    stroke: var(--bp-line-on-paper);
+    stroke-width: 1.1;
+  }
+  .line path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.1;
+    opacity: 0.8;
+  }
+  .flow path {
+    stroke-width: 1.4;
+    stroke-linecap: round;
+  }
+  .inkfill {
+    fill: var(--ink);
+    stroke: var(--ink);
+  }
+  .cap {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    fill: var(--ink-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .cap.strong {
+    fill: var(--ink);
+  }
+  .cap.accent {
+    fill: var(--accent);
+  }
+  .arrow {
+    fill: none;
+    stroke: var(--ink-muted);
+    stroke-width: 1.2;
+  }
+  .card .c1,
+  .card .c2,
+  .card .c3 {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1.4;
+  }
+  .card .c2,
+  .card .c3 {
+    fill: var(--paper-sunk);
+  }
+  .card .hero {
+    fill: var(--ink);
+    stroke: var(--ink);
+  }
+  .card .pill {
+    fill: var(--accent);
+  }
+  .thresh {
+    stroke: var(--accent);
+    stroke-width: 1.2;
+    stroke-dasharray: 5 5;
+  }
+  .trail {
+    fill: none;
+    stroke: var(--bp-line-on-paper);
+    stroke-width: 1.6;
+    stroke-dasharray: 3 5;
+  }
+  .trail.solid {
+    stroke-dasharray: none;
+  }
+  .dot {
+    fill: var(--accent);
+  }
+</style>

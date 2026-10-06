@@ -1,22 +1,260 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import WorkVisual from '../../components/WorkVisual.astro';
+import '../../styles/prose.css';
 
 export async function getStaticPaths() {
-  const work = await getCollection('work');
-  return work.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+  const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+  return work.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: {
+      entry,
+      prev: work[i - 1] ?? null,
+      next: work[i + 1] ?? null,
+      index: i,
+      total: work.length,
+    },
+  }));
 }
 
-const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { entry, prev, next, index, total } = Astro.props;
+const { Content, headings } = await render(entry);
+const toc = headings.filter((h) => h.depth === 2);
+const { data } = entry;
 ---
 
-<Base title={entry.data.title} description={entry.data.summary}>
-  <main>
-    <p><a href="/">&larr; foundy</a></p>
-    <h1>{entry.data.title}</h1>
-    <p class="mono">{entry.data.year}</p>
-    <p>{entry.data.summary}</p>
-    <Content />
+<Base
+  title={data.title}
+  description={data.summary}
+  ogImage={`/og/${entry.id}.png`}
+  ogImageAlt={`${data.title}, case study cover`}
+  ogType="article"
+>
+  <main id="main">
+    <article>
+      <header class="head wrap">
+        <p class="crumb label">
+          <a href="/#work">Work</a>
+          <span aria-hidden="true"> / </span>
+          <span>{String(index + 1).padStart(2, '0')} of {String(total).padStart(2, '0')}</span>
+          {data.mock && <span class="badge">Mock content</span>}
+        </p>
+
+        <h1 style={`view-transition-name: work-title-${entry.id}`}>{data.title}</h1>
+        <p class="summary">{data.summary}</p>
+
+        <dl class="meta">
+          <div>
+            <dt class="label">Year</dt>
+            <dd class="mono">{data.year}</dd>
+          </div>
+          <div>
+            <dt class="label">Role</dt>
+            <dd>{data.role}</dd>
+          </div>
+          <div class="stack">
+            <dt class="label">Stack</dt>
+            <dd class="mono">{data.stack.join(', ')}</dd>
+          </div>
+        </dl>
+
+        <div class="cover">
+          <WorkVisual slug={entry.id} vtName={`work-visual-${entry.id}`} />
+        </div>
+      </header>
+
+      <div class="body wrap grid">
+        <nav class="toc" aria-label="Contents">
+          <p class="label">Contents</p>
+          <ol>
+            {
+              toc.map((h, i) => (
+                <li>
+                  <a href={`#${h.slug}`}>
+                    <span class="mono">{String(i + 1).padStart(2, '0')}</span> {h.text}
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+
+        <div class="prose">
+          <Content />
+        </div>
+      </div>
+    </article>
+
+    <nav class="pager wrap" aria-label="More case studies">
+      {
+        prev ? (
+          <a class="prev" href={`/work/${prev.id}`} rel="prev">
+            <span class="label">Previous</span>
+            <span class="t">{prev.data.title}</span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        next ? (
+          <a class="next" href={`/work/${next.id}`} rel="next">
+            <span class="label">Next</span>
+            <span class="t">{next.data.title}</span>
+          </a>
+        ) : (
+          <a class="next" href="/lab">
+            <span class="label">Next</span>
+            <span class="t">Lab</span>
+          </a>
+        )
+      }
+    </nav>
   </main>
 </Base>
+
+<style>
+  .head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    row-gap: var(--space-m);
+    padding-top: var(--space-l);
+    padding-bottom: var(--space-2xl);
+  }
+  .head > * {
+    grid-column: 1 / -1;
+  }
+  .crumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-2xs);
+    align-items: center;
+  }
+  .crumb a {
+    text-decoration: none;
+  }
+  .crumb a:hover {
+    text-decoration: underline;
+  }
+  h1 {
+    grid-column: 1 / span 10;
+    font-size: var(--step-5);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    font-weight: 750;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .summary {
+    grid-column: 1 / span 7;
+    font-size: var(--step-2);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--ink-soft);
+    text-wrap: balance;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: 6rem 1fr 2fr;
+    gap: var(--space-s) var(--col-gap);
+    margin: 0;
+    padding-block: var(--space-s);
+    border-block: 1px solid var(--rule);
+  }
+  .meta div {
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+  }
+  .meta dd {
+    margin: 0;
+  }
+  .cover {
+    margin-top: var(--space-s);
+  }
+
+  .body {
+    row-gap: var(--space-l);
+    padding-bottom: var(--space-3xl);
+  }
+  .toc {
+    grid-column: 1 / span 3;
+    align-self: start;
+    position: sticky;
+    top: var(--space-m);
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .toc ol {
+    list-style: none;
+    display: grid;
+    gap: var(--space-2xs);
+    font-size: var(--step--1);
+  }
+  .toc a {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+  .toc a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+  }
+  .prose {
+    grid-column: 5 / span 7;
+    min-width: 0;
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--col-gap);
+    padding-block: var(--space-xl);
+    border-top: 1px solid var(--rule);
+  }
+  .pager a {
+    display: grid;
+    gap: var(--space-2xs);
+    text-decoration: none;
+    padding-block: var(--space-xs);
+  }
+  .pager .next {
+    text-align: right;
+    justify-items: end;
+  }
+  .pager .t {
+    font-size: var(--step-3);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .pager a:hover .t {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+
+  @media (max-width: 56rem) {
+    h1,
+    .summary,
+    .toc,
+    .prose {
+      grid-column: 1 / -1;
+    }
+    .toc {
+      position: static;
+      padding-bottom: var(--space-s);
+      border-bottom: 1px solid var(--rule);
+    }
+    .meta {
+      grid-template-columns: 1fr 1fr;
+    }
+    .meta .stack {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

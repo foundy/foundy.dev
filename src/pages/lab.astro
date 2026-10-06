@@ -1,11 +1,164 @@
 ---
 import Base from '../layouts/Base.astro';
+import { labEntries, mock } from '../data/site';
 ---
 
-<Base title="Lab" description="Experiments in graphics and interaction.">
-  <main>
-    <p><a href="/">&larr; foundy</a></p>
-    <h1>Lab</h1>
-    <p>Coming soon</p>
+<Base
+  title="Lab"
+  description="Four design decisions from the card interaction study, with the reasoning behind each."
+>
+  <main id="main">
+    <header class="head wrap">
+      <p class="label">
+        Lab {mock && <span class="badge">Mock content</span>}
+      </p>
+      <h1>Four decisions that changed the feel.</h1>
+      <p class="intro">
+        The <a href="/work/card-study">card interaction study</a> went through more than forty
+        iterations. These are the four changes that mattered most: what I decided, and what the
+        previous version got wrong.
+      </p>
+    </header>
+
+    <section class="wrap" aria-label="Decisions">
+      <ol class="entries">
+        {
+          labEntries.map((e) => (
+            <li class="entry" id={`d${e.n}`}>
+              <div class="num">
+                <span class="mono">{e.n}</span>
+                <span class="mono ver">{e.versions}</span>
+              </div>
+              <div class="main">
+                <h2>{e.title}</h2>
+                <dl class="rows">
+                  <div>
+                    <dt class="label">Decision</dt>
+                    <dd>{e.decision}</dd>
+                  </div>
+                  <div>
+                    <dt class="label">Why</dt>
+                    <dd>{e.why}</dd>
+                  </div>
+                </dl>
+              </div>
+              <div class="side">
+                <p class="label">Key value</p>
+                <p class="metric">{e.metric}</p>
+                <div class="replay" role="note">
+                  <span class="label">Replay comparison</span>
+                  <span>Arrives in Phase 6: the same recorded gesture, played on the old and new rule.</span>
+                </div>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
   </main>
 </Base>
+
+<style>
+  .head {
+    display: grid;
+    gap: var(--space-m);
+    padding-top: var(--space-l);
+    padding-bottom: var(--space-2xl);
+  }
+  h1 {
+    font-size: var(--step-5);
+    line-height: 0.96;
+    letter-spacing: -0.045em;
+    font-weight: 750;
+    max-width: 15ch;
+  }
+  .intro {
+    max-width: 38rem;
+    font-size: var(--step-1);
+    color: var(--ink-soft);
+  }
+  .entries {
+    list-style: none;
+    padding-bottom: var(--space-3xl);
+  }
+  .entry {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    row-gap: var(--space-m);
+    padding-block: var(--space-xl);
+    border-top: 1px solid var(--rule);
+  }
+  .num {
+    grid-column: 1 / span 2;
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+  }
+  .num .mono:first-child {
+    font-size: var(--step-3);
+    color: var(--ink);
+    line-height: 1;
+  }
+  .ver {
+    font-size: var(--step--2);
+  }
+  .main {
+    grid-column: 3 / span 6;
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+  }
+  h2 {
+    font-size: var(--step-2);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    font-weight: 680;
+  }
+  .rows {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    color: var(--ink-soft);
+  }
+  .rows div {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+  .side {
+    grid-column: 10 / -1;
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+  .metric {
+    font-family: var(--font-mono);
+    font-size: var(--step-1);
+    color: var(--ink);
+    margin-bottom: var(--space-s);
+  }
+  .replay {
+    display: grid;
+    gap: var(--space-3xs);
+    padding: var(--space-xs);
+    border: 1px dashed var(--bp-line-on-paper);
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+  }
+  .replay .label {
+    color: var(--bp-line-on-paper);
+  }
+
+  @media (max-width: 64rem) {
+    .num {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: var(--space-s);
+      align-items: baseline;
+    }
+    .main,
+    .side {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
