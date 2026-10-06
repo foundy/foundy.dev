@@ -1,0 +1,107 @@
+[
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "raw@dpr3",
+  "ttffFromNavMs": 83,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   4080,
+   1768
+  ],
+  "dpr": 3,
+  "sdfMs": 24.1,
+  "initMs": 13.3,
+  "firstFrameAfterInitMs": 20.7,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.1,
+   "cpuP95Ms": 0.2,
+   "moveEvents": 299
+  },
+  "bench": {
+   "frames": 3291,
+   "medianMs": 0.9,
+   "p95Ms": 1,
+   "maxMs": 4.7,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "three@dpr3",
+  "ttffFromNavMs": 153,
+  "backend": "webgpu (three TSL)",
+  "gpu": "webgpu adapter info n/a",
+  "canvasPx": [
+   4080,
+   1768
+  ],
+  "dpr": 3,
+  "sdfMs": 21.7,
+  "initMs": 29.6,
+  "firstFrameAfterInitMs": 44.9,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.5,
+   "cpuP95Ms": 0.8,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 2479,
+   "medianMs": 1.1,
+   "p95Ms": 2.2,
+   "maxMs": 5.3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "three-gl2@dpr3",
+  "ttffFromNavMs": 159,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   4080,
+   1768
+  ],
+  "dpr": 3,
+  "sdfMs": 22,
+  "initMs": 59.2,
+  "firstFrameAfterInitMs": 83.5,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.4,
+   "cpuP95Ms": 0.7,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 3008,
+   "medianMs": 0.9,
+   "p95Ms": 1.1,
+   "maxMs": 5.4,
+   "cpuMedianMs": 0
+  }
+ }
+]
