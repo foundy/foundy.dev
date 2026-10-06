@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base>
+  <main>
+    <h1>foundy</h1>
+    <p>Frontend developer crafting graphics &amp; interaction for the web.</p>
+
+    <section aria-labelledby="work-heading">
+      <h2 id="work-heading" class="mono">Work</h2>
+      <ul>
+        {
+          work.map((entry) => (
+            <li>
+              <a href={`/work/${entry.id}`}>{entry.data.title}</a>
+              <span class="mono"> — {entry.data.summary}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <nav aria-label="Secondary">
+      <a href="/lab">Lab</a>
+    </nav>
+
+    <!-- TODO: contact (decide method; do not publish email yet) -->
+  </main>
+</Base>

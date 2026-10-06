@@ -1,0 +1,25 @@
+:root {
+  --paper: #f4f0e8;
+  --ink: #16140f;
+  --ink-muted: #5c574c;
+  --rule: #d8d2c4;
+  --accent: #1f4fd8;
+
+  /* TODO: replace with self-hosted variable sans + mono */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --measure: 40rem;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #14130f;
+    --ink: #ece7da;
+    --ink-muted: #a39d8e;
+    --rule: #2e2b23;
+    --accent: #8aa7ff;
+  }
+}
