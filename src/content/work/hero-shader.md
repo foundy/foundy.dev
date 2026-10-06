@@ -43,12 +43,12 @@ The page ships a static SVG poster of the wordmark first. When the GL chunk has 
 3. **Flow field.** A low-resolution velocity grid, updated from pointer motion, advects the ink.
 4. **Ink and paper composite.** Density becomes tone, grain and edge softness.
 
-<figure class="placeholder" aria-label="Placeholder for the interactive hero pipeline">
+<figure class="placeholder" aria-label="Pointer to the live Inspect on the home page">
   <div class="placeholder__frame">
     <span class="label">Interactive figure</span>
-    <p>Live demo arrives in Phase 4. This slot will hold the four-stage scrubber: drag to move from the raw distance field to the finished composite.</p>
+    <p>Turn on Inspect at the top of the <a href="/">home page</a> (or press I). A slider peels the hero apart into these four stages, each with a plain-English explanation and, if you want them, the developer numbers. The ink stays live while you look, so you can push it and watch each stage react.</p>
   </div>
-  <figcaption>Fig. 1. The four stages, rendered independently. Placeholder until the inspector ships.</figcaption>
+  <figcaption>Fig. 1. The four stages, rendered independently. Live on the home page; this slot becomes an embedded copy later.</figcaption>
 </figure>
 
 ### Performance budget
