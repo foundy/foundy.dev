@@ -1,0 +1,1367 @@
+[
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "raw",
+  "ttffFromNavMs": 82,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22.6,
+  "initMs": 17.3,
+  "firstFrameAfterInitMs": 20.6,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0.2,
+   "moveEvents": 299
+  },
+  "bench": {
+   "frames": 7215,
+   "medianMs": 0.4,
+   "p95Ms": 0.5,
+   "maxMs": 2.1,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "three",
+  "ttffFromNavMs": 151,
+  "backend": "webgpu (three TSL)",
+  "gpu": "webgpu adapter info n/a",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22.1,
+  "initMs": 30.4,
+  "firstFrameAfterInitMs": 42.9,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.4,
+   "cpuP95Ms": 0.7,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 6264,
+   "medianMs": 0.4,
+   "p95Ms": 0.8,
+   "maxMs": 3.4,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "three-gl2",
+  "ttffFromNavMs": 129,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 21.3,
+  "initMs": 46.7,
+  "firstFrameAfterInitMs": 67.1,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.3,
+   "cpuP95Ms": 0.6,
+   "moveEvents": 299
+  },
+  "bench": {
+   "frames": 6572,
+   "medianMs": 0.4,
+   "p95Ms": 0.5,
+   "maxMs": 2.6,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "raw-refract",
+  "ttffFromNavMs": 68,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 23.2,
+  "initMs": 7.6,
+  "firstFrameAfterInitMs": 10.7,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0.1,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 7143,
+   "medianMs": 0.4,
+   "p95Ms": 0.5,
+   "maxMs": 1.9,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "raw-riso",
+  "ttffFromNavMs": 67,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22.5,
+  "initMs": 7.1,
+  "firstFrameAfterInitMs": 10.4,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.1,
+   "cpuP95Ms": 0.1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 7086,
+   "medianMs": 0.4,
+   "p95Ms": 0.5,
+   "maxMs": 2.3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "raw@dpr3",
+  "ttffFromNavMs": 67,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 23.4,
+  "initMs": 6.8,
+  "firstFrameAfterInitMs": 11.1,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.1,
+   "cpuP95Ms": 0.1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 5834,
+   "medianMs": 0.5,
+   "p95Ms": 0.6,
+   "maxMs": 2.1,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "three@dpr3",
+  "ttffFromNavMs": 103,
+  "backend": "webgpu (three TSL)",
+  "gpu": "webgpu adapter info n/a",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 21.7,
+  "initMs": 29,
+  "firstFrameAfterInitMs": 42.2,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.5,
+   "cpuP95Ms": 0.7,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 4916,
+   "medianMs": 0.6,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "desktop",
+  "case": "three-gl2@dpr3",
+  "ttffFromNavMs": 121,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 22.1,
+  "initMs": 45.4,
+  "firstFrameAfterInitMs": 62.2,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.4,
+   "cpuP95Ms": 0.6,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 5131,
+   "medianMs": 0.6,
+   "p95Ms": 0.7,
+   "maxMs": 3.1,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "mobile",
+  "case": "raw",
+  "ttffFromNavMs": 64,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22.2,
+  "initMs": 6.3,
+  "firstFrameAfterInitMs": 8.3,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0.1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 10529,
+   "medianMs": 0.3,
+   "p95Ms": 0.4,
+   "maxMs": 1.4,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "mobile",
+  "case": "three",
+  "ttffFromNavMs": 100,
+  "backend": "webgpu (three TSL)",
+  "gpu": "webgpu adapter info n/a",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 21.1,
+  "initMs": 28.1,
+  "firstFrameAfterInitMs": 39.3,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.3,
+   "cpuP95Ms": 0.6,
+   "moveEvents": 299
+  },
+  "bench": {
+   "frames": 9317,
+   "medianMs": 0.3,
+   "p95Ms": 0.4,
+   "maxMs": 1.6,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "mobile",
+  "case": "three-gl2",
+  "ttffFromNavMs": 159,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22,
+  "initMs": 46.5,
+  "firstFrameAfterInitMs": 63.1,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0.3,
+   "cpuP95Ms": 0.5,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 9418,
+   "medianMs": 0.3,
+   "p95Ms": 0.6,
+   "maxMs": 2.1,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "mobile",
+  "case": "raw-refract",
+  "ttffFromNavMs": 60,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22.6,
+  "initMs": 6.6,
+  "firstFrameAfterInitMs": 8.7,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0.1,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 10700,
+   "medianMs": 0.3,
+   "p95Ms": 0.4,
+   "maxMs": 1.4,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "chrome 155.0.8059.26",
+  "viewport": "mobile",
+  "case": "raw-riso",
+  "ttffFromNavMs": 66,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22.9,
+  "initMs": 7.1,
+  "firstFrameAfterInitMs": 9.5,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "maxMs": 16.8,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0.1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 10679,
+   "medianMs": 0.3,
+   "p95Ms": 0.4,
+   "maxMs": 1.7,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "desktop",
+  "case": "raw",
+  "ttffFromNavMs": 101,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 39,
+  "initMs": 7,
+  "firstFrameAfterInitMs": 12,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 20,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 7533,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "desktop",
+  "case": "three",
+  "ttffFromNavMs": 870,
+  "backend": "webgpu (three TSL)",
+  "gpu": "webgpu adapter info n/a",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 15,
+  "initMs": 465,
+  "firstFrameAfterInitMs": 488,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 19,
+   "maxMs": 20,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 8138,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "desktop",
+  "case": "three-gl2",
+  "ttffFromNavMs": 877,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 16,
+  "initMs": 515,
+  "firstFrameAfterInitMs": 548,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 19,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 1,
+   "cpuP95Ms": 1,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 5611,
+   "medianMs": 1,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "desktop",
+  "case": "raw-refract",
+  "ttffFromNavMs": 57,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 15,
+  "initMs": 6,
+  "firstFrameAfterInitMs": 11,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 18,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 7838,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "desktop",
+  "case": "raw-riso",
+  "ttffFromNavMs": 58,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 16,
+  "initMs": 6,
+  "firstFrameAfterInitMs": 11,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 17,
+   "maxMs": 19,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 7287,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "desktop",
+  "case": "raw@dpr3",
+  "ttffFromNavMs": 58,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 16,
+  "initMs": 6,
+  "firstFrameAfterInitMs": 12,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 20,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 6005,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "desktop",
+  "case": "three@dpr3",
+  "ttffFromNavMs": 870,
+  "backend": "webgpu (three TSL)",
+  "gpu": "webgpu adapter info n/a",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 16,
+  "initMs": 464,
+  "firstFrameAfterInitMs": 490,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 20,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 1,
+   "cpuP95Ms": 1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 5504,
+   "medianMs": 1,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "desktop",
+  "case": "three-gl2@dpr3",
+  "ttffFromNavMs": 870,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 16,
+  "initMs": 531,
+  "firstFrameAfterInitMs": 568,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 17,
+   "p95Ms": 19,
+   "maxMs": 20,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 4834,
+   "medianMs": 1,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "mobile",
+  "case": "raw",
+  "ttffFromNavMs": 64,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 23,
+  "initMs": 5,
+  "firstFrameAfterInitMs": 8,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 19,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 10621,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "mobile",
+  "case": "three",
+  "ttffFromNavMs": 867,
+  "backend": "webgpu (three TSL)",
+  "gpu": "webgpu adapter info n/a",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 16,
+  "initMs": 461,
+  "firstFrameAfterInitMs": 486,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 20,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 12709,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "mobile",
+  "case": "three-gl2",
+  "ttffFromNavMs": 873,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 16,
+  "initMs": 531,
+  "firstFrameAfterInitMs": 564,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 23,
+   "over16_7": 1,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 299
+  },
+  "bench": {
+   "frames": 7514,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "mobile",
+  "case": "raw-refract",
+  "ttffFromNavMs": 57,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 17,
+  "initMs": 7,
+  "firstFrameAfterInitMs": 11,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 20,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 10756,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "webkit 26.6",
+  "viewport": "mobile",
+  "case": "raw-riso",
+  "ttffFromNavMs": 56,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple GPU",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 16,
+  "initMs": 6,
+  "firstFrameAfterInitMs": 10,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 17,
+   "p95Ms": 18,
+   "maxMs": 20,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 301
+  },
+  "bench": {
+   "frames": 10327,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "desktop",
+  "case": "raw",
+  "ttffFromNavMs": 145,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 20,
+  "initMs": 19,
+  "firstFrameAfterInitMs": 26,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.36,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 6767,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "desktop",
+  "case": "three",
+  "ttffFromNavMs": 170,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 18,
+  "initMs": 41,
+  "firstFrameAfterInitMs": 68,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.4,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 6809,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "desktop",
+  "case": "three-gl2",
+  "ttffFromNavMs": 167,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 21,
+  "initMs": 41,
+  "firstFrameAfterInitMs": 68,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.66,
+   "p95Ms": 16.7,
+   "maxMs": 17.42,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 295
+  },
+  "bench": {
+   "frames": 6837,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "desktop",
+  "case": "raw-refract",
+  "ttffFromNavMs": 79,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22,
+  "initMs": 14,
+  "firstFrameAfterInitMs": 19,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.42,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 299
+  },
+  "bench": {
+   "frames": 7382,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "desktop",
+  "case": "raw-riso",
+  "ttffFromNavMs": 76,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   2040,
+   884
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22,
+  "initMs": 12,
+  "firstFrameAfterInitMs": 19,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.36,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 298
+  },
+  "bench": {
+   "frames": 6984,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "desktop",
+  "case": "raw@dpr3",
+  "ttffFromNavMs": 81,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 22,
+  "initMs": 13,
+  "firstFrameAfterInitMs": 21,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.36,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 300
+  },
+  "bench": {
+   "frames": 5472,
+   "medianMs": 1,
+   "p95Ms": 1,
+   "maxMs": 4,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "desktop",
+  "case": "three@dpr3",
+  "ttffFromNavMs": 168,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 19,
+  "initMs": 42,
+  "firstFrameAfterInitMs": 69,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.5,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 298
+  },
+  "bench": {
+   "frames": 5183,
+   "medianMs": 1,
+   "p95Ms": 1,
+   "maxMs": 3,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "desktop",
+  "case": "three-gl2@dpr3",
+  "ttffFromNavMs": 172,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   2720,
+   1179
+  ],
+  "dpr": 2,
+  "sdfMs": 21,
+  "initMs": 42,
+  "firstFrameAfterInitMs": 69,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.42,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 299
+  },
+  "bench": {
+   "frames": 5108,
+   "medianMs": 1,
+   "p95Ms": 1,
+   "maxMs": 4,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "mobile",
+  "case": "raw",
+  "ttffFromNavMs": 73,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 21,
+  "initMs": 13,
+  "firstFrameAfterInitMs": 18,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.34,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 1,
+   "moveEvents": 298
+  },
+  "bench": {
+   "frames": 10522,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "mobile",
+  "case": "three",
+  "ttffFromNavMs": 166,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 21,
+  "initMs": 40,
+  "firstFrameAfterInitMs": 66,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 301,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.5,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 1,
+   "cpuP95Ms": 1,
+   "moveEvents": 298
+  },
+  "bench": {
+   "frames": 10130,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "mobile",
+  "case": "three-gl2",
+  "ttffFromNavMs": 166,
+  "backend": "webgl2 (three TSL fallback)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 18,
+  "initMs": 41,
+  "firstFrameAfterInitMs": 67,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.66,
+   "p95Ms": 16.7,
+   "maxMs": 17.4,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 1,
+   "cpuP95Ms": 1,
+   "moveEvents": 297
+  },
+  "bench": {
+   "frames": 10146,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "mobile",
+  "case": "raw-refract",
+  "ttffFromNavMs": 77,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 22,
+  "initMs": 14,
+  "firstFrameAfterInitMs": 19,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.24,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 298
+  },
+  "bench": {
+   "frames": 10336,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ },
+ {
+  "browser": "firefox 155.0",
+  "viewport": "mobile",
+  "case": "raw-riso",
+  "ttffFromNavMs": 74,
+  "backend": "webgl2 (raw)",
+  "gpu": "webgl2 Apple M1, or similar",
+  "canvasPx": [
+   532,
+   573
+  ],
+  "dpr": 1.5,
+  "sdfMs": 20,
+  "initMs": 14,
+  "firstFrameAfterInitMs": 19,
+  "navigatorGpu": true,
+  "drag": {
+   "frames": 300,
+   "medianMs": 16.66,
+   "p95Ms": 16.68,
+   "maxMs": 17.56,
+   "over16_7": 0,
+   "over33": 0,
+   "cpuMedianMs": 0,
+   "cpuP95Ms": 0,
+   "moveEvents": 297
+  },
+  "bench": {
+   "frames": 10560,
+   "medianMs": 0,
+   "p95Ms": 1,
+   "maxMs": 2,
+   "cpuMedianMs": 0
+  }
+ }
+]
