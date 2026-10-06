@@ -6,30 +6,43 @@
 type Runtime = typeof import('./runtime');
 
 export function initInspectToggle() {
-  const btn = document.querySelector<HTMLButtonElement>('[data-inspect-toggle]');
-  if (!btn) return;
+  const SEL = '[data-inspect-toggle]';
+  if (!document.querySelector(SEL)) return;
+  // there can be more than one toggle (header/hero, and one inside the card sheet, whose background is inert while open)
+  const all = () => document.querySelectorAll<HTMLButtonElement>(SEL);
+  const mark = () => all().forEach((b) => b.setAttribute('aria-pressed', String(on)));
   let rt: Promise<Runtime> | undefined;
   const load = () => (rt ??= import('./runtime'));
   let on = false;
 
   const set = (next: boolean) => {
     on = next;
-    btn.setAttribute('aria-pressed', String(on));
+    mark();
     document.body.dataset.inspect = on ? 'on' : 'off';
     load().then(
       (m) => m.inspect.setEnabled(on),
       () => {
         // the chunk failed to load (offline): put the toggle back instead of pretending
         on = false;
-        btn.setAttribute('aria-pressed', 'false');
+        mark();
         document.body.dataset.inspect = 'off';
         rt = undefined;
       },
     );
   };
 
-  btn.addEventListener('click', () => set(!on));
-  for (const ev of ['pointerenter', 'focus', 'touchstart'] as const) btn.addEventListener(ev, load, { once: true, passive: true });
+  document.addEventListener('click', (e) => {
+    if ((e.target as Element | null)?.closest?.(SEL)) set(!on);
+  });
+  // intent on any toggle: fetch the chunk now so the click does not wait for it
+  for (const ev of ['pointerover', 'focusin', 'touchstart'] as const) {
+    const once = (e: Event) => {
+      if (!(e.target as Element | null)?.closest?.(SEL)) return;
+      document.removeEventListener(ev, once, true);
+      load();
+    };
+    document.addEventListener(ev, once, { capture: true, passive: true });
+  }
 
   document.addEventListener('keydown', (e) => {
     if (e.defaultPrevented) return;

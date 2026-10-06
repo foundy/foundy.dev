@@ -1,0 +1,261 @@
+/* Work-card preview sheet. Imported by the cards chunk (src/lib/cards/index.ts).
+   Animated by JS with transform and opacity only; everything here is static layout. */
+
+.cards-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  --sheet-top: 4vh;
+  --sheet-bottom: 4vh;
+  --sheet-inline: var(--gutter);
+  --sheet-r: 10px;
+}
+.cards-layer [hidden] {
+  display: none !important;
+}
+.sheet-dialog {
+  position: fixed;
+  inset: 0;
+  pointer-events: auto;
+}
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 42%, transparent);
+  touch-action: none;
+}
+
+/* the panel: positioned at its final rect; JS transforms it from/to the card */
+.sheet {
+  position: fixed;
+  top: var(--sheet-top);
+  bottom: calc(var(--sheet-bottom) + var(--dock-h, 0px));
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: min(68rem, calc(100% - 2 * var(--sheet-inline)));
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.sheet-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--sheet-r);
+  box-shadow: 0 30px 90px -30px rgb(0 0 0 / 0.45);
+}
+.sheet-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  border-radius: var(--sheet-r);
+  scrollbar-width: thin;
+}
+.sheet-bar {
+  position: absolute;
+  top: var(--space-2xs);
+  right: var(--space-2xs);
+  display: flex;
+  gap: var(--space-2xs);
+  align-items: center;
+}
+.sheet-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0 0.9em;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+.sheet-btn:hover {
+  border-color: var(--ink);
+}
+.sheet-btn[data-inspect-toggle] {
+  border-style: dashed;
+  border-color: var(--bp-line-on-paper);
+  color: var(--bp-line-on-paper);
+}
+.sheet-btn[data-inspect-toggle][aria-pressed='true'] {
+  border-style: solid;
+  background: var(--bp-line-on-paper);
+  color: var(--paper);
+}
+
+/* content */
+.sh {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-s);
+  padding: 3.5rem var(--space-m) var(--space-l);
+}
+.sh-meta {
+  margin: 0;
+  align-self: center;
+}
+.sh-title {
+  margin: 0;
+  font-size: var(--step-4);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  text-wrap: balance;
+  transform-origin: 0 0;
+}
+.sh-title:focus {
+  outline: none;
+}
+.sh-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform;
+}
+.sh-hero {
+  min-width: 0;
+}
+.sh-text {
+  display: grid;
+  gap: var(--space-s);
+  align-content: start;
+  min-width: 0;
+}
+.sh-summary {
+  font-size: var(--step-1);
+  line-height: 1.3;
+  color: var(--ink);
+}
+.sh-p {
+  color: var(--ink-soft);
+  max-width: 46ch;
+}
+.sh-facts,
+.sh-meta2 {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding-block: var(--space-xs);
+  border-block: 1px solid var(--rule);
+}
+.sh-facts > div,
+.sh-meta2 > div {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: var(--space-xs);
+  align-items: baseline;
+}
+.sh-read {
+  justify-self: start;
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  padding-block: var(--space-2xs);
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (min-width: 56rem) {
+  .sh {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    column-gap: var(--space-l);
+    align-content: start;
+    padding-inline: var(--space-l);
+  }
+  .sh-meta {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+  }
+  .sh-title {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .sh-hero {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+  .sh-text {
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
+/* phones: a full-width sheet with the top corners rounded, close to the top edge */
+@media (max-width: 40rem) {
+  .cards-layer {
+    --sheet-top: max(1.5rem, env(safe-area-inset-top));
+    --sheet-bottom: 0px;
+    --sheet-inline: 0px;
+    --sheet-r: 18px;
+  }
+  .sheet-bg,
+  .sheet-scroll {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .sh {
+    padding-inline: var(--space-s);
+    padding-bottom: calc(var(--space-l) + env(safe-area-inset-bottom));
+  }
+}
+
+html.cards-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html.cards-dragging,
+html.cards-dragging * {
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grabbing !important;
+}
+
+/* Inspect dock + overlay for the card timeline */
+.cards-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-inline: auto;
+  width: min(68rem, 100%);
+  max-height: 46dvh;
+  overflow-y: auto;
+  pointer-events: auto;
+  z-index: 3;
+}
+.cards-dock:empty {
+  display: none;
+}
+.cards-dock .inspect-panel {
+  margin: 0;
+  background-color: var(--paper);
+  border-bottom: 0;
+  box-shadow: 0 -16px 40px -20px rgb(0 0 0 / 0.35);
+}
+.cards-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    will-change: auto;
+  }
+}

@@ -18,6 +18,8 @@
 }
 
 html {
+  /* reserve the scrollbar's space so locking the scroll (the card sheet) never shifts the layout */
+  scrollbar-gutter: stable;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-sans);

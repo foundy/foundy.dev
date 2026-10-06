@@ -211,3 +211,121 @@ body[data-inspect='on'] .poster .hero-gl {
     transition: none;
   }
 }
+
+/* ---- timeline panel (card sheet) ---- */
+.inspect-timeline {
+  grid-template-columns: auto 1fr;
+}
+.inspect-timeline .inspect-time {
+  grid-column: 2;
+  justify-self: end;
+  font-size: var(--step--2);
+  color: var(--ink-muted);
+}
+.inspect-play {
+  font-size: var(--step--1);
+}
+.inspect-rangewrap {
+  position: relative;
+}
+.inspect-ticks {
+  position: absolute;
+  inset: auto 0 0.3rem 0;
+  height: 0.5rem;
+  pointer-events: none;
+}
+.inspect-tick {
+  position: absolute;
+  left: calc(0.5rem + (100% - 1rem) * var(--at));
+  bottom: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--bp-line-on-paper);
+}
+.inspect-marks .inspect-stop {
+  font-size: var(--step--2);
+}
+.inspect-col {
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+.inspect-summary {
+  margin: 0;
+  font-size: var(--step-0);
+  line-height: 1.35;
+  color: var(--ink);
+  max-width: 44rem;
+  text-wrap: pretty;
+}
+.inspect-empty {
+  max-width: 44rem;
+}
+.inspect-col .inspect-body {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+/* ---- card overlay: the visitor's last pull, drawn over the page ---- */
+.cards-overlay .ov-ghost {
+  fill: none;
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+.cards-overlay .ov-line {
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 1.75;
+  fill: none;
+}
+.cards-overlay .ov-thr .ov-line {
+  stroke-dasharray: 3 4;
+}
+.cards-overlay .ov-projline {
+  stroke-dasharray: 5 5;
+}
+.cards-overlay .ov-traj {
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cards-overlay .halo {
+  stroke: var(--paper);
+  stroke-width: 6;
+  opacity: 0.85;
+  stroke-dasharray: none;
+}
+.cards-overlay .ov-pt {
+  fill: var(--paper);
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 2;
+}
+.cards-overlay .ov-dot {
+  fill: var(--accent);
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+.cards-overlay .ov-vecline {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+.cards-overlay .ov-text {
+  fill: var(--bp-line-on-paper);
+  font: 600 12px var(--font-mono);
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.cards-overlay .ov-verdict {
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+.cards-overlay .ov-verdict.is-close,
+.cards-overlay .ov-proj.is-close .ov-text {
+  fill: var(--accent);
+}
+.cards-overlay .ov-proj.is-close .ov-projend {
+  stroke: var(--accent);
+}

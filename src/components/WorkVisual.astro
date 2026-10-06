@@ -7,8 +7,10 @@
 interface Props {
   slug: string;
   vtName?: string;
+  /** id prefix suffix, for a second copy of the same visual on one page (the preview sheet) */
+  variant?: string;
 }
-const { slug, vtName } = Astro.props;
+const { slug, vtName, variant = '' } = Astro.props;
 
 const W = 800;
 const H = 500;
@@ -65,7 +67,7 @@ const stages = [
   ['03', 'Flow'],
   ['04', 'Ink'],
 ];
-const id = (n: string) => `wv-${slug}-${n}`;
+const id = (n: string) => `wv-${slug}${variant}-${n}`;
 ---
 
 <figure class="visual" style={vtName ? `view-transition-name: ${vtName}` : undefined}>

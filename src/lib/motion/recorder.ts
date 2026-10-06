@@ -69,7 +69,7 @@ export function parseRecording(json: string): Recording {
  * Drive a fresh pipeline with the recorded samples, synchronously and in order.
  * Events go to `handler` and are also returned. `claim` defaults to "yes": recordings only exist for claimed gestures.
  */
-export function replay(rec: Recording, handler?: (e: GestureEvent) => void, cfg: Partial<GestureConfig> = {}): GestureEvent[] {
+export function replay(rec: Pick<Recording<unknown>, 'meta' | 'samples'>, handler?: (e: GestureEvent) => void, cfg: Partial<GestureConfig> = {}): GestureEvent[] {
   const out: GestureEvent[] = [];
   const pipe = new GesturePipeline({ slop: rec.meta.slop, claim: () => true, ...cfg }, rec.meta.pointerType, (e) => {
     out.push(e);

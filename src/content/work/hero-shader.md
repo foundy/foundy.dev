@@ -7,6 +7,14 @@ year: 2026
 role: Design and engineering
 stack: [TypeScript, three.js TSL, WebGPU, WebGL2, GLSL]
 mock: true
+facts:
+  - { label: 'Pipeline', value: 'Four stages, each renderable alone' }
+  - { label: 'Weight', value: '8 KB gzipped, loaded after first paint' }
+  - { label: 'Fallback', value: 'The same wordmark as SVG, still a finished piece' }
+preview:
+  - 'The first screen is a shader you can touch and then take apart. Switch on Inspect and the picture falls back through its own stages: a distance field of the letters, a warped noise, a flow field, and finally ink on paper.'
+  - 'It is plain WebGL2 with a small GLSL pipeline. Three.js and WebGPU were prototyped and measured, and the smaller path won on weight and on how evenly it runs on a mid-range phone.'
+  - 'When there is no GL, or the visitor asks for reduced motion, the page shows pre-rendered stills of every stage, so the explanation survives the fallback.'
 ---
 
 ## Problem
