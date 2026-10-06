@@ -231,6 +231,7 @@ export function createRaw({ canvas, sdf, theme, query }: RendererInit): Renderer
   const loseExt = g.getExtension('WEBGL_lose_context');
 
   const vao = g.createVertexArray();
+  const syncBuf = new Uint8Array(4);
   let aspect = 1;
   let sdfTex: WebGLTexture | null = null;
   let vel: Pair | null = null;
@@ -430,7 +431,8 @@ export function createRaw({ canvas, sdf, theme, query }: RendererInit): Renderer
       draw();
     },
     gpuSync() {
-      g.finish();
+      // readPixels of one texel is a hard CPU<->GPU sync; finish() alone is not reliable in ANGLE/Safari
+      g.readPixels(0, 0, 1, 1, g.RGBA, g.UNSIGNED_BYTE, syncBuf);
       return Promise.resolve();
     },
     dispose() {

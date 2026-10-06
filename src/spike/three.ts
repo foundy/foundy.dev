@@ -277,6 +277,7 @@ export function createThree({ canvas, sdf, theme, query }: RendererInit): Render
     return vec4(col, 1);
   })();
 
+  const syncBuf = new Uint8Array(4);
   const quad = new QuadMesh(velMat);
 
   function allocSim() {
@@ -371,7 +372,7 @@ export function createThree({ canvas, sdf, theme, query }: RendererInit): Render
     async gpuSync() {
       const be = renderer.backend as unknown as { isWebGPUBackend?: boolean; device?: GPUDevice; gl?: WebGL2RenderingContext };
       if (be.isWebGPUBackend && be.device) await be.device.queue.onSubmittedWorkDone();
-      else be.gl?.finish();
+      else be.gl?.readPixels(0, 0, 1, 1, be.gl.RGBA, be.gl.UNSIGNED_BYTE, syncBuf);
     },
     dispose() {
       velRT?.forEach((r) => r.dispose());

@@ -249,7 +249,8 @@ export function summarize(dts: number[], cpu: number[]): Stats {
     median: pct(s, 0.5),
     p95: pct(s, 0.95),
     max: s[s.length - 1] ?? 0,
-    over167: dts.filter((x) => x > 16.7 + 0.5).length,
+    // 60 Hz vsync = 16.7 ms; >20 ms absorbs timer quantisation (WebKit rounds to 1 ms) and means >=1 missed vsync
+    over167: dts.filter((x) => x > 20).length,
     over33: dts.filter((x) => x > 33.4).length,
     cpuMedian: pct(c, 0.5),
     cpuP95: pct(c, 0.95),
@@ -263,6 +264,7 @@ export interface SpikeApi {
   ready: Promise<void>;
   info: Record<string, unknown>;
   disposed: boolean;
+  isRunning(): boolean;
   stats(): Stats;
   resetStats(): void;
   bench(ms: number): Promise<Stats>;
@@ -275,7 +277,7 @@ declare global {
   }
 }
 
-const WIN = 240;
+const WIN = 600;
 
 export function run(
   make: (init: RendererInit) => Renderer,
@@ -376,9 +378,10 @@ export function run(
       `stage=${query.stage} look=${query.look} dpr=${info.dpr} px=${(info.canvasPx as number[])?.join('x')}`,
       `frame ms  med ${s.median.toFixed(1)}  p95 ${s.p95.toFixed(1)}  max ${s.max.toFixed(1)}   (n=${s.frames})`,
       `cpu ms    med ${s.cpuMedian.toFixed(2)}  p95 ${s.cpuP95.toFixed(2)}`,
-      `long      >16.7: ${s.over167}   >33: ${s.over33}`,
+      `long      >16.7 (missed vsync, >20ms): ${s.over167}   >33: ${s.over33}`,
       `sdf bake ${f(info.sdfMs)}ms  init ${f(info.initMs)}ms  first frame ${f(info.firstFrameMs)}ms`,
       `js ${kb(dec)} KB decoded / ${kb(enc)} KB transferred (gzip: see docs)`,
+      info.benchStats ? `bench (gpu-inclusive) med ${(info.benchStats as Stats).median.toFixed(2)}  p95 ${(info.benchStats as Stats).p95.toFixed(2)} ms` : '',
       `${info.gpu}`,
       info.reducedMotion ? 'reduced motion: static frame' : running ? 'running' : 'paused',
     ].join('\n');
@@ -449,6 +452,7 @@ export function run(
     info,
     disposed: false,
     ready: undefined as unknown as Promise<void>,
+    isRunning: () => running,
     stats: () => summarize(dts, cpus),
     resetStats: () => {
       dts.length = 0;
