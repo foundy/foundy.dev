@@ -8,12 +8,15 @@
  *   4 composite (filled, bled ink)  +  1 SDF outline (dashed blueprint hairline)
  */
 import InspectToggle from './InspectToggle.astro';
+import wordmark from '../gl/hero/wordmark.json';
 
-const W = 1200;
-const H = 372;
+// Geometry comes from the build-time bake (scripts/bake-sdf.mjs): the same outline the GL hero's SDF was made from,
+// so the poster and the canvas line up in every browser.
+const [W, H] = wordmark.box;
 ---
 
-<figure class="poster">
+<figure class="poster" data-hero-poster>
+  <div class="stage">
   <svg
     class="art"
     viewBox={`0 0 ${W} ${H}`}
@@ -62,13 +65,18 @@ const H = 372;
       <path d={`M${W - 14} ${H - 8}h14M${W - 7} ${H - 15}v14`}></path>
     </g>
 
+    <path id="hp-word" d={wordmark.path}></path>
+
     <!-- stage 1 echo: SDF outline, offset -->
-    <text class="word outline" x="10" y="290" textLength={W - 20} lengthAdjust="spacing" aria-hidden="true">foundy</text>
-    <!-- bleed -->
-    <text class="word bleed" x="0" y="278" textLength={W - 20} lengthAdjust="spacing" filter="url(#hp-bleed)" aria-hidden="true">foundy</text>
-    <!-- stage 4: composite -->
-    <text class="word ink" x="0" y="278" textLength={W - 20} lengthAdjust="spacing" filter="url(#hp-ink)" aria-hidden="true">foundy</text>
+    <use class="outline" href="#hp-word" transform="translate(10 12)" aria-hidden="true"></use>
+    <g class="glyphs">
+      <!-- bleed -->
+      <use class="bleed" href="#hp-word" filter="url(#hp-bleed)" aria-hidden="true"></use>
+      <!-- stage 4: composite -->
+      <use class="ink" href="#hp-word" filter="url(#hp-ink)" aria-hidden="true"></use>
+    </g>
   </svg>
+  </div>
 
   <figcaption class="caption">
     <span class="mono">Fig. 0 &middot; Poster &middot; stage 4 of 4, composite</span>
@@ -86,11 +94,33 @@ const H = 372;
     aspect-ratio: 1200 / 372;
     overflow: visible;
   }
-  .word {
-    font-family: var(--font-sans);
-    font-weight: 820;
-    font-size: 352px;
-    font-kerning: normal;
+  .stage {
+    position: relative;
+  }
+  /* The GL hero (src/gl/boot.ts) cross-fades its canvas over the glyph layer, then the poster glyphs stop painting
+     (visibility, so their SVG filters stop costing anything). The registration marks and the blueprint outline stay:
+     they are the drawn frame around the canvas. */
+  .poster :global(.hero-gl) {
+    position: absolute;
+    display: block;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 400ms ease-out;
+    /* vertical swipes scroll the page; horizontal drags and long presses push ink (src/gl/hero/input.ts) */
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .poster.gl-on :global(.hero-gl) {
+    opacity: 1;
+  }
+  .poster.gl-instant :global(.hero-gl) {
+    transition: none;
+  }
+  .poster.gl-done .glyphs {
+    visibility: hidden;
   }
   .ink {
     fill: var(--ink);
