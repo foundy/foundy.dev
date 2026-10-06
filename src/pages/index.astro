@@ -141,7 +141,9 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
 
 <script>
   import { bootHero } from '../gl/boot';
+  import { initInspectToggle } from '../lib/inspect/toggle';
   bootHero();
+  initInspectToggle();
 </script>
 
 <style>
