@@ -16,6 +16,9 @@
 | Inspect | 누구나 이해하는 해설 + 개발자용 상세 수치는 펼쳐서 보기 |
 | 테스트 | iPhone Safari, Mac Chrome / Safari / Firefox |
 | 출시일 | 없음. 단계별 통과 기준을 만족하면 배포(1단계 후 중간 배포 가능) |
+| 히어로 스택 (스파이크 후 확정) | **raw WebGL2 + 소형 GLSL**(핑퐁 FBO). three/TSL은 참고 구현(`src/spike/three.ts`)으로만 보존, 프로덕션 페이지에서 import 금지. §5의 "three WebGPURenderer + TSL" 기본안은 폐기 |
+| 히어로 look (스파이크 후 확정) | **ink**(종이 위 검은 잉크 번짐). riso/refract는 출시하지 않음 |
+| 모바일 히어로 입력 (확정) | **히어로 위 세로 스크롤 허용**(`touch-action: pan-y`). 가로 드래그 또는 롱프레스(약 300ms 정지 후 이동)가 잉크에 힘을 줌. 데스크톱은 호버 이동 = 약한 힘, 버튼 누른 드래그 = 강한 힘 |
 
 ## 1. 한 줄 요약
 
@@ -127,6 +130,8 @@ Android는 실기기 테스트에서 빠지므로 품질 등급의 보수적 기
 | 6 | 3~5일 | Lab: 핵심 결정 4개, 구/신 비교, 변수 1개 조절 | 비교만으로 판단 차이가 이해됨 |
 | 7 | 상시 + 3~5일 | 케이스 스터디 2편 작성, 실기기 QA, 접근성, 성능, OG | 직접 진입·뒤로가기·확대·모션 축소·GPU 실패 경로 통과 |
 | P2 | 이후 | ⌘K, AI 워크플로 노트, 셰이더 스케치, 사운드(기본 off) | — |
+
+**3단계 완료 노트 (구현 끝, 실기기 확인 대기).** raw WebGL2 ink 히어로를 `src/gl/`에 정식 구현했다. SDF는 `npm run bake:sdf`로 빌드타임 베이크(`public/gl/wordmark-sdf.png`, 커밋됨), 포스터 SVG는 같은 외곽선을 `<path>`로 그려 포스터↔캔버스가 모든 브라우저에서 정렬된다(정지 상태 평균 절대 차이 약 3/255). 홈의 렌더 블로킹 JS는 0, 초기 스크립트 1.6 KB gz, 히어로 청크 8.2 KB gz(지연 로드, 목표 15 KB). 품질 등급은 프레임 시간 기반 자동 조절, `?gl=none|webgl2` `?hud=1` `?stage=` `?tier=` 플래그 유지. Chromium/WebKit/Firefox 자동 검증(`scripts/hero/verify.mjs`) 통과. **남은 것:** iPhone Safari 실기기 확인(`docs/spike/device-checklist.md` 0절), 그 결과로 §6의 모바일 프레임/발열 기준 확정, 케이스 스터디의 mock 수치 교체. 상세 수치와 한계는 PR 본문 참고.
 
 **총 예상: 6~8주.** 범위를 줄여야 하면 빼는 순서: P2 → Lab 변수 조절 → 카드 Inspect(케이스 스터디 글로 대체).
 
