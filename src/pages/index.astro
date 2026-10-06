@@ -139,6 +139,11 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
   </main>
 </Base>
 
+<script>
+  import { bootHero } from '../gl/boot';
+  bootHero();
+</script>
+
 <style>
   .hero {
     padding-top: var(--space-m);

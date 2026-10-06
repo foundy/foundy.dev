@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
+    "bake:sdf": "node scripts/bake-sdf.mjs",
     "astro": "astro"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "fontkit": "^2.0.4",
     "playwright": "^1.63.0",
     "sharp": "^0.35.5",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wawoff2": "^2.0.1"
   }
 }
