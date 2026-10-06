@@ -1,0 +1,167 @@
+/* Long-form styles for rendered markdown (case studies). */
+.prose {
+  max-width: var(--prose-measure);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.prose > * + * {
+  margin-top: 1.1em;
+}
+
+.prose h2 {
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-s);
+  border-top: 1px solid var(--rule);
+  font-size: var(--step-3);
+  line-height: 1.05;
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.prose h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.prose h3 {
+  margin-top: var(--space-l);
+  font-size: var(--step-1);
+  color: var(--ink);
+  letter-spacing: -0.015em;
+}
+
+.prose h2 + *,
+.prose h3 + * {
+  margin-top: var(--space-s);
+}
+
+.prose strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.25em;
+}
+
+.prose ul {
+  list-style: none;
+}
+
+.prose ul > li {
+  position: relative;
+}
+
+.prose ul > li::before {
+  content: '';
+  position: absolute;
+  left: -1.05em;
+  top: 0.78em;
+  width: 0.5em;
+  height: 1px;
+  background: var(--accent);
+}
+
+.prose li + li {
+  margin-top: 0.45em;
+}
+
+.prose ol > li::marker {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--ink-muted);
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  padding: 0.08em 0.35em;
+  background: var(--paper-sunk);
+  border: 1px solid var(--rule);
+}
+
+.prose blockquote {
+  padding-left: var(--space-s);
+  border-left: 2px solid var(--accent);
+  color: var(--ink);
+}
+
+.prose a {
+  color: var(--ink);
+}
+
+/* Tables scroll inside themselves, never the page. */
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prose th,
+.prose td {
+  padding: 0.6em 1em 0.6em 0;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--rule);
+}
+
+.prose th {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  font-weight: 450;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.prose td:last-child,
+.prose td:first-child {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Placeholder for a future interactive figure. */
+.prose .placeholder {
+  margin-block: var(--space-l);
+}
+
+.prose .placeholder__frame {
+  display: grid;
+  gap: var(--space-2xs);
+  align-content: center;
+  min-height: 12rem;
+  padding: var(--space-m);
+  border: 1px dashed var(--bp-line-on-paper);
+  background:
+    linear-gradient(var(--rule) 1px, transparent 1px) 0 0 / 100% 1.5rem,
+    var(--paper-sunk);
+  background-blend-mode: normal;
+  color: var(--ink-soft);
+}
+
+.prose .placeholder__frame .label {
+  color: var(--bp-line-on-paper);
+}
+
+.prose .placeholder__frame p {
+  max-width: 34rem;
+  margin: 0;
+  background: var(--paper-sunk);
+  padding-block: 0.15em;
+}
+
+.prose .placeholder figcaption {
+  margin-top: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  color: var(--ink-muted);
+}

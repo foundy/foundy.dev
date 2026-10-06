@@ -1,0 +1,33 @@
+---
+/**
+ * Reserved entry point for Inspect (Phase 4). Visual only for now:
+ * disabled, and styled with the blueprint tokens.
+ */
+---
+
+<button type="button" class="inspect" disabled aria-describedby="inspect-note">
+  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+    <rect x="1.5" y="1.5" width="13" height="13" fill="none" stroke="currentColor" stroke-dasharray="2 2"></rect>
+    <path d="M5 8h6M8 5v6" stroke="currentColor" fill="none"></path>
+  </svg>
+  <span>Inspect &mdash; coming soon</span>
+</button>
+<span id="inspect-note" class="visually-hidden">
+  Inspect will let you peel the image apart into the stages it is built from. Not available yet.
+</span>
+
+<style>
+  .inspect {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: 0.45em 0.9em;
+    border: 1px dashed var(--bp-line-on-paper);
+    background: transparent;
+    color: var(--bp-line-on-paper);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    line-height: 1.3;
+    cursor: not-allowed;
+  }
+</style>
