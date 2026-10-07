@@ -335,6 +335,11 @@
   font-family: var(--font-mono);
   font-size: 13px;
   fill: var(--ink-muted);
+  /* a paper halo keeps a label legible where a series or rule runs under it */
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
 }
 .ch-axis {
   stroke: var(--ink-muted);

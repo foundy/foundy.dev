@@ -89,27 +89,46 @@ export function tauTableRows(rows: { id: string; title: string; old: string; new
 
 /* ---------------- chart ---------------- */
 
-const CH = { w: 390, h: 170, l: 44, r: 12, t: 14, b: 26 };
+const CH = { w: 390, h: 184, l: 44, r: 12, t: 34, b: 26 };
+const GLYPH = 7.9; // advance of the 13 px mono face in the chart, for label boxes (no layout pass at build time)
 
 export function chartMarkup(t: Track): string {
   const c: Chart = t.chart;
   const X = (ms: number) => CH.l + (ms / t.duration) * (CH.w - CH.l - CH.r);
   const Y = (v: number) => CH.t + (1 - (v - c.ymin) / (c.ymax - c.ymin || 1)) * (CH.h - CH.t - CH.b);
   const pl = (pts: [number, number][]) => pts.map((p) => `${f(X(p[0]))},${f(Y(p[1]))}`).join(' ');
+  const base = CH.h - CH.b;
   let s = `<svg class="ch" viewBox="0 0 ${CH.w} ${CH.h}" aria-hidden="true" focusable="false">`;
-  s += `<line class="ch-axis" x1="${CH.l}" x2="${CH.w - CH.r}" y1="${CH.h - CH.b}" y2="${CH.h - CH.b}"/><line class="ch-axis" x1="${CH.l}" x2="${CH.l}" y1="${CH.t}" y2="${CH.h - CH.b}"/>`;
-  s += `<text class="ch-txt" x="${CH.l}" y="${CH.h - 8}">0</text><text class="ch-txt" x="${CH.w - CH.r}" y="${CH.h - 8}" text-anchor="end">${Math.round(t.duration)} ms</text>`;
-  s += `<text class="ch-txt" x="${CH.l - 6}" y="${CH.t + 8}" text-anchor="end">${c.ymax < 5 ? '1' : Math.round(c.ymax)}</text><text class="ch-txt" x="${CH.l - 6}" y="${CH.h - CH.b}" text-anchor="end">${Math.round(c.ymin)}</text>`;
-  for (const h of c.hlines) {
-    s += `<line class="ch-hline" x1="${CH.l}" x2="${CH.w - CH.r}" y1="${f(Y(h.v))}" y2="${f(Y(h.v))}"/><text class="ch-txt ch-lbl" x="${CH.w - CH.r - 2}" y="${f(Y(h.v) - 5)}" text-anchor="end">${esc(h.label)}</text>`;
+  s += `<line class="ch-axis" x1="${CH.l}" x2="${CH.w - CH.r}" y1="${base}" y2="${base}"/><line class="ch-axis" x1="${CH.l}" x2="${CH.l}" y1="${CH.t}" y2="${base}"/>`;
+  // lanes: the legend owns the band above the plot, tick labels and "release" share the band under it, the y labels sit left of the axis
+  const endLbl = `${Math.round(t.duration)} ms`;
+  s += `<text class="ch-txt" x="${CH.l}" y="${CH.h - 8}" text-anchor="middle">0</text><text class="ch-txt" x="${CH.w - CH.r}" y="${CH.h - 8}" text-anchor="end">${endLbl}</text>`;
+  s += `<text class="ch-txt" x="${CH.l - 6}" y="${CH.t + 4}" text-anchor="end">${c.ymax < 5 ? '1' : Math.round(c.ymax)}</text><text class="ch-txt" x="${CH.l - 6}" y="${base}" text-anchor="end">${Math.round(c.ymin)}</text>`;
+  // hline labels sit just above their line, right-aligned; a label that would touch the previous one goes under its line
+  let prevY = -99;
+  for (const h of [...c.hlines].sort((a, b) => Y(a.v) - Y(b.v))) {
+    const y = Y(h.v);
+    const ly = y - prevY < 17 ? y + 14 : y - 5;
+    prevY = y;
+    s += `<line class="ch-hline" x1="${CH.l}" x2="${CH.w - CH.r}" y1="${f(y)}" y2="${f(y)}"/><text class="ch-txt ch-lbl" x="${CH.w - CH.r - 2}" y="${f(ly)}" text-anchor="end">${esc(h.label)}</text>`;
   }
-  s += `<line class="ch-rel" x1="${f(X(t.tUp))}" x2="${f(X(t.tUp))}" y1="${CH.t}" y2="${CH.h - CH.b}"/><text class="ch-txt" x="${f(X(t.tUp) + 4)}" y="${CH.t + 8}">release</text>`;
+  const rx = X(t.tUp);
+  s += `<line class="ch-rel" x1="${f(rx)}" x2="${f(rx)}" y1="${CH.t}" y2="${base}"/>`;
+  // "release" centred under its line, kept clear of the "0" and the end label
+  const rw = 'release'.length * GLYPH;
+  const lo = CH.l + 12 + rw / 2;
+  const hi = CH.w - CH.r - (endLbl.length * GLYPH + 8) - rw / 2;
+  s += `<text class="ch-txt" x="${f(Math.min(hi, Math.max(lo, rx)))}" y="${CH.h - 8}" text-anchor="middle">release</text>`;
   for (const se of c.series) s += `<polyline class="ch-s ch-${se.cls}" points="${pl(se.pts)}"/>`;
   if (c.series.length > 1) {
-    c.series.forEach((se, i) => (s += `<text class="ch-txt ch-${se.cls}-t" x="${CH.l + 8}" y="${CH.t + 24 + i * 15}">${esc(se.label)}</text>`));
+    let x = CH.l;
+    c.series.forEach((se) => {
+      s += `<line class="ch-s ch-${se.cls}" x1="${f(x)}" x2="${f(x + 16)}" y1="12" y2="12"/><text class="ch-txt ch-${se.cls}-t" x="${f(x + 22)}" y="16">${esc(se.label)}</text>`;
+      x += 22 + se.label.length * GLYPH + 18;
+    });
   }
   if (c.proj) s += `<polyline class="ch-proj" points="${pl(c.proj)}"/><circle class="ch-projdot" cx="${f(X(c.proj[1][0]))}" cy="${f(Y(c.proj[1][1]))}" r="4"/>`;
-  s += `<line data-r="playhead" class="ch-play" x1="${f(X(0))}" x2="${f(X(0))}" y1="${CH.t}" y2="${CH.h - CH.b}" data-x0="${f(X(0))}" data-x1="${f(X(t.duration))}"/>`;
+  s += `<line data-r="playhead" class="ch-play" x1="${f(X(0))}" x2="${f(X(0))}" y1="${CH.t}" y2="${base}" data-x0="${f(X(0))}" data-x1="${f(X(t.duration))}"/>`;
   return s + `</svg>`;
 }
 
