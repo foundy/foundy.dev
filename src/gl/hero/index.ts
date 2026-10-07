@@ -20,7 +20,7 @@ export type { Tier } from '../../lib/core/quality';
 export interface HeroOptions {
   /** the poster's SVG element: the canvas is laid out over its DOM rect */
   anchor: Element;
-  /** the baked SDF PNG (public/gl/wordmark-sdf.png), as a Blob or a promise of one */
+  /** the baked SDF image (public/gl/wordmark-sdf.webp, lossless), as a Blob or a promise of one */
   sdf: Blob | Promise<Blob>;
   stage?: HeroStage;
   /** 'auto' starts at mid and adapts; a fixed tier pins it (QA) */

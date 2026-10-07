@@ -17,5 +17,5 @@ for (const f of readdirSync('dist/_astro').filter((f) => f.endsWith('.js')).sort
   const spike = /^(common|raw|three)\./.test(f) || /^(raw|three)\.astro/.test(f);
   console.log(`${f.padEnd(62)} ${kb(buf.length).padStart(7)} ${kb(gz).padStart(9)} ${kb(br).padStart(9)}${spike ? '   (spike pages only)' : ''}`);
 }
-const png = statSync('dist/gl/wordmark-sdf.png').size;
-console.log(`\nSDF PNG: ${kb(png)} KB (already compressed; fetched lazily with the hero chunk)`);
+const png = statSync('dist/gl/wordmark-sdf.webp').size;
+console.log(`\nSDF (lossless WebP): ${kb(png)} KB (already compressed; fetched lazily with the hero chunk)`);

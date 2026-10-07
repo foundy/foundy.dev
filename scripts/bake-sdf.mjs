@@ -1,6 +1,6 @@
 // Build-time wordmark bake. Run with `npm run bake:sdf`; the outputs are committed, `npm run build` does not need this.
 //
-//   public/gl/wordmark-sdf.png    8-bit grayscale signed distance field (see ENCODING)
+//   public/gl/wordmark-sdf.webp   8-bit grayscale signed distance field, lossless WebP (see ENCODING)
 //   src/gl/hero/wordmark.json     metrics for the GL hero + the outline path the SVG poster draws
 //
 // Geometry is defined once, here, in the poster's SVG user units (viewBox 0 0 1200 372):
@@ -14,7 +14,7 @@
 //   d = signed distance to the glyph outline in SVG user units, positive inside. So 128 ~ the edge,
 //   255 = `spread` units inside, 0 = `spread` units outside. Decode: d = (v/255 - 0.5) * 2 * spread.
 // The texture covers the box expanded by `pad` units on every side, at `scale` texels per unit.
-// Row 0 is the top (PNG order); upload without flipY.
+// Row 0 is the top (image order); upload without flipY.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import * as fontkit from 'fontkit';
 import wawoff2 from 'wawoff2';
@@ -143,8 +143,8 @@ for (let ty = 0; ty < TH; ty++) {
 
 mkdirSync('public/gl', { recursive: true });
 await sharp(out, { raw: { width: TW, height: TH, channels: 1 } })
-  .png({ compressionLevel: 9, palette: false, effort: 10 })
-  .toFile('public/gl/wordmark-sdf.png');
+  .webp({ lossless: true, effort: 6 }) // exact: same texels as the PNG it replaced (158 KB -> ~56 KB)
+  .toFile('public/gl/wordmark-sdf.webp');
 
 const meta = {
   text: TEXT,

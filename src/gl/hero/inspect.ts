@@ -50,7 +50,7 @@ const STAGES: InspectStage[] = [
     explain:
       'Every pixel knows how far it is from the letters, and that distance is all the shader works with. The blue rings are like contour lines on a map.',
     detail: () => [
-      ['Source', `baked at build time, ${sdf.width}×${sdf.height} px PNG`],
+      ['Source', `baked at build time, ${sdf.width}×${sdf.height} px lossless WebP`],
       ['Texture', 'RGBA8, distance in the red channel'],
       ['Range', `±${sdf.spread} units around each edge (box 1200×372)`],
       ...rowsCommon(),
@@ -98,7 +98,12 @@ export function registerHeroInspectable() {
   let still: HTMLImageElement | undefined;
   let unsub: (() => void) | undefined;
 
-  const stillUrl = (s: HeroStage) => `${BASE}${s}${dark.matches ? '-dark' : ''}.webp`;
+  const stillUrl = (s: HeroStage, at2x = false) => `${BASE}${s}${dark.matches ? '-dark' : ''}${at2x ? '@2x' : ''}.webp`;
+  /** 1x/2x pair: the browser picks by device pixel ratio, so retina screens get the sharp one (<= 80 KB each) */
+  const loadStill = (img: HTMLImageElement, s: HeroStage) => {
+    img.srcset = `${stillUrl(s)} 1x, ${stillUrl(s, true)} 2x`;
+    img.src = stillUrl(s);
+  };
 
   function clearStill() {
     still?.remove();
@@ -110,7 +115,7 @@ export function registerHeroInspectable() {
     img.className = 'inspect-still';
     img.alt = '';
     img.decoding = 'async';
-    img.src = stillUrl(s);
+    loadStill(img, s);
     const put = () => {
       if (my !== token) return;
       const old = still;
@@ -158,7 +163,7 @@ export function registerHeroInspectable() {
     initialScrub: HERO_STAGES.length - 1,
     onEnter() {
       on = true;
-      if (!bridge.hero) for (const s of HERO_STAGES) new Image().src = stillUrl(s); // warm the cache for instant swaps
+      if (!bridge.hero) for (const s of HERO_STAGES) loadStill(new Image(), s); // warm the cache for instant swaps
       unsub = bridge.onHero(() => {
         // GL arrived (or went away) while Inspect is on: follow it
         if (bridge.hero) clearStill();

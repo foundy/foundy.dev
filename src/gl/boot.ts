@@ -55,7 +55,7 @@ export function bootHero() {
     };
     try {
       if (reduced.matches) return;
-      const sdfUrl = `${import.meta.env.BASE_URL}gl/wordmark-sdf.png`.replace(/\/{2,}/g, '/');
+      const sdfUrl = `${import.meta.env.BASE_URL}gl/wordmark-sdf.webp`.replace(/\/{2,}/g, '/');
       const sdf = fetch(sdfUrl).then((r) => {
         if (!r.ok) throw new Error(`sdf ${r.status}`);
         return r.blob();
