@@ -5,35 +5,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev      # Start Astro dev server
-npm run build    # astro check (types) + astro build -> dist/
-npm run preview  # Preview production build locally
-npm test         # vitest: motion primitives, close decision, recorder replay, Lab old/new rule pairs
+npm run dev                  # Astro dev server (add `-- --host` to open it from a phone on the LAN); also serves /spike/*
+npm run build                # astro check (types) + astro build -> dist/
+npm run preview              # serve dist/ (astro 7 daemonizes in non-TTY shells and prints its pid; `astro preview stop`)
+npm test                     # vitest (motion primitives, decision rule, Lab simulation)
+npm run verify               # fresh build + preview on a free port, then every verify script in Chromium/WebKit/Firefox
+                             #   (hero, inspect, cards, lab) + audits (Lab chart labels, keyboard/zoom, axe). Non-zero exit on failure.
+                             #   Options: node scripts/verify-all.mjs --no-build --browsers=chromium --only=hero,cards,audit
+npm run bake:sdf             # rebake public/gl/wordmark-sdf.webp + src/gl/hero/wordmark.json from the font (outputs are committed)
+node scripts/og.mjs          # regenerate public/og/*.png (title/summary/year of each case study); outputs are committed
+node scripts/hero/render-stages.mjs <baseUrl>   # regenerate the Inspect stills public/gl/stages/*.webp (+ @2x) from a running preview
+node scripts/audit/lighthouse.mjs <baseUrl> [runs]   # Lighthouse mobile+desktop on 4 pages -> docs/qa/lighthouse.json
 ```
+
+Individual checks: `node scripts/<hero|inspect|cards|lab>/verify.mjs <baseUrl> <chromium|webkit|firefox>` and `node scripts/audit/{a11y,keyboard}.mjs <baseUrl> <browser>`.
+Screenshots: `scripts/<phase>/shots.mjs`. Never leave a preview/dev server running; use a free port.
 
 ## Architecture
 
-Personal site (foundy.dev): Astro (static output) + vanilla TypeScript, no UI framework. Redesign in progress; see `docs/redesign-plan.md` (roadmap, decisions, quality bar). The pre-redesign site and card-deck prototypes are preserved at git tag `legacy-v1` (old data copies in `docs/legacy-data/`).
+Personal portfolio (foundy.dev): Astro (static output) + vanilla TypeScript. No UI framework. The plan, decisions and per-phase notes are in `docs/redesign-plan.md`; read it before changing behaviour.
 
-**Structure:**
-- `src/pages/` - `index.astro`, `work/[slug].astro` (from the `work` collection), `lab.astro`, `404.astro`
-- `src/content.config.ts` + `src/content/work/*.md` - `work` content collection (title, summary, order, year, plus `facts`/`preview` for the card's preview sheet)
-- `src/layouts/Base.astro` - html shell: meta/OG, viewport (zoom must stay enabled), theme-color, favicon
-- `src/styles/` - `tokens.css` (paper/ink design tokens), `global.css` (base, reduced-motion, view transitions)
-- `src/gl/` - the WebGL2 hero. `boot.ts` is the only eager script (checks WebGL2 / `?gl=none` / reduced motion / Save-Data, then lazy-imports `hero/` and cross-fades over the SVG poster). `renderer.ts` = context, program/FBO ping-pong helpers, visibility-aware loop. `hero/` = `index.ts` (`mountHero`, `HeroHandle.renderStage()/stats()`), `pipeline.ts` (velocity -> deviation sim, then one display pass), `stages/{sdf,warp,flow,composite}.ts` (GLSL, each stage renderable alone via `HeroStage`), `input.ts` (pointer -> force, touch rules), `hud.ts` (`?hud=1` only). The wordmark SDF is baked at build time by `scripts/bake-sdf.mjs` (`npm run bake:sdf`, outputs committed).
-- `src/lib/inspect/` - the Inspect layer, built for reuse. `core.ts` = `registerInspectable({id,title,element,kind:'stages'|'timeline',context,stages,timeline,onEnter,onExit,onScrub})` + global state (`inspect.enabled/active/scrub`, `refresh()` re-picks the active inspectable by its `context()`, `notifyTimeline()`) + tiny emitter. `panel.ts` = generic stages UI (scrubber, aria-live explanation, Details disclosure); `timeline.ts` = generic timeline UI (replay button, scrubber with marker stops, plain-English summary, Details). `toggle.ts` is the eager half (button + `I`/Escape keys; dynamic-imports `runtime.ts` on first use or hover/focus prefetch). `bridge.ts` hands the live hero handle and the card deck handle (`bridge.cards`) to Inspect; `runtime.ts` lazy-loads `../cards/inspect` when the deck exists. The hero's inspectable (copy, developer numbers, still-image fallback) is `src/gl/hero/inspect.ts`; styling is `src/styles/inspect.css`. No GL: stills `public/gl/stages/*.webp` from `scripts/hero/render-stages.mjs`.
-- `src/lib/core/` - clock, quality tiers.
-- `src/lib/motion/` - framework-free, time-based, unit-tested (`npm test`, vitest): `spring.ts` (closed-form damped spring, retarget keeps velocity), `velocity.ts` (least-squares px/ms over the last 90 ms), `gesture.ts` (`GesturePipeline` pure state machine fed `{t,x,y,type}` samples + `bindPointerGesture` DOM half: pointer capture, cancel handling, touchmove preventDefault), `recorder.ts` (versioned JSON recordings + deterministic `replay()`).
-- `src/lib/cards/` - the work cards: `boot.ts` (eager ~0.5 KB: cards are plain links without JS; click/Enter opens the sheet; loads the chunk on pointerdown/focus/idle; `#work/<slug>` direct load), `index.ts` (lazy: the preview sheet, an explicit state machine idle/opening/open/dragging/closing, FLIP morph by springs, pull-down close, history/inert/focus), `decision.ts` (`decideClose`/`shouldClose`, drag rubber band; constants documented there), `inspect.ts` (card timeline inspectable: markers, summary, SVG overlay), `types.ts`. The sheet markup is static in `index.astro` (`#work-sheet`, per-card `<template data-sheet-for>`); styles `src/styles/cards.css`.
-- `src/lib/lab/` - the Lab (`/lab`): four card-study decisions, each a live old-rule vs new-rule comparison of ONE recorded gesture. `rules.ts` = pure `simulate(decision, side, recording, tau)` (replays through `GesturePipeline`, applies the side's rule, returns frames every 8 ms + outcome + chart data + plain-English explanation; both sides share `tUp` and a fixed tail, so one clock drives both), `stage.ts` = SVG markup/painter for a mini sheet and its chart (used at build time for the no-JS annotated diagram AND in the browser), `section.ts` = lazy live half (IntersectionObserver per section in `lab.astro`; play/scrub/recording chips, "your turn" via `bindPointerGesture` + `GestureRecorder`, the tunable look-ahead τ with a live table). Copy in `src/data/lab/decisions.ts` (inferred specifics listed in `mock`); canned recordings `src/data/lab/*.json` are generated by `scripts/lab/make-recordings.mjs` and served at `/lab/data/<id>.json` (fetched on demand, not bundled). Shared sheet constants (`SNAP_CFG`, `CLOSE_CFG`, `SCRIM_GRACE_MS`) live in `src/lib/cards/tuning.ts`. Tests: `src/lib/lab/lab.test.ts`.
-- `src/components/` - Astro components (HeroPoster, InspectToggle, WorkVisual, ...)
-- `scripts/hero/`, `scripts/inspect/`, `scripts/cards/` (+ `sizes.mjs` chunk sizes), `scripts/lab/` (`verify.mjs`, `shots.mjs`, `make-recordings.mjs`) - Playwright verification (`verify.mjs`, `shots.mjs`); run against `npm run build && npm run preview`
+- `src/pages/` `index` (home: hero, two work cards, about, contact), `work/[slug]` (case studies from `src/content/work/*.md`), `lab`, `404`. The hero spike pages live in `src/spike/pages/` and are injected as routes **only on the dev server** (`astro.config.mjs`); they are not built or deployed.
+- `src/gl/` raw WebGL2 ink hero (`boot.ts` is the only JS on the home page's critical path; the hero chunk loads after first paint). `public/gl/wordmark-sdf.webp` is the baked SDF (lossless WebP), `public/gl/stages/` the pre-rendered Inspect stills (1x and @2x).
+- `src/lib/motion/` spring, velocity, gesture (Pointer Events), recorder/replay. `src/lib/cards/` preview sheet + close decision (`decision.ts` holds `TAU_MS`, `CLOSE_FRACTION`). `src/lib/inspect/` shared Inspect layer (lazy). `src/lib/lab/` Lab simulation and UI.
+- `src/data/site.ts` and `src/content/work/*.md` hold all copy. Everything invented is marked `mock` on screen; the list of what needs real information is `docs/content-todo.md`.
+- `docs/device-checklist.md` is the iPhone pass; `docs/card-study-notes.md` the lessons from the legacy prototypes (tag `legacy-v1`).
 
-**Key behaviors:**
-- Work cards: click/tap/Enter on a card opens a preview sheet in the same document (URL `#work/<slug>`, pushState); Escape, close button, scrim, Back and a pull-down from scrollTop 0 close it. Background is `inert`, focus returns to the card. Only transform/opacity are animated; a transform has exactly one owner (the spring loop). Docs: `docs/card-study-notes.md`.
-- Cross-document view transitions via CSS `@view-transition` (no ClientRouter); unsupported browsers navigate normally
-- English only; system font stack for now (TODO: self-hosted fonts)
+## Rules of thumb
 
-**Deployment:**
-- GitHub Pages via `.github/workflows/deploy.yml` (Node 22, `npm ci`, `npm run build`, upload `dist`)
-- Pushes to `main` trigger automatic build and deploy
+- Keep first-view cost low: no render-blocking JS, GL/Inspect/cards/Lab code stay lazy. Budgets: home initial script ~1.6 KB gz, hero chunk 15 KB gz, Inspect 10 KB, cards 12 KB, Lab 10 KB.
+- Layout must not shift when JS hydrates (Lab renders same-sized placeholders server-side; keep that when editing Lab controls).
+- Accessibility is checked by `npm run verify` (axe, keyboard walkthrough, 200% zoom and 320 px). Do not add `user-scalable=no`.
+- Do not import `three` or `src/spike/*` from production pages.
+
+## Deployment
+
+GitHub Pages via `.github/workflows/deploy.yml` (`npm ci && npm run build`, uploads `dist/`). Pushes to `main` build and deploy.

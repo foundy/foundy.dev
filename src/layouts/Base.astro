@@ -13,6 +13,8 @@ interface Props {
   ogImage?: string;
   ogImageAlt?: string;
   ogType?: 'website' | 'article';
+  /** keep the page out of search results (the 404 page) */
+  noindex?: boolean;
 }
 
 const {
@@ -21,6 +23,7 @@ const {
   ogImage = '/og/default.png',
   ogImageAlt = 'foundy, set in large type on paper',
   ogType = 'website',
+  noindex = false,
 } = Astro.props;
 
 const fullTitle = title === site.name ? site.name : `${title} — ${site.name}`;
@@ -35,6 +38,7 @@ const ogUrl = new URL(ogImage, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14130f" media="(prefers-color-scheme: dark)" />

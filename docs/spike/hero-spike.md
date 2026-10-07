@@ -11,7 +11,7 @@
 | 비주얼 방향 | **riso(2색 오버프린트)를 1순위, ink(잉크 번짐)를 2순위**로 추천. refract(유리 굴절)는 가장 "해부 가능"하지만 아직 거칠고 정지 상태 가독성이 약해 비추. 최종 선택은 사용자 몫(9절). |
 | 성능 예산(제안) | 아래 7절 표. 실기기(iPhone) 수치가 들어오기 전까지는 "이 Mac에서의 상한선"으로만 읽을 것. |
 
-한계를 먼저 밝힌다. **모든 측정은 M5 Pro Mac 한 대(Playwright 구동 Chrome 155 / WebKit 26 / Firefox 155)에서 했고, 어느 케이스도 60 Hz vsync를 넘기지 못해 프레임 시간만으로는 스택을 가를 수 없었다.** 구분이 되는 것은 번들 크기, 초기화/컴파일 시간, GPU 연속 비용(bench)이다. 모바일 GPU 수치는 없다(`device-checklist.md` 참고).
+한계를 먼저 밝힌다. **모든 측정은 M5 Pro Mac 한 대(Playwright 구동 Chrome 155 / WebKit 26 / Firefox 155)에서 했고, 어느 케이스도 60 Hz vsync를 넘기지 못해 프레임 시간만으로는 스택을 가를 수 없었다.** 구분이 되는 것은 번들 크기, 초기화/컴파일 시간, GPU 연속 비용(bench)이다. 모바일 GPU 수치는 없다(`docs/device-checklist.md` 참고).
 
 ## 1. 방법
 
@@ -249,7 +249,7 @@ Firefox는 `navigator.gpu`가 존재해도 three가 어댑터를 얻지 못해 W
 1. **어느 look?** 추천은 riso(1순위) / ink(2순위). refract는 더 다듬을 가치가 있는지? (계획 9절 "시각 방향" 미결 항목)
 2. **스택**: raw WebGL2로 확정해도 되는지(three는 참고 구현으로만 보존).
 3. **워드마크**: 서체 기반 SDF(현재 Schibsted Grotesk 820)로 간다면 SDF를 **빌드타임 베이크**로 옮길지(런타임 15~39 ms 제거), 직접 제작이면 베이크가 필수.
-4. **실기기**: `docs/spike/device-checklist.md`의 항목 1~2번(iPhone Safari에서 raw / three / three `gl=webgl2`, look 3종)과 HUD 스크린샷이 필요하다. 이 결과가 오면 7절 예산의 "프레임 비용" 행을 확정한다.
+4. **실기기**: `docs/device-checklist.md`의 히어로 항목(H4~H6)과 HUD 스크린샷이 필요하다. (스파이크 페이지 `/spike/raw`, `/spike/three`는 이제 `npm run dev`에서만 열린다. raw / three / three `?gl=webgl2` 비교가 필요하면 개발 서버에서 `?hud=1`로 연다.) 이 결과가 오면 7절 예산의 "프레임 비용" 행을 확정한다.
 5. 캔버스 위 터치: 스파이크는 `touch-action: none`이라 캔버스 위 세로 스크롤이 막힌다. 정식 구현에서 히어로 위 스크롤을 허용할지(허용하면 포인터 힘을 가로 제스처로 제한).
 
 ## 11. 측정하지 못한 것
