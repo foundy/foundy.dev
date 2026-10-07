@@ -1,15 +1,35 @@
 {
-  "name": "foundy.dev",
-  "private": true,
-  "version": "0.0.0",
+  "name": "foundy-dev",
   "type": "module",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "bake:sdf": "node scripts/bake-sdf.mjs",
+    "astro": "astro",
+    "verify": "node scripts/verify-all.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/schibsted-grotesk": "^5.3.0",
+    "astro": "^7.3.6",
+    "three": "^0.186.1"
   },
   "devDependencies": {
-    "typescript": "~5.9.3",
-    "vite": "^7.3.1"
+    "@astrojs/check": "^0.9.10",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/schibsted-grotesk": "^5.3.0",
+    "@types/three": "^0.186.0",
+    "axe-core": "^4.14.0",
+    "fontkit": "^2.0.4",
+    "playwright": "^1.63.0",
+    "sharp": "^0.35.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3",
+    "wawoff2": "^2.0.1"
   }
 }

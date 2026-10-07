@@ -1,0 +1,349 @@
+/* Inspect: blueprint look. Imported by the Inspect chunk (runtime.ts); Astro folds it into the page CSS. Thin blue lines and
+   mono labels, tasteful: a column grid behind the page, bounds on headings under the pointer, a frame around the
+   hero, and the panel under it. Colours come from the --bp-* tokens, so dark mode follows. */
+
+body[data-inspect='on']::before {
+  content: '';
+  position: fixed;
+  inset-block: 0;
+  left: 50%;
+  width: min(var(--page-max), calc(100% - 2 * var(--gutter)));
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.2;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--bp-line-on-paper) 0 1px,
+    transparent 1px calc((100% - 11 * var(--col-gap)) / 12 + var(--col-gap))
+  );
+}
+
+body[data-inspect='on'] :is(h1, h2, h3, .statement, .lede):hover {
+  outline: 1px dashed var(--bp-line-on-paper);
+  outline-offset: 6px;
+}
+
+body[data-inspect='on'] .poster .stage {
+  outline: 1px solid var(--bp-line-on-paper);
+  outline-offset: 12px;
+}
+body[data-inspect='on'] .poster :is(.caption .mono, .inspect-head) {
+  color: var(--bp-line-on-paper);
+}
+
+/* the canvas dips instead of fading slowly while stages change */
+body[data-inspect='on'] .poster .hero-gl {
+  transition-duration: 140ms;
+}
+
+/* static stills used when GL is not running */
+.inspect-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  display: block;
+  opacity: 0;
+  background: var(--paper);
+  transition: opacity 140ms ease-out;
+  pointer-events: none;
+  user-select: none;
+}
+.inspect-still.in {
+  opacity: 1;
+}
+
+.inspect-panel {
+  margin-top: var(--space-l);
+  padding: var(--space-s);
+  border: 1px solid var(--bp-line-on-paper);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--bp-line-on-paper) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--bp-line-on-paper) 7%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+  display: grid;
+  gap: var(--space-s);
+}
+.inspect-head {
+  margin: 0;
+}
+.inspect-panel :focus-visible {
+  outline-color: var(--bp-line-on-paper);
+}
+/* wide screens: explanation on the left, developer numbers on the right, so hero + panel fit one screen */
+@media (min-width: 56rem) {
+  .inspect-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--space-l);
+    align-items: start;
+    margin-top: var(--space-m);
+  }
+  .inspect-head,
+  .inspect-controls {
+    grid-column: 1 / -1;
+  }
+}
+
+.inspect-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-xs);
+  align-items: start;
+}
+.inspect-step {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--bp-line-on-paper);
+  background: var(--paper);
+  color: var(--bp-line-on-paper);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+.inspect-step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.inspect-track {
+  min-width: 0;
+}
+.inspect-range {
+  display: block;
+  width: 100%;
+  height: 2.75rem;
+  margin: 0;
+  background: transparent;
+  accent-color: var(--bp-line-on-paper);
+  cursor: pointer;
+}
+.inspect-stops {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  margin: -0.25rem 0 0;
+  padding: 0;
+}
+.inspect-stop {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  width: 100%;
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+.inspect-n {
+  font-size: var(--step--2);
+  opacity: 0.8;
+}
+.inspect-stop[data-on] {
+  color: var(--bp-line-on-paper);
+  font-weight: 700;
+}
+
+.inspect-explain {
+  max-width: 44rem;
+}
+.inspect-title {
+  margin: 0 0 var(--space-3xs);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--bp-line-on-paper);
+  font-weight: 700;
+}
+.inspect-body {
+  margin: 0;
+  font-size: var(--step-1);
+  line-height: 1.35;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.inspect-details summary {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--bp-line-on-paper);
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+.inspect-dl {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3xs);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+.inspect-dl > div {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 11rem) 1fr;
+  gap: var(--space-xs);
+  padding-block: var(--space-3xs);
+  border-top: 1px solid color-mix(in srgb, var(--bp-line-on-paper) 35%, transparent);
+}
+.inspect-dl dt {
+  color: var(--ink-muted);
+}
+.inspect-dl dd {
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 30rem) {
+  .inspect-dl > div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .inspect-stop {
+    font-size: var(--step--2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inspect-still,
+  body[data-inspect='on'] .poster .hero-gl {
+    transition: none;
+  }
+}
+
+/* ---- timeline panel (card sheet) ---- */
+.inspect-timeline {
+  grid-template-columns: auto 1fr;
+}
+.inspect-timeline .inspect-time {
+  grid-column: 2;
+  justify-self: end;
+  font-size: var(--step--2);
+  color: var(--ink-muted);
+}
+.inspect-play {
+  font-size: var(--step--1);
+}
+.inspect-rangewrap {
+  position: relative;
+}
+.inspect-ticks {
+  position: absolute;
+  inset: auto 0 0.3rem 0;
+  height: 0.5rem;
+  pointer-events: none;
+}
+.inspect-tick {
+  position: absolute;
+  left: calc(0.5rem + (100% - 1rem) * var(--at));
+  bottom: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--bp-line-on-paper);
+}
+.inspect-marks .inspect-stop {
+  font-size: var(--step--2);
+}
+.inspect-col {
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+.inspect-summary {
+  margin: 0;
+  font-size: var(--step-0);
+  line-height: 1.35;
+  color: var(--ink);
+  max-width: 44rem;
+  text-wrap: pretty;
+}
+.inspect-empty {
+  max-width: 44rem;
+}
+.inspect-col .inspect-body {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+/* ---- card overlay: the visitor's last pull, drawn over the page ---- */
+.cards-overlay .ov-ghost {
+  fill: none;
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+.cards-overlay .ov-line {
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 1.75;
+  fill: none;
+}
+.cards-overlay .ov-thr .ov-line {
+  stroke-dasharray: 3 4;
+}
+.cards-overlay .ov-projline {
+  stroke-dasharray: 5 5;
+}
+.cards-overlay .ov-traj {
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cards-overlay .halo {
+  stroke: var(--paper);
+  stroke-width: 6;
+  opacity: 0.85;
+  stroke-dasharray: none;
+}
+.cards-overlay .ov-pt {
+  fill: var(--paper);
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 2;
+}
+.cards-overlay .ov-dot {
+  fill: var(--accent);
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+.cards-overlay .ov-vecline {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+.cards-overlay .ov-text {
+  fill: var(--bp-line-on-paper);
+  font: 600 12px var(--font-mono);
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.cards-overlay .ov-verdict {
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+.cards-overlay .ov-verdict.is-close,
+.cards-overlay .ov-proj.is-close .ov-text {
+  fill: var(--accent);
+}
+.cards-overlay .ov-proj.is-close .ov-projend {
+  stroke: var(--accent);
+}
+
+/* stage mode: strokes keep their screen width and text its screen size whatever the viewBox scale is */
+.cards-overlay.is-stage :is(line, polyline, path, rect, circle) {
+  vector-effect: non-scaling-stroke;
+}
+.cards-overlay.is-stage .ov-text {
+  font-size: calc(12px * var(--u, 1));
+  stroke-width: calc(4px * var(--u, 1));
+}
+.cards-overlay.is-stage .ov-verdict {
+  font-size: calc(18px * var(--u, 1));
+}
+.cards-overlay.is-stage .ov-caption {
+  font-size: calc(10px * var(--u, 1));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: var(--ink-soft);
+}

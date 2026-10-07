@@ -1,0 +1,527 @@
+/* Lab: the side-by-side comparisons (src/pages/lab.astro, src/lib/lab/*). Global on purpose: the stage SVG is
+   injected by script, so scoped styles would not reach it. Colours come from the tokens (light and dark). */
+
+.lab-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  padding-block: var(--space-xl);
+  border-top: 1px solid var(--rule);
+}
+.lab-sec:last-child {
+  margin-bottom: var(--space-3xl);
+}
+.lab-copy {
+  display: grid;
+  gap: var(--space-s);
+  max-width: 52rem;
+}
+.lab-num {
+  display: flex;
+  gap: var(--space-s);
+  align-items: baseline;
+}
+.lab-n {
+  font-size: var(--step-3);
+  color: var(--ink);
+  line-height: 1;
+}
+.lab-copy h2 {
+  font-size: var(--step-2);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 680;
+}
+.lab-rows {
+  display: grid;
+  gap: var(--space-s);
+  margin: 0;
+  color: var(--ink-soft);
+}
+.lab-rows > div {
+  display: grid;
+  gap: var(--space-3xs);
+}
+.lab-mock {
+  list-style: none;
+  display: grid;
+  gap: var(--space-3xs);
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+/* ---- controls ---- */
+.lab-ui {
+  display: grid;
+  gap: var(--space-xs);
+  max-width: 52rem;
+}
+.lab-static {
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+/* stand-in for the live controls: server-rendered, shown only when scripts can run, replaced in place on hydration */
+.lab-pre {
+  display: none;
+}
+@media (scripting: enabled) {
+  .lab-ui .lab-static {
+    display: none;
+  }
+  .lab-tau-ui .lab-static {
+    display: none;
+  }
+  .lab-tau-ui .lab-pre {
+    display: contents; /* its children are the flex items, exactly where the live controls go */
+  }
+  .lab-ui .lab-pre {
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .lab-bar.lab-pre {
+    display: block;
+  }
+}
+.lab-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+.lab-chip,
+.lab-btn {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  padding: 0.5em 0.9em;
+  min-height: 2.5rem;
+  cursor: pointer;
+}
+.lab-chip[aria-pressed='true'],
+.lab-pre .lab-chip[data-on] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.lab-btn:disabled {
+  color: var(--ink-muted);
+  cursor: default;
+  opacity: 0.6;
+}
+.lab-chip:focus-visible,
+.lab-btn:focus-visible,
+.lab-range:focus-visible {
+  outline: 2px solid var(--bp-line-on-paper);
+  outline-offset: 2px;
+}
+.lab-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  padding-block: var(--space-2xs);
+}
+.lab-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  flex-wrap: wrap;
+}
+.lab-play {
+  min-width: 6rem;
+}
+.lab-range {
+  flex: 1 1 14rem;
+  min-width: 0;
+  accent-color: var(--bp-line-on-paper);
+  height: 2.5rem;
+}
+.lab-time {
+  min-width: 9.5rem;
+  text-align: right;
+}
+.lab-hint {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+/* ---- the two sides ---- */
+.lab-sides {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-l) var(--col-gap);
+}
+@media (min-width: 52rem) {
+  .lab-sides {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.lab-side {
+  display: grid;
+  gap: var(--space-2xs);
+  align-content: start;
+  margin: 0;
+  min-width: 0;
+}
+.lab-side figcaption {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.lab-cap {
+  font-weight: 680;
+  font-size: var(--step-0);
+  letter-spacing: -0.01em;
+}
+.lab-hit {
+  width: 100%;
+  max-width: 16rem;
+  margin-inline: auto;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--paper-sunk);
+}
+.lab-hit:active {
+  cursor: grabbing;
+}
+.lab-badge {
+  justify-self: center;
+  width: 100%;
+  max-width: 16rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  font-weight: 600;
+  padding: 0.35em 0.6em;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  margin-inline: auto;
+}
+.lab-badge[data-key='closed'],
+.lab-badge[data-key='link'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+.lab-badge[data-key='swallowed'],
+.lab-badge[data-key='ignored'] {
+  border-style: dashed;
+}
+.lab-badge[data-key='wait'] {
+  color: var(--ink-muted);
+  border-style: dotted;
+  border-color: var(--rule);
+}
+.lab-detail {
+  text-align: center;
+  min-height: 3.2em; /* two lines: the static final-state numbers and the blank start of a replay take the same room */
+  max-width: 16rem;
+  margin-inline: auto;
+  font-size: var(--step--2);
+}
+.lab-chart {
+  max-width: 26rem;
+  margin-inline: auto;
+  width: 100%;
+}
+.lab-why {
+  max-width: 28rem;
+  margin-inline: auto;
+  color: var(--ink-soft);
+  font-size: var(--step--1);
+  min-height: 7em;
+}
+
+/* ---- stage SVG ---- */
+.st {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.st text {
+  font-family: var(--font-mono);
+}
+.st-page {
+  fill: var(--paper-sunk);
+}
+.st-slot rect {
+  fill: none;
+  stroke: var(--ink-muted);
+  stroke-width: 3;
+  stroke-dasharray: 10 8;
+}
+.st-note {
+  font-size: 20px;
+  fill: var(--ink-muted);
+}
+.st-scrim {
+  fill: var(--ink);
+  fill-opacity: 0.1;
+}
+.st-bg {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+.st-line {
+  fill: var(--rule);
+}
+.st-hero {
+  fill: var(--ink);
+}
+.st-heroart {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+.st-link rect {
+  fill: none;
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 3;
+}
+.st-link text {
+  font-size: 24px;
+  fill: var(--bp-line-on-paper);
+}
+.st-link[data-link='1'] rect {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+.st-link[data-link='1'] text {
+  fill: var(--paper);
+}
+.st-link[data-link='2'] rect {
+  stroke-dasharray: 8 6;
+  stroke: var(--ink-muted);
+}
+.st-trail {
+  fill: none;
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 3;
+  stroke-dasharray: 3 9;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+.st-live {
+  fill: none;
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.st-start {
+  fill: var(--paper);
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 4;
+}
+.st-finger {
+  fill: var(--accent);
+  fill-opacity: 0.55;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.st-thr {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-dasharray: 14 8;
+}
+.st-proj {
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 4;
+  stroke-dasharray: 4 8;
+  stroke-linecap: round;
+}
+.st-projdot {
+  fill: var(--paper);
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 4;
+}
+
+/* ---- chart ---- */
+.ch {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.ch text,
+.ch-txt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  fill: var(--ink-muted);
+  /* a paper halo keeps a label legible where a series or rule runs under it */
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.ch-axis {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+}
+.ch-hline {
+  stroke: var(--accent);
+  stroke-width: 1.2;
+  stroke-dasharray: 5 4;
+}
+.ch-lbl {
+  fill: var(--accent);
+}
+.ch-rel {
+  stroke: var(--rule);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+}
+.ch-s {
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+.ch-pull,
+.ch-hero {
+  stroke: var(--bp-line-on-paper);
+}
+.ch-text {
+  stroke: var(--ink-muted);
+}
+.ch-hero-t {
+  fill: var(--bp-line-on-paper);
+}
+.ch-text-t {
+  fill: var(--ink-muted);
+}
+.ch-proj {
+  fill: none;
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 2;
+  stroke-dasharray: 3 4;
+}
+.ch-projdot {
+  fill: var(--paper);
+  stroke: var(--bp-line-on-paper);
+  stroke-width: 2;
+}
+.ch-play {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+/* ---- tunable ---- */
+.lab-tau {
+  display: grid;
+  gap: var(--space-s);
+  max-width: 52rem;
+  padding: var(--space-s);
+  border: 1px dashed var(--bp-line-on-paper);
+}
+.lab-tau h3 {
+  font-size: var(--step-1);
+  letter-spacing: -0.02em;
+  font-weight: 680;
+}
+.lab-tau-ui {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  flex-wrap: wrap;
+}
+.lab-tau-out {
+  min-width: 4.5rem;
+  color: var(--ink);
+}
+.lab-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+.lab-table th,
+.lab-table td {
+  text-align: left;
+  padding: 0.45em 0.6em;
+  border-top: 1px solid var(--rule);
+  font-weight: 450;
+}
+.lab-table thead th {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  border-top: 0;
+}
+.lab-table td[data-key='closed'] {
+  font-weight: 650;
+}
+.lab-table tr[data-diff] {
+  background: color-mix(in srgb, var(--bp-line-on-paper) 10%, transparent);
+}
+.lab-note {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+/* wide: the copy stays beside the comparison, so the two phones are on screen together with their text */
+@media (min-width: 64rem) {
+  .lab-sec {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    align-items: start;
+  }
+  .lab-copy {
+    grid-column: 1 / span 4;
+    grid-row: 1 / span 4;
+    position: sticky;
+    top: var(--space-m);
+  }
+  .lab-ui,
+  .lab-bar,
+  .lab-sides,
+  .lab-tau {
+    grid-column: 5 / -1;
+    max-width: none;
+  }
+  .lab-ui {
+    grid-row: 1;
+  }
+  .lab-bar {
+    grid-row: 2;
+    position: static;
+    border: 0;
+    padding: 0;
+    background: none;
+  }
+  .lab-sides {
+    grid-row: 3;
+  }
+  .lab-tau {
+    grid-row: 4;
+  }
+  .lab-hit,
+  .lab-badge,
+  .lab-detail {
+    max-width: 15.5rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .lab-time {
+    text-align: left;
+  }
+}
+
+.lab-unit {
+  display: block;
+  margin-top: 0.35em;
+  font-size: var(--step--2);
+  color: var(--ink-muted);
+}

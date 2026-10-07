@@ -1,0 +1,46 @@
+---
+import { contact, mock, site } from '../data/site';
+---
+
+<footer class="site-footer">
+  <div class="wrap row">
+    <p class="mono">&copy; {site.year} {site.name}</p>
+    <ul class="links">
+      {
+        contact.socials.slice(0, 2).map((s) => (
+          <li>
+            <a class="mono" href={s.href} rel="me noopener">
+              {s.label}
+            </a>
+          </li>
+        ))
+      }
+      <li><a class="mono" href="/sitemap-index.xml">Sitemap</a></li>
+    </ul>
+    {mock && <p class="mono note">Placeholder content. Work in progress.</p>}
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: auto;
+    padding-block: var(--space-l);
+    border-top: 1px solid var(--rule);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-m);
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .links {
+    list-style: none;
+    display: flex;
+    gap: var(--space-m);
+  }
+  .note {
+    flex-basis: 100%;
+    font-size: var(--step--2);
+  }
+</style>

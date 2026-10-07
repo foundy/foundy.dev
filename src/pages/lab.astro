@@ -1,0 +1,220 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/lab.css';
+import { mock } from '../data/site';
+import { canned } from '../data/lab';
+import { decisions, tauNote } from '../data/lab/decisions';
+import { releaseTable, simulate } from '../lib/lab/rules';
+import { chartMarkup, stageMarkup, tauTableRows } from '../lib/lab/stage';
+import { TAU_MS } from '../lib/cards/decision';
+import { HINT_LEAD, UNIT_NOTE, hintBody } from '../lib/lab/copy';
+
+// `[mock]` in lab copy becomes the inline mock marker (copy is trusted, authored in src/data/lab/decisions.ts)
+const withMock = (s: string) => s.replace(/\[mock\]/g, ' <span class="mock-tag">mock</span>');
+
+// Static view of every comparison: the final frame of the first recording on both rules, annotated. The live replay
+// (src/lib/lab/section.ts) takes over per section when it scrolls into view.
+const blocks = decisions.map((d) => {
+  const set = canned[d.id];
+  const rec = set.recordings[0];
+  const sides = (['old', 'new'] as const).map((side) => {
+    const track = simulate(d.id, side, rec.recording);
+    const name = side === 'old' ? d.oldName : d.newName;
+    return { side, name, tag: side === 'old' ? d.oldTag : d.newTag, track, stage: stageMarkup(track, track.duration, name), chart: chartMarkup(track) };
+  });
+  const table = d.id === 'release-rule' ? tauTableRows(releaseTable(set.recordings, TAU_MS)) : '';
+  return { d, set, rec, sides, table };
+});
+---
+
+<Base
+  title="Lab"
+  description="Four design decisions from the card interaction study, each replayed side by side on the old rule and the new one."
+>
+  <main id="main">
+    <header class="head wrap">
+      <p class="label">
+        Lab {mock && <span class="badge">Mock content</span>}
+      </p>
+      <h1>Four decisions that changed the feel.</h1>
+      <p class="intro">
+        The <a href="/work/card-study">card interaction study</a> went through more than forty
+        iterations. These are the four changes that mattered most. Each one runs the same recorded
+        gesture through the old rule and the new rule, so you can watch where they disagree. Then
+        drag on a phone to feed in your own.
+        <span class="mock-tag">mock</span> The four preset gestures are synthesised from typical
+        values, not captured from a person.
+      </p>
+    </header>
+
+    <div class="wrap">
+      {
+        blocks.map(({ d, set, rec, sides, table }) => (
+          <section
+            class="lab-sec"
+            id={`d${d.n}`}
+            data-lab={d.id}
+            data-old-name={d.oldName}
+            data-new-name={d.newName}
+            data-try={d.tryIt}
+            aria-labelledby={`h-${d.id}`}
+          >
+            <div class="lab-copy">
+              <p class="lab-num">
+                <span class="mono lab-n">{d.n}</span>
+                <span class="mono">{d.versions}</span>
+              </p>
+              <h2 id={`h-${d.id}`}>{d.title}</h2>
+              <dl class="lab-rows">
+                <div>
+                  <dt class="label">The problem</dt>
+                  <dd set:html={withMock(d.problem)} />
+                </div>
+                <div>
+                  <dt class="label">The change</dt>
+                  <dd>{d.change}</dd>
+                </div>
+                <div>
+                  <dt class="label">Why</dt>
+                  <dd>{d.why}</dd>
+                </div>
+              </dl>
+              {
+                mock && d.mock.length > 0 && (
+                  <ul class="lab-mock">
+                    {d.mock.map((m) => (
+                      <li>
+                        <span class="badge">mock</span> {m}
+                      </li>
+                    ))}
+                  </ul>
+                )
+              }
+            </div>
+
+            <div class="lab-ui" data-ui>
+              <p class="lab-static">
+                Showing <strong>{rec.title}</strong>: {rec.note} With JavaScript this replays and
+                you can record your own.
+              </p>
+              <!-- same-sized stand-in for the live controls (shown only when scripting is on), so hydrating moves nothing -->
+              <div class="lab-pre" aria-hidden="true">
+                <div class="lab-chips">
+                  {set.recordings.map((r, i) => <span class="lab-chip" data-on={i === 0 ? "1" : undefined}>{r.title}</span>)}
+                </div>
+                <p class="lab-hint">
+                  <strong>{HINT_LEAD}</strong>{hintBody(d.tryIt)}<span class="lab-unit">{UNIT_NOTE}</span>
+                </p>
+              </div>
+            </div>
+            <div class="lab-bar lab-pre" data-bar aria-hidden="true">
+              <div class="lab-row">
+                <span class="lab-btn lab-play">Play</span>
+                <span class="lab-range"></span>
+                <span class="lab-time mono">0.00 s / 1.02 s</span>
+              </div>
+            </div>
+
+            <div class="lab-sides">
+              {sides.map((s) => (
+                <figure class="lab-side" data-side={s.side}>
+                  <figcaption>
+                    <span class="lab-cap">{s.name}</span>
+                    <span class="mono">{s.tag}</span>
+                  </figcaption>
+                  <div class="lab-hit" data-hit set:html={s.stage} />
+                  <p class="lab-badge" data-badge data-key={s.track.outcome.key}>
+                    {s.track.outcome.label}
+                  </p>
+                  <p class="lab-detail mono" data-detail>{s.track.outcome.detail}</p>
+                  <div class="lab-chart" data-chart set:html={s.chart} />
+                  <p class="lab-why" data-why>{s.track.explain}</p>
+                </figure>
+              ))}
+            </div>
+
+            {
+              d.id === 'release-rule' && (
+                <div class="lab-tau" data-tau>
+                  <h3>One tunable: the look-ahead</h3>
+                  <p>
+                    The new rule closes when <span class="mono">distance + velocity × τ</span> passes
+                    35% of the sheet. τ is how far ahead it looks. The table re-runs both rules on all
+                    recordings as you move it (τ = 0 is the old distance-only idea, at 35% instead of
+                    38%).
+                  </p>
+                  <div class="lab-tau-ui" data-tau-ui>
+                    <p class="lab-static">
+                      Shipped: <span class="mono">{TAU_MS} ms</span>. The slider needs JavaScript.
+                    </p>
+                    <span class="lab-pre" aria-hidden="true">
+                      <span class="lab-tau-label">Look-ahead τ (ms)</span>
+                      <span class="lab-range"></span>
+                      <span class="mono lab-tau-out">{TAU_MS} ms</span>
+                      <span class="lab-btn">Reset to shipped ({TAU_MS} ms)</span>
+                    </span>
+                  </div>
+                  <table class="lab-table">
+                    <caption class="visually-hidden">Outcome of each rule for every recording</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Recording</th>
+                        <th scope="col">Old rule</th>
+                        <th scope="col">New rule</th>
+                      </tr>
+                    </thead>
+                    <tbody set:html={table} />
+                  </table>
+                  <p class="lab-note">
+                    <strong>Why {TAU_MS} ms.</strong> <Fragment set:html={withMock(tauNote.why)} />
+                  </p>
+                </div>
+              )
+            }
+          </section>
+        ))
+      }
+    </div>
+  </main>
+</Base>
+
+<script>
+  // Lazy per section: the comparison code loads when a section is about to be seen.
+  const secs = document.querySelectorAll<HTMLElement>('[data-lab]');
+  const load = (el: HTMLElement) => import('../lib/lab/section').then((m) => m.mountSection(el));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (es) => {
+        for (const e of es) {
+          if (e.isIntersecting) {
+            io.unobserve(e.target);
+            load(e.target as HTMLElement);
+          }
+        }
+      },
+      { rootMargin: '300px 0px' },
+    );
+    secs.forEach((s) => io.observe(s));
+  } else secs.forEach(load);
+</script>
+
+<style>
+  .head {
+    display: grid;
+    gap: var(--space-m);
+    padding-top: var(--space-l);
+    padding-bottom: var(--space-xl);
+  }
+  h1 {
+    font-size: var(--step-5);
+    line-height: 0.96;
+    letter-spacing: -0.045em;
+    font-weight: 750;
+    max-width: 15ch;
+  }
+  .intro {
+    max-width: 40rem;
+    font-size: var(--step-1);
+    color: var(--ink-soft);
+  }
+</style>

@@ -1,0 +1,152 @@
+---
+/**
+ * Static hero poster: the "foundy" wordmark as inline SVG with an ink-on-paper
+ * treatment. It is the LCP-safe first paint and the permanent fallback for the
+ * future GL hero (Phase 3), which cross-fades over it.
+ *
+ * Stages echoed here, statically:
+ *   4 composite (filled, bled ink)  +  1 SDF outline (dashed blueprint hairline)
+ */
+import InspectToggle from './InspectToggle.astro';
+import wordmark from '../gl/hero/wordmark.json';
+
+// Geometry comes from the build-time bake (scripts/bake-sdf.mjs): the same outline the GL hero's SDF was made from,
+// so the poster and the canvas line up in every browser.
+const [W, H] = wordmark.box;
+---
+
+<figure class="poster" data-hero-poster>
+  <div class="stage">
+  <svg
+    class="art"
+    viewBox={`0 0 ${W} ${H}`}
+    aria-hidden="true"
+    focusable="false"
+    preserveAspectRatio="xMinYMid meet"
+  >
+    <defs>
+      <!-- Ink edge: low-frequency wobble, then fine paper-tooth pitting. -->
+      <filter
+        id="hp-ink"
+        filterUnits="userSpaceOnUse"
+        x="-40"
+        y="-40"
+        width={W + 80}
+        height={H + 80}
+        color-interpolation-filters="sRGB"
+      >
+        <feTurbulence type="fractalNoise" baseFrequency="0.011 0.016" numOctaves="2" seed="7" result="warp"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="warp" scale="11" xChannelSelector="R" yChannelSelector="G" result="wobbled"></feDisplacementMap>
+        <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="3" result="tooth"></feTurbulence>
+        <feColorMatrix in="tooth" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 2.1" result="toothAlpha"></feColorMatrix>
+        <feComposite in="wobbled" in2="toothAlpha" operator="in"></feComposite>
+      </filter>
+      <!-- Bleed: a soft, displaced halo under the ink. -->
+      <filter
+        id="hp-bleed"
+        filterUnits="userSpaceOnUse"
+        x="-60"
+        y="-60"
+        width={W + 120}
+        height={H + 120}
+        color-interpolation-filters="sRGB"
+      >
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="11" result="n"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="34" xChannelSelector="G" yChannelSelector="R" result="d"></feDisplacementMap>
+        <feGaussianBlur in="d" stdDeviation="5"></feGaussianBlur>
+      </filter>
+    </defs>
+
+    <!-- registration marks -->
+    <g class="reg" aria-hidden="true">
+      <path d="M0 8h14M7 1v14"></path>
+      <path d={`M${W - 14} 8h14M${W - 7} 1v14`}></path>
+      <path d={`M0 ${H - 8}h14M7 ${H - 15}v14`}></path>
+      <path d={`M${W - 14} ${H - 8}h14M${W - 7} ${H - 15}v14`}></path>
+    </g>
+
+    <path id="hp-word" d={wordmark.path}></path>
+
+    <!-- stage 1 echo: SDF outline, offset -->
+    <use class="outline" href="#hp-word" transform="translate(10 12)" aria-hidden="true"></use>
+    <g class="glyphs">
+      <!-- bleed -->
+      <use class="bleed" href="#hp-word" filter="url(#hp-bleed)" aria-hidden="true"></use>
+      <!-- stage 4: composite -->
+      <use class="ink" href="#hp-word" filter="url(#hp-ink)" aria-hidden="true"></use>
+    </g>
+  </svg>
+  </div>
+
+  <figcaption class="caption">
+    <span class="mono" data-inspect-caption>Fig. 0 &middot; Poster &middot; stage 4 of 4, composite</span>
+    <InspectToggle />
+  </figcaption>
+</figure>
+
+<style>
+  .poster {
+    display: block;
+  }
+  .art {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1200 / 372;
+    overflow: visible;
+  }
+  .stage {
+    position: relative;
+  }
+  /* The GL hero (src/gl/boot.ts) cross-fades its canvas over the glyph layer, then the poster glyphs stop painting
+     (visibility, so their SVG filters stop costing anything). The registration marks and the blueprint outline stay:
+     they are the drawn frame around the canvas. */
+  .poster :global(.hero-gl) {
+    position: absolute;
+    display: block;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 400ms ease-out;
+    /* vertical swipes scroll the page; horizontal drags and long presses push ink (src/gl/hero/input.ts) */
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .poster.gl-on :global(.hero-gl) {
+    opacity: 1;
+  }
+  .poster.gl-instant :global(.hero-gl) {
+    transition: none;
+  }
+  .poster.gl-done .glyphs {
+    visibility: hidden;
+  }
+  .ink {
+    fill: var(--ink);
+  }
+  .bleed {
+    fill: var(--ink);
+    opacity: 0.2;
+  }
+  .outline {
+    fill: none;
+    stroke: var(--bp-line-on-paper);
+    stroke-width: 1.25;
+    stroke-dasharray: 2 6;
+    opacity: 0.7;
+  }
+  .reg path {
+    fill: none;
+    stroke: var(--ink-muted);
+    stroke-width: 1;
+  }
+  .caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-m);
+    margin-top: var(--space-s);
+  }
+</style>
