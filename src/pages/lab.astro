@@ -1,11 +1,31 @@
 ---
 import Base from '../layouts/Base.astro';
-import { labEntries, mock } from '../data/site';
+import '../styles/lab.css';
+import { mock } from '../data/site';
+import { canned } from '../data/lab';
+import { decisions, tauNote } from '../data/lab/decisions';
+import { releaseTable, simulate } from '../lib/lab/rules';
+import { chartMarkup, stageMarkup, tauTableRows } from '../lib/lab/stage';
+import { TAU_MS } from '../lib/cards/decision';
+
+// Static view of every comparison: the final frame of the first recording on both rules, annotated. The live replay
+// (src/lib/lab/section.ts) takes over per section when it scrolls into view.
+const blocks = decisions.map((d) => {
+  const set = canned[d.id];
+  const rec = set.recordings[0];
+  const sides = (['old', 'new'] as const).map((side) => {
+    const track = simulate(d.id, side, rec.recording);
+    const name = side === 'old' ? d.oldName : d.newName;
+    return { side, name, tag: side === 'old' ? d.oldTag : d.newTag, track, stage: stageMarkup(track, track.duration, name), chart: chartMarkup(track) };
+  });
+  const table = d.id === 'release-rule' ? tauTableRows(releaseTable(set.recordings, TAU_MS)) : '';
+  return { d, set, rec, sides, table };
+});
 ---
 
 <Base
   title="Lab"
-  description="Four design decisions from the card interaction study, with the reasoning behind each."
+  description="Four design decisions from the card interaction study, each replayed side by side on the old rule and the new one."
 >
   <main id="main">
     <header class="head wrap">
@@ -15,55 +35,147 @@ import { labEntries, mock } from '../data/site';
       <h1>Four decisions that changed the feel.</h1>
       <p class="intro">
         The <a href="/work/card-study">card interaction study</a> went through more than forty
-        iterations. These are the four changes that mattered most: what I decided, and what the
-        previous version got wrong.
+        iterations. These are the four changes that mattered most. Each one runs the same recorded
+        gesture through the old rule and the new rule, so you can watch where they disagree. Then
+        drag on a phone to feed in your own.
       </p>
     </header>
 
-    <section class="wrap" aria-label="Decisions">
-      <ol class="entries">
-        {
-          labEntries.map((e) => (
-            <li class="entry" id={`d${e.n}`}>
-              <div class="num">
-                <span class="mono">{e.n}</span>
-                <span class="mono ver">{e.versions}</span>
-              </div>
-              <div class="main">
-                <h2>{e.title}</h2>
-                <dl class="rows">
-                  <div>
-                    <dt class="label">Decision</dt>
-                    <dd>{e.decision}</dd>
-                  </div>
-                  <div>
-                    <dt class="label">Why</dt>
-                    <dd>{e.why}</dd>
-                  </div>
-                </dl>
-              </div>
-              <div class="side">
-                <p class="label">Key value</p>
-                <p class="metric">{e.metric}</p>
-                <div class="replay" role="note">
-                  <span class="label">Replay comparison</span>
-                  <span>Arrives in Phase 6: the same recorded gesture, played on the old and new rule.</span>
+    <div class="wrap">
+      {
+        blocks.map(({ d, rec, sides, table }) => (
+          <section
+            class="lab-sec"
+            id={`d${d.n}`}
+            data-lab={d.id}
+            data-old-name={d.oldName}
+            data-new-name={d.newName}
+            data-try={d.tryIt}
+            aria-labelledby={`h-${d.id}`}
+          >
+            <div class="lab-copy">
+              <p class="lab-num">
+                <span class="mono lab-n">{d.n}</span>
+                <span class="mono">{d.versions}</span>
+              </p>
+              <h2 id={`h-${d.id}`}>{d.title}</h2>
+              <dl class="lab-rows">
+                <div>
+                  <dt class="label">The problem</dt>
+                  <dd>{d.problem}</dd>
                 </div>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-    </section>
+                <div>
+                  <dt class="label">The change</dt>
+                  <dd>{d.change}</dd>
+                </div>
+                <div>
+                  <dt class="label">Why</dt>
+                  <dd>{d.why}</dd>
+                </div>
+              </dl>
+              {
+                mock && d.mock.length > 0 && (
+                  <ul class="lab-mock">
+                    {d.mock.map((m) => (
+                      <li>
+                        <span class="badge">mock</span> {m}
+                      </li>
+                    ))}
+                  </ul>
+                )
+              }
+            </div>
+
+            <div class="lab-ui" data-ui>
+              <p class="lab-static">
+                Showing <strong>{rec.title}</strong>: {rec.note} With JavaScript this replays and
+                you can record your own.
+              </p>
+            </div>
+
+            <div class="lab-sides">
+              {sides.map((s) => (
+                <figure class="lab-side" data-side={s.side}>
+                  <figcaption>
+                    <span class="lab-cap">{s.name}</span>
+                    <span class="mono">{s.tag}</span>
+                  </figcaption>
+                  <div class="lab-hit" data-hit set:html={s.stage} />
+                  <p class="lab-badge" data-badge data-key={s.track.outcome.key}>
+                    {s.track.outcome.label}
+                  </p>
+                  <p class="lab-detail mono" data-detail>{s.track.outcome.detail}</p>
+                  <div class="lab-chart" data-chart set:html={s.chart} />
+                  <p class="lab-why" data-why>{s.track.explain}</p>
+                </figure>
+              ))}
+            </div>
+
+            {
+              d.id === 'release-rule' && (
+                <div class="lab-tau" data-tau>
+                  <h3>One tunable: the look-ahead</h3>
+                  <p>
+                    The new rule closes when <span class="mono">distance + velocity × τ</span> passes
+                    35% of the sheet. τ is how far ahead it looks. The table re-runs both rules on all
+                    recordings as you move it (τ = 0 is the old distance-only idea, at 35% instead of
+                    38%).
+                  </p>
+                  <div class="lab-tau-ui" data-tau-ui>
+                    <p class="lab-static">
+                      Shipped: <span class="mono">{TAU_MS} ms</span>. The slider needs JavaScript.
+                    </p>
+                  </div>
+                  <table class="lab-table">
+                    <caption class="visually-hidden">Outcome of each rule for every recording</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Recording</th>
+                        <th scope="col">Old rule</th>
+                        <th scope="col">New rule</th>
+                      </tr>
+                    </thead>
+                    <tbody set:html={table} />
+                  </table>
+                  <p class="lab-note">
+                    <strong>Why {TAU_MS} ms.</strong> {tauNote.why}
+                  </p>
+                </div>
+              )
+            }
+          </section>
+        ))
+      }
+    </div>
   </main>
 </Base>
+
+<script>
+  // Lazy per section: the comparison code loads when a section is about to be seen.
+  const secs = document.querySelectorAll<HTMLElement>('[data-lab]');
+  const load = (el: HTMLElement) => import('../lib/lab/section').then((m) => m.mountSection(el));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (es) => {
+        for (const e of es) {
+          if (e.isIntersecting) {
+            io.unobserve(e.target);
+            load(e.target as HTMLElement);
+          }
+        }
+      },
+      { rootMargin: '300px 0px' },
+    );
+    secs.forEach((s) => io.observe(s));
+  } else secs.forEach(load);
+</script>
 
 <style>
   .head {
     display: grid;
     gap: var(--space-m);
     padding-top: var(--space-l);
-    padding-bottom: var(--space-2xl);
+    padding-bottom: var(--space-xl);
   }
   h1 {
     font-size: var(--step-5);
@@ -73,92 +185,8 @@ import { labEntries, mock } from '../data/site';
     max-width: 15ch;
   }
   .intro {
-    max-width: 38rem;
+    max-width: 40rem;
     font-size: var(--step-1);
     color: var(--ink-soft);
-  }
-  .entries {
-    list-style: none;
-    padding-bottom: var(--space-3xl);
-  }
-  .entry {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--col-gap);
-    row-gap: var(--space-m);
-    padding-block: var(--space-xl);
-    border-top: 1px solid var(--rule);
-  }
-  .num {
-    grid-column: 1 / span 2;
-    display: grid;
-    gap: var(--space-3xs);
-    align-content: start;
-  }
-  .num .mono:first-child {
-    font-size: var(--step-3);
-    color: var(--ink);
-    line-height: 1;
-  }
-  .ver {
-    font-size: var(--step--2);
-  }
-  .main {
-    grid-column: 3 / span 6;
-    display: grid;
-    gap: var(--space-m);
-    align-content: start;
-  }
-  h2 {
-    font-size: var(--step-2);
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-    font-weight: 680;
-  }
-  .rows {
-    display: grid;
-    gap: var(--space-s);
-    margin: 0;
-    color: var(--ink-soft);
-  }
-  .rows div {
-    display: grid;
-    gap: var(--space-3xs);
-  }
-  .side {
-    grid-column: 10 / -1;
-    display: grid;
-    gap: var(--space-2xs);
-    align-content: start;
-  }
-  .metric {
-    font-family: var(--font-mono);
-    font-size: var(--step-1);
-    color: var(--ink);
-    margin-bottom: var(--space-s);
-  }
-  .replay {
-    display: grid;
-    gap: var(--space-3xs);
-    padding: var(--space-xs);
-    border: 1px dashed var(--bp-line-on-paper);
-    font-size: var(--step--1);
-    color: var(--ink-muted);
-  }
-  .replay .label {
-    color: var(--bp-line-on-paper);
-  }
-
-  @media (max-width: 64rem) {
-    .num {
-      grid-column: 1 / -1;
-      display: flex;
-      gap: var(--space-s);
-      align-items: baseline;
-    }
-    .main,
-    .side {
-      grid-column: 1 / -1;
-    }
   }
 </style>
