@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.1 Raw Image URL</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.0-product-images.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+  var base='https://raw.githubusercontent.com/foundy/foundy.dev/main/public/prototypes/assets/';
+  var map={
+    '/prototypes/assets/bonnet-ivory.webp':base+'bonnet-ivory.webp',
+    '/prototypes/assets/bonnet-red.webp':base+'bonnet-red.webp',
+    '/prototypes/assets/bonnet-blue.webp':base+'bonnet-blue.webp',
+    '/prototypes/assets/bonnet-green.webp':base+'bonnet-green.webp',
+    '/prototypes/assets/bonnet-yellow.webp':base+'bonnet-yellow.webp'
+  };
+  function patch(){
+    var doc=frame.contentDocument;
+    if(!doc)return;
+    doc.querySelectorAll('img.product-img').forEach(function(img){
+      var src=img.getAttribute('src');
+      if(map[src]) img.src=map[src];
+      img.onerror=function(){
+        img.style.display='none';
+        var hero=img.closest('.hero');
+        if(hero) hero.style.background='linear-gradient(145deg,#f5dac8,#d9b69e)';
+      };
+    });
+  }
+  frame.addEventListener('load',patch);
+  setInterval(patch,300);
+})();
+</script>
+</body>
+</html>

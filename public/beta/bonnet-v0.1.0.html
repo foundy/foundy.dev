@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Bonnet Beta v0.1.0</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.13-reveal-smooth.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+  var imageMap={
+    'Ivory Crochet Bonnet':'/beta/assets/bonnet-beige-front.webp',
+    'Red Crochet Bonnet':'/beta/assets/bonnet-red-front.webp',
+    'Blue Crochet Bonnet':'/beta/assets/bonnet-skyblue-front.webp',
+    'Green Crochet Bonnet':'/beta/assets/bonnet-green-front.webp',
+    'Yellow Crochet Bonnet':'/beta/assets/bonnet-yellow-front.webp'
+  };
+
+  Object.keys(imageMap).forEach(function(key){
+    var img=new Image();
+    img.src=imageMap[key];
+  });
+
+  function getDeepDoc(){
+    var doc=frame.contentDocument;
+    var guard=0;
+    while(doc&&guard<8){
+      var inner=doc.querySelector('iframe');
+      if(!inner||!inner.contentDocument)break;
+      doc=inner.contentDocument;
+      guard++;
+    }
+    return doc;
+  }
+
+  function patchImages(){
+    var doc=getDeepDoc();
+    if(!doc)return;
+
+    if(!doc.getElementById('beta-v0-1-0-image-style')){
+      var style=doc.createElement('style');
+      style.id='beta-v0-1-0-image-style';
+      style.textContent=[
+        'img.product-img[src^="https://picsum.photos"]{opacity:0!important;visibility:hidden!important;}',
+        'img.product-img[src^="/beta/assets/"]{opacity:1!important;visibility:visible!important;}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+
+    doc.querySelectorAll('img.product-img').forEach(function(img){
+      var key=img.getAttribute('alt')||'';
+      var next=imageMap[key];
+      if(!next)return;
+      if(img.getAttribute('src')!==next){
+        img.setAttribute('src',next);
+      }
+    });
+  }
+
+  function installObserver(){
+    var doc=getDeepDoc();
+    if(!doc||doc.__betaV010ImageObserver)return;
+    doc.__betaV010ImageObserver=new MutationObserver(function(){
+      patchImages();
+    });
+    doc.__betaV010ImageObserver.observe(doc.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src','alt','class']});
+  }
+
+  function tick(){
+    patchImages();
+    installObserver();
+  }
+
+  frame.addEventListener('load',tick);
+  setInterval(tick,80);
+})();
+</script>
+</body>
+</html>

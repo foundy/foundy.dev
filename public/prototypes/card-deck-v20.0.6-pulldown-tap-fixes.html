@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.6 Pulldown Tap Fixes</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.5-appstore-close-flow.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+
+  function inject(){
+    var doc=frame.contentDocument;
+    if(!doc)return;
+
+    if(!doc.getElementById('v20-0-6-fix-style')){
+      var style=doc.createElement('style');
+      style.id='v20-0-6-fix-style';
+      style.textContent=[
+        '.scrim:not(.visible){background:rgba(247,241,232,0)!important;pointer-events:none!important;}',
+        '.card.promoted:not(.pulling){transform-origin:top left!important;}',
+        '.card.promoted.pulling{transform-origin:center top!important;}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+
+    function getActiveCard(){
+      var cards=[].slice.call(doc.querySelectorAll('.deck .card'));
+      if(!cards.length)return null;
+      return cards.reduce(function(best,card){
+        var z=parseInt(card.style.zIndex || getComputedStyle(card).zIndex || '0',10) || 0;
+        var bz=best ? (parseInt(best.style.zIndex || getComputedStyle(best).zIndex || '0',10) || 0) : -Infinity;
+        return z>bz ? card : best;
+      },null);
+    }
+
+    function isDetailOpen(){
+      return !!doc.querySelector('.card.promoted') || doc.querySelector('.app.detail-open');
+    }
+
+    function clearPullArtifacts(){
+      var scrim=doc.getElementById('scrim');
+      if(scrim && !scrim.classList.contains('visible')){
+        scrim.style.background='';
+        scrim.style.transition='';
+      }
+      doc.querySelectorAll('.card.promoted:not(.pulling)').forEach(function(card){
+        if(card.style.transformOrigin && card.style.transformOrigin !== 'top left'){
+          card.style.transformOrigin='top left';
+        }
+      });
+    }
+
+    if(!doc.__v2006TapFix){
+      doc.__v2006TapFix=true;
+
+      doc.addEventListener('pointerdown',function(e){
+        var deck=doc.getElementById('deck');
+        if(!deck || isDetailOpen())return;
+        if(!(e.target===deck || deck.contains(e.target)))return;
+        var active=getActiveCard();
+        var card=e.target.closest && e.target.closest('.card');
+        if(!active || card!==active){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+      },true);
+
+      doc.addEventListener('pointerup',function(e){
+        var deck=doc.getElementById('deck');
+        if(!deck || isDetailOpen())return;
+        if(!(e.target===deck || deck.contains(e.target)))return;
+        var active=getActiveCard();
+        var card=e.target.closest && e.target.closest('.card');
+        if(!active || card!==active){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+      },true);
+
+      doc.addEventListener('touchend',function(){
+        setTimeout(clearPullArtifacts,0);
+        setTimeout(clearPullArtifacts,280);
+      },true);
+
+      var closeBtn=doc.getElementById('closeBtn');
+      if(closeBtn && !closeBtn.__v2006ClosePatch){
+        closeBtn.__v2006ClosePatch=true;
+        closeBtn.addEventListener('click',function(){
+          var scrim=doc.getElementById('scrim');
+          if(scrim){
+            scrim.style.transition='';
+            scrim.style.background='';
+          }
+          doc.querySelectorAll('.card.promoted').forEach(function(card){
+            card.classList.remove('pulling');
+            card.style.transformOrigin='top left';
+          });
+          setTimeout(function(){
+            if(scrim){
+              scrim.style.background='';
+              scrim.style.transition='';
+            }
+          },560);
+        },true);
+      }
+
+      new MutationObserver(clearPullArtifacts).observe(doc.documentElement,{attributes:true,subtree:true,attributeFilter:['class','style']});
+    }
+
+    clearPullArtifacts();
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,300);
+})();
+</script>
+</body>
+</html>

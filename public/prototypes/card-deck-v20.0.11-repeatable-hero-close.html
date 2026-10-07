@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.11 Repeatable Hero Close</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.7-safe-tap-scrim-fix.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+
+  function getDeepDoc(){
+    var doc=frame.contentDocument;
+    var guard=0;
+    while(doc && guard<5){
+      var inner=doc.querySelector('iframe');
+      if(!inner || !inner.contentDocument) break;
+      doc=inner.contentDocument;
+      guard++;
+    }
+    return doc;
+  }
+
+  function inject(){
+    var doc=getDeepDoc();
+    if(!doc)return;
+
+    if(!doc.getElementById('v20-0-11-style')){
+      var style=doc.createElement('style');
+      style.id='v20-0-11-style';
+      style.textContent=[
+        '.card.promoted.hero-only-close .detail-scroll{height:100%!important;overflow:hidden!important}',
+        '.card.promoted.hero-only-close .detail-hero{height:100%!important;min-height:0!important}',
+        '.card.promoted.hero-only-close .detail-body{display:none!important}',
+        '.card.promoted.hero-only-close .copy h2{font-size:30px!important;line-height:1.02!important;letter-spacing:-.06em!important}',
+        '.card.promoted.hero-only-close .copy p{font-size:13px!important;line-height:1.42!important}',
+        '.card.promoted.hero-only-close .copy{left:24px!important;right:24px!important;bottom:24px!important}',
+        '.scrim:not(.visible){background:rgba(247,241,232,0)!important;pointer-events:none!important}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+
+    function makeHeroOnly(card){
+      if(!card) return;
+      if(card.classList.contains('hero-only-close')) return;
+      var hero=card.querySelector('.detail-hero');
+      if(!hero) return;
+      var rect=card.getBoundingClientRect();
+      var scroll=doc.createElement('div');
+      scroll.className='detail-scroll';
+      scroll.appendChild(hero.cloneNode(true));
+      card.classList.add('hero-only-close');
+      card.style.transition='none';
+      card.style.width=rect.width+'px';
+      card.style.height=rect.height+'px';
+      card.style.transformOrigin='top left';
+      card.style.transform='translate3d('+rect.left+'px,'+rect.top+'px,0) scale(1,1)';
+      while(card.firstChild) card.removeChild(card.firstChild);
+      card.appendChild(scroll);
+      card.offsetHeight;
+    }
+
+    function patchCloseButton(){
+      var btn=doc.getElementById('closeBtn');
+      if(!btn || btn.__v2011Patch)return;
+      btn.__v2011Patch=true;
+      btn.addEventListener('click',function(){
+        makeHeroOnly(doc.querySelector('.card.promoted'));
+      },true);
+    }
+
+    if(!doc.__v2011Observer){
+      doc.__v2011Observer=new MutationObserver(function(){
+        doc.querySelectorAll('.card.promoted.closing:not(.hero-only-close)').forEach(makeHeroOnly);
+        doc.querySelectorAll('.deck .card').forEach(function(card){
+          card.classList.remove('hero-only-close');
+        });
+      });
+      doc.__v2011Observer.observe(doc.documentElement,{subtree:true,attributes:true,childList:true,attributeFilter:['class']});
+    }
+
+    patchCloseButton();
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,250);
+})();
+</script>
+</body>
+</html>

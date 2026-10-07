@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.14 Product Assets</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.13-reveal-smooth.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+  var imageMap = {
+    'Ivory Crochet Bonnet': '/prototypes/assets/bonnet-beige-front.webp',
+    'Red Crochet Bonnet': '/prototypes/assets/bonnet-red-front.webp',
+    'Blue Crochet Bonnet': '/prototypes/assets/bonnet-skyblue-front.webp',
+    'Green Crochet Bonnet': '/prototypes/assets/bonnet-green-front.webp',
+    'Yellow Crochet Bonnet': '/prototypes/assets/bonnet-yellow-front.webp'
+  };
+
+  function getDeepDoc(){
+    var doc=frame.contentDocument;
+    var guard=0;
+    while(doc && guard<8){
+      var inner=doc.querySelector('iframe');
+      if(!inner || !inner.contentDocument) break;
+      doc=inner.contentDocument;
+      guard++;
+    }
+    return doc;
+  }
+
+  function patchImages(){
+    var doc=getDeepDoc();
+    if(!doc)return;
+    doc.querySelectorAll('img.product-img').forEach(function(img){
+      var key = img.getAttribute('alt') || '';
+      var nextSrc = imageMap[key];
+      if(!nextSrc)return;
+      if(img.getAttribute('src') !== nextSrc){
+        img.setAttribute('src', nextSrc);
+      }
+    });
+  }
+
+  frame.addEventListener('load',patchImages);
+  setInterval(patchImages,200);
+})();
+</script>
+</body>
+</html>

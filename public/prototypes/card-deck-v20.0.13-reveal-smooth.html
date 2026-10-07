@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.13 Smooth Reveal</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.12-closing-title-css.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+
+  function getDeepDoc(){
+    var doc=frame.contentDocument;
+    var guard=0;
+    while(doc && guard<6){
+      var inner=doc.querySelector('iframe');
+      if(!inner || !inner.contentDocument) break;
+      doc=inner.contentDocument;
+      guard++;
+    }
+    return doc;
+  }
+
+  function inject(){
+    var doc=getDeepDoc();
+    if(!doc)return;
+
+    if(!doc.getElementById('v20-0-13-reveal-style')){
+      var style=doc.createElement('style');
+      style.id='v20-0-13-reveal-style';
+      style.textContent=[
+        '.reveal{',
+        '  transition:transform 170ms cubic-bezier(.22,1,.36,1), opacity 140ms ease, filter 140ms ease!important;',
+        '}',
+        '.revealing-out{',
+        '  transition:transform 170ms cubic-bezier(.22,1,.36,1), opacity 140ms ease, filter 140ms ease!important;',
+        '}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+
+    function getActiveIndex(){
+      var dots=[].slice.call(doc.querySelectorAll('.pager .dot'));
+      var idx=dots.findIndex(function(dot){return dot.classList.contains('on')});
+      return idx < 0 ? 0 : idx;
+    }
+
+    function cards(){return [].slice.call(doc.querySelectorAll('.deck .card'))}
+
+    function baseValues(card){
+      var active=getActiveIndex();
+      var idx=parseInt(card.dataset.index || '0',10) || 0;
+      var pos=[[0,0,0,1,5,1,0],[48,18,7,.91,3,.78,.3],[92,36,12,.82,1,.58,.6],[-92,36,-12,.82,1,.58,.6],[-48,18,-7,.91,2,.78,.3]];
+      var r=(idx-active+5)%5;
+      var f=pos[r];
+      return {transform:'translate3d('+f[0]+'px,'+f[1]+'px,0) rotate('+f[2]+'deg) scale('+f[3]+')', z:f[4], opacity:f[5], filter:'blur('+f[6]+'px)'};
+    }
+
+    function smoothOldReveal(card){
+      if(!card || card.classList.contains('dragging'))return;
+      var v=baseValues(card);
+      card.classList.add('revealing-out');
+      card.style.transform=v.transform;
+      card.style.zIndex=v.z;
+      card.style.opacity=v.opacity;
+      card.style.filter=v.filter;
+      clearTimeout(card.__v2013Timer);
+      card.__v2013Timer=setTimeout(function(){
+        card.classList.remove('revealing-out');
+      },190);
+    }
+
+    if(!doc.__v2013RevealObserver){
+      doc.__v2013RevealObserver=new MutationObserver(function(mutations){
+        mutations.forEach(function(m){
+          if(m.type!=='attributes' || m.attributeName!=='class')return;
+          var el=m.target;
+          if(!el.classList || !el.classList.contains('card'))return;
+          var before=(m.oldValue || '').split(/\s+/);
+          var hadReveal=before.indexOf('reveal')>=0;
+          var hasReveal=el.classList.contains('reveal');
+          if(hadReveal && !hasReveal){
+            smoothOldReveal(el);
+          }
+        });
+      });
+      doc.__v2013RevealObserver.observe(doc.documentElement,{subtree:true,attributes:true,attributeOldValue:true,attributeFilter:['class']});
+    }
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,300);
+})();
+</script>
+</body>
+</html>
