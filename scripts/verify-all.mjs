@@ -1,12 +1,12 @@
 // `npm run verify`: fresh build -> astro preview on a free port -> every verify script x every browser, sequentially.
-// usage: node scripts/verify-all.mjs [--no-build] [--browsers=chromium,webkit,firefox] [--only=hero,inspect,cards,lab]
+// usage: node scripts/verify-all.mjs [--no-build] [--browsers=chromium,webkit,firefox] [--only=hero,inspect,cards,lab,audit]
 // Exits non-zero if the build or any script fails. Servers are always stopped.
 import { spawn, spawnSync } from 'node:child_process';
 import net from 'node:net';
 
 const arg = (k, d) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const browsers = arg('browsers', 'chromium,webkit,firefox').split(',');
-const only = arg('only', 'hero,inspect,cards,lab').split(',');
+const only = arg('only', 'hero,inspect,cards,lab,audit').split(',');
 const skipBuild = process.argv.includes('--no-build');
 
 if (!skipBuild) {
@@ -51,7 +51,7 @@ for (let i = 0; i < 60; i++) {
 }
 
 const rows = [];
-for (const name of only) {
+for (const name of only.filter((n) => n !== 'audit')) {
   for (const br of browsers) {
     const r = spawnSync('node', [`scripts/${name}/verify.mjs`, base, br], { encoding: 'utf8', maxBuffer: 1 << 26 });
     const lines = (r.stdout ?? '').split('\n').filter((l) => l.startsWith('{'));
@@ -70,6 +70,21 @@ for (const name of only) {
     console.log(`${ok ? 'PASS' : 'FAIL'} ${name} / ${br}: ${checks.length - fail.length}/${checks.length}`);
     for (const f of fail.slice(0, 8)) console.log('   x', f.name);
     if (!ok && r.stderr) console.log(r.stderr.split('\n').slice(0, 6).join('\n'));
+  }
+}
+// audits: exit-code based (no per-check JSON). keyboard + axe run in every browser, chart labels once.
+const audits = [
+  ['lab-chart-labels', 'scripts/lab/charts.mjs', ['chromium']],
+  ['keyboard+zoom', 'scripts/audit/keyboard.mjs', browsers],
+  ['axe', 'scripts/audit/a11y.mjs', browsers],
+].filter(() => only.includes('audit'));
+for (const [name, script, brs] of audits) {
+  for (const br of brs) {
+    const r = spawnSync('node', [script, base, br], { encoding: 'utf8', maxBuffer: 1 << 26 });
+    const ok = r.status === 0;
+    rows.push({ name, br, ok, total: 1, failed: ok ? 0 : 1 });
+    console.log(`${ok ? 'PASS' : 'FAIL'} ${name} / ${br}`);
+    if (!ok) console.log((r.stdout ?? '').split('\n').filter((l) => /FAIL|VIOLATION|overlap/i.test(l)).slice(0, 8).join('\n'));
   }
 }
 stop();
