@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v18.0.4 Close Height Fix</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;touch-action:manipulation;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v18-pointer-gesture-fix.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+  var lastParentTouchEnd=0;
+
+  function isFastClickAllowed(target){
+    return !!(target && target.closest && target.closest('button,.btn,.controls,label,[role="button"],a'));
+  }
+
+  function isNonTextUi(target){
+    return !!(target && target.closest && target.closest('button,.btn,.controls,.pager,.dot,label,[role="button"],.deck,.stage,.card,.close-btn'));
+  }
+
+  document.addEventListener('touchend',function(e){
+    if(isFastClickAllowed(e.target)) return;
+    var now=Date.now();
+    if(now-lastParentTouchEnd<350) e.preventDefault();
+    lastParentTouchEnd=now;
+  },{capture:true,passive:false});
+
+  document.addEventListener('contextmenu',function(e){
+    if(isNonTextUi(e.target)) e.preventDefault();
+  },{capture:true});
+
+  function inject(){
+    var doc=frame.contentDocument;
+    var win=frame.contentWindow;
+    if(!doc || !win)return;
+
+    var meta=doc.querySelector('meta[name="viewport"]');
+    if(!meta){
+      meta=doc.createElement('meta');
+      meta.name='viewport';
+      doc.head.appendChild(meta);
+    }
+    meta.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');
+
+    if(!doc.getElementById('v18-0-4-close-height-style')){
+      var style=doc.createElement('style');
+      style.id='v18-0-4-close-height-style';
+      style.textContent=[
+        'html,body{touch-action:manipulation!important;overscroll-behavior:none!important;-webkit-text-size-adjust:100%!important;-webkit-tap-highlight-color:transparent!important;}',
+        'button,.btn,.controls,.controls *,.pager,.pager *,.dot,label,[role="button"],.close-btn{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;}',
+        '.deck,.stage,.card,.card *{touch-action:none!important;-webkit-tap-highlight-color:transparent!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;}',
+        '.detail-layer{overflow:hidden!important;touch-action:none!important;}',
+        '.detail-card{width:100vw!important;height:var(--vvh,100vh)!important;overflow:hidden!important;max-width:100vw!important;touch-action:pan-y!important;}',
+        '.detail-scroll{overflow-x:hidden!important;overflow-y:auto!important;width:100%!important;max-width:100vw!important;touch-action:pan-y!important;overscroll-behavior-y:contain!important;overscroll-behavior-x:none!important;}',
+        '.detail-scroll>*{max-width:100vw!important;}',
+        '.hero-box,.shared-scale,.shared-hero,.detail-body{max-width:100vw!important;}',
+        '.detail-body{overflow-x:hidden!important;}',
+        '.detail-layer,.detail-card,.hero-box,.shared-scale,.shared-hero,.shared-tag,.shared-emoji{touch-action:none!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;}',
+        '.detail-body,.detail-body *{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;}',
+        'button:focus,.btn:focus,label:focus{outline:none!important;}',
+        '*{-webkit-tap-highlight-color:transparent;}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+
+    function syncViewportHeight(){
+      var h = win.visualViewport ? win.visualViewport.height : win.innerHeight;
+      doc.documentElement.style.setProperty('--vvh', h + 'px');
+      doc.body.style.setProperty('--vvh', h + 'px');
+      doc.querySelectorAll('.detail-card').forEach(function(card){
+        card.style.height = h + 'px';
+      });
+    }
+
+    function syncDetailCards(){
+      syncViewportHeight();
+      doc.querySelectorAll('.detail-card').forEach(function(detail){
+        detail.style.width = win.innerWidth + 'px';
+        detail.style.height = (win.visualViewport ? win.visualViewport.height : win.innerHeight) + 'px';
+        detail.style.maxWidth = '100vw';
+        detail.style.overflow = 'hidden';
+        detail.style.setProperty('--heroScale','1');
+      });
+    }
+
+    syncDetailCards();
+
+    if(!doc.__v1804CloseHeightFix){
+      doc.__v1804CloseHeightFix=true;
+      var lastTouchEnd=0;
+
+      doc.addEventListener('touchend',function(e){
+        if(isFastClickAllowed(e.target)) return;
+        var now=Date.now();
+        if(now-lastTouchEnd<350) e.preventDefault();
+        lastTouchEnd=now;
+      },{capture:true,passive:false});
+
+      doc.addEventListener('selectstart',function(e){
+        if(isNonTextUi(e.target)) e.preventDefault();
+      },{capture:true,passive:false});
+
+      doc.addEventListener('contextmenu',function(e){
+        if(isNonTextUi(e.target)) e.preventDefault();
+      },{capture:true,passive:false});
+
+      doc.addEventListener('gesturestart',function(e){e.preventDefault();},{capture:true,passive:false});
+      doc.addEventListener('gesturechange',function(e){e.preventDefault();},{capture:true,passive:false});
+      doc.addEventListener('gestureend',function(e){e.preventDefault();},{capture:true,passive:false});
+
+      var observer=new MutationObserver(syncDetailCards);
+      observer.observe(doc.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+      doc.__v1804Observer=observer;
+
+      win.addEventListener('resize',syncDetailCards);
+      if(win.visualViewport){
+        win.visualViewport.addEventListener('resize',syncDetailCards);
+        win.visualViewport.addEventListener('scroll',syncDetailCards);
+      }
+    }
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,300);
+})();
+</script>
+</body>
+</html>

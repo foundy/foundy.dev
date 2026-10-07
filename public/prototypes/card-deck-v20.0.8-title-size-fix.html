@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>Card Deck v20.0.8 Title Size Fix</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e8;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e8;}
+</style>
+</head>
+<body>
+<iframe id="preview" src="/prototypes/card-deck-v20.0.7-safe-tap-scrim-fix.html"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('preview');
+
+  function inject(){
+    var doc=frame.contentDocument;
+    if(!doc)return;
+
+    if(!doc.getElementById('v20-0-8-title-size-style')){
+      var style=doc.createElement('style');
+      style.id='v20-0-8-title-size-style';
+      style.textContent=[
+        '.card.deck-frame .copy h2{',
+        '  font-size:30px!important;',
+        '  line-height:1.02!important;',
+        '  letter-spacing:-.06em!important;',
+        '  transition:none!important;',
+        '}',
+        '.card.deck-frame .copy p{',
+        '  font-size:13px!important;',
+        '  line-height:1.42!important;',
+        '  transition:none!important;',
+        '}',
+        '.card.promoted.closing .detail-hero .copy h2{',
+        '  font-size:30px!important;',
+        '  line-height:1.02!important;',
+        '  letter-spacing:-.06em!important;',
+        '}',
+        '.card.promoted.closing .detail-hero .copy p{',
+        '  font-size:13px!important;',
+        '  line-height:1.42!important;',
+        '}',
+        '.card.promoted.closing .copy{',
+        '  left:24px!important;',
+        '  right:24px!important;',
+        '  bottom:24px!important;',
+        '}'
+      ].join('\n');
+      doc.head.appendChild(style);
+    }
+  }
+
+  frame.addEventListener('load',inject);
+  setInterval(inject,300);
+})();
+</script>
+</body>
+</html>
