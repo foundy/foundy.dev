@@ -36,7 +36,7 @@ async function stage(page, i) {
   await page.waitForTimeout(700);
 }
 async function on(page) {
-  await page.locator('[data-inspect-toggle]').click();
+  await page.locator('.inspect[data-inspect-toggle]').click();
   await page.waitForSelector('.inspect-panel');
   await page.mouse.move(2, 2);
   await page.evaluate(() => document.activeElement?.blur?.());
@@ -71,7 +71,7 @@ const desktop = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 }
 }
 {
   const { ctx, page } = await open({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true }, '?t=3');
-  await page.locator('[data-inspect-toggle]').scrollIntoViewIfNeeded();
+  await page.locator('.inspect[data-inspect-toggle]').scrollIntoViewIfNeeded();
   await on(page);
   await stage(page, 2);
   await page.locator('.inspect-panel').scrollIntoViewIfNeeded();

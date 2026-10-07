@@ -44,7 +44,7 @@ const diff = (a, b) => {
   for (let i = 0; i < n; i++) s += Math.abs(a[i] - b[i]);
   return s / n;
 };
-const pressed = (page) => page.locator('[data-inspect-toggle]').getAttribute('aria-pressed');
+const pressed = (page) => page.locator('.inspect[data-inspect-toggle]').getAttribute('aria-pressed');
 const bodyState = (page) => page.evaluate(() => document.body.dataset.inspect);
 const live = (page) => page.locator('.inspect-explain').innerText();
 async function setStage(page, i) {
@@ -67,7 +67,7 @@ for (const vp of [
     const { ctx, page, errors, reqs } = await open(vp, '?hud=1&t=3&tier=high');
     await glDone(page);
     await page.waitForTimeout(400);
-    const btn = page.locator('[data-inspect-toggle]');
+    const btn = page.locator('.inspect[data-inspect-toggle]');
     check(`${tag} toggle visible, aria-pressed=false, labelled "Inspect"`, (await btn.isVisible()) && (await pressed(page)) === 'false' && /Inspect/.test(await btn.innerText()));
     check(`${tag} inspect chunk NOT requested before activation`, !reqs.some((u) => /runtime\.[^/]*\.js/.test(u)), { n: reqs.length });
     check(`${tag} no stills requested before activation`, !reqs.some((u) => u.includes('/gl/stages/')));
@@ -208,7 +208,7 @@ for (const vp of [
     const { ctx, page, errors, reqs } = await open(vp, mode === 'gl=none' ? '?gl=none' : '', mode === 'reduced' ? { reducedMotion: 'reduce' } : {});
     await page.waitForTimeout(1500);
     check(`${tag} [${mode}] no canvas`, (await page.locator('.hero-gl').count()) === 0);
-    const btn = page.locator('[data-inspect-toggle]');
+    const btn = page.locator('.inspect[data-inspect-toggle]');
     await btn.scrollIntoViewIfNeeded();
     await btn.click();
     await page.waitForSelector('.inspect-panel', { timeout: 8000 });
