@@ -79,7 +79,10 @@ export async function mountSection(root: HTMLElement) {
   const row = h('div', 'lab-row');
   row.append(play, scrub, time);
   const hint = h('p', 'lab-hint');
-  hint.append(h('strong', undefined, 'Your turn. '), document.createTextNode(`Drag on either phone to record your own gesture; both rules replay it. ${dec.tryIt}`));
+  hint.append(h('strong', undefined, 'Your turn. '), document.createTextNode(`Drag on either phone to record your own gesture; both rules replay it. ${dec.tryIt} `));
+  // one unit everywhere: the phone is a 390 × 720 px screen drawn smaller, so a drag on it is scaled up to that size
+  const unit = h('span', 'lab-unit', 'Distances and speeds are in phone px: the little phone stands for a 390 × 720 px screen, so your drag is scaled up to that size before it is measured.');
+  hint.append(unit);
   const live = h('p', 'visually-hidden');
   live.setAttribute('aria-live', 'polite');
   live.setAttribute('aria-atomic', 'true');

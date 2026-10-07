@@ -5,8 +5,8 @@ import Spike from '../../layouts/Spike.astro';
 <Spike title="spike raw webgl2" variant="raw" />
 
 <script>
-  import { run } from '../../spike/common';
-  import { createRaw } from '../../spike/raw';
+  import { run } from '../common';
+  import { createRaw } from '../raw';
   run(
     (init) => createRaw(init),
     document.getElementById('gl') as HTMLCanvasElement,

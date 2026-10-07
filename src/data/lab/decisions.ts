@@ -29,7 +29,7 @@ export const decisions: LabDecision[] = [
     title: 'Close on where the pull is going, not where it is',
     versions: 'v1 → v12 → now',
     problem:
-      'The first versions looked at distance only. A short fast flick was cancelled, and a long pull that you were already taking back was closed. The case study counted 31% missed closes.',
+      'The first versions looked at distance only. A short fast flick was cancelled, and a long pull that you were already taking back was closed. The case study counted 31% missed closes.[mock]',
     change:
       'At release the sheet projects the pull forward: distance + release velocity × τ. If that lands past 35% of the sheet height, it closes. A pull shorter than 16 px never counts.',
     why: 'People judge intent by speed first and distance second. The projection is one multiplication, cheap enough to show and tune.',
@@ -97,5 +97,5 @@ export const tauNote = {
   min: 0,
   max: 200,
   step: 5,
-  why: 'On these four recordings the right answer holds for roughly 55 to 125 ms. Below that, the flick is missed again; above it, the twitch starts to close the sheet. 80 ms is about five frames at 60 Hz, inside the window and a little on the cautious side. It is still to be tuned by hand on a phone (mock).',
+  why: 'On these four recordings the right answer holds for roughly 55 to 125 ms. Below that, the flick is missed again; above it, the twitch starts to close the sheet. 80 ms is about five frames at 60 Hz, inside the window and a little on the cautious side. It is still to be tuned by hand on a phone.[mock]',
 };

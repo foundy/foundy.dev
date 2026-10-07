@@ -191,6 +191,24 @@ svg {
   line-height: 1.6;
 }
 
+/* inline marker after an invented figure or claim: nothing marked like this is a fact yet */
+.mock-tag {
+  display: inline-block;
+  vertical-align: 0.15em;
+  margin-inline: 0.2em;
+  padding: 0 0.4em;
+  border: 1px dashed var(--accent);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 /* View transition tuning: keep it quiet. */
 ::view-transition-group(*) {
   animation-duration: 420ms;

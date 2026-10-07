@@ -8,6 +8,9 @@ import { releaseTable, simulate } from '../lib/lab/rules';
 import { chartMarkup, stageMarkup, tauTableRows } from '../lib/lab/stage';
 import { TAU_MS } from '../lib/cards/decision';
 
+// `[mock]` in lab copy becomes the inline mock marker (copy is trusted, authored in src/data/lab/decisions.ts)
+const withMock = (s: string) => s.replace(/\[mock\]/g, ' <span class="mock-tag">mock</span>');
+
 // Static view of every comparison: the final frame of the first recording on both rules, annotated. The live replay
 // (src/lib/lab/section.ts) takes over per section when it scrolls into view.
 const blocks = decisions.map((d) => {
@@ -38,6 +41,8 @@ const blocks = decisions.map((d) => {
         iterations. These are the four changes that mattered most. Each one runs the same recorded
         gesture through the old rule and the new rule, so you can watch where they disagree. Then
         drag on a phone to feed in your own.
+        <span class="mock-tag">mock</span> The four preset gestures are synthesised from typical
+        values, not captured from a person.
       </p>
     </header>
 
@@ -62,7 +67,7 @@ const blocks = decisions.map((d) => {
               <dl class="lab-rows">
                 <div>
                   <dt class="label">The problem</dt>
-                  <dd>{d.problem}</dd>
+                  <dd set:html={withMock(d.problem)} />
                 </div>
                 <div>
                   <dt class="label">The change</dt>
@@ -138,7 +143,7 @@ const blocks = decisions.map((d) => {
                     <tbody set:html={table} />
                   </table>
                   <p class="lab-note">
-                    <strong>Why {TAU_MS} ms.</strong> {tauNote.why}
+                    <strong>Why {TAU_MS} ms.</strong> <Fragment set:html={withMock(tauNote.why)} />
                   </p>
                 </div>
               )

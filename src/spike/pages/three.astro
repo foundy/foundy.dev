@@ -5,8 +5,8 @@ import Spike from '../../layouts/Spike.astro';
 <Spike title="spike three tsl" variant="three" />
 
 <script>
-  import { run } from '../../spike/common';
-  import { createThree } from '../../spike/three';
+  import { run } from '../common';
+  import { createThree } from '../three';
   run(
     (init) => createThree(init),
     document.getElementById('gl') as HTMLCanvasElement,

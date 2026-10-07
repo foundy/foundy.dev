@@ -495,3 +495,10 @@
     text-align: left;
   }
 }
+
+.lab-unit {
+  display: block;
+  margin-top: 0.35em;
+  font-size: var(--step--2);
+  color: var(--ink-muted);
+}
