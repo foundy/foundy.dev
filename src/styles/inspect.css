@@ -329,3 +329,21 @@ body[data-inspect='on'] .poster .hero-gl {
 .cards-overlay .ov-proj.is-close .ov-projend {
   stroke: var(--accent);
 }
+
+/* stage mode: strokes keep their screen width and text its screen size whatever the viewBox scale is */
+.cards-overlay.is-stage :is(line, polyline, path, rect, circle) {
+  vector-effect: non-scaling-stroke;
+}
+.cards-overlay.is-stage .ov-text {
+  font-size: calc(12px * var(--u, 1));
+  stroke-width: calc(4px * var(--u, 1));
+}
+.cards-overlay.is-stage .ov-verdict {
+  font-size: calc(18px * var(--u, 1));
+}
+.cards-overlay.is-stage .ov-caption {
+  font-size: calc(10px * var(--u, 1));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: var(--ink-soft);
+}

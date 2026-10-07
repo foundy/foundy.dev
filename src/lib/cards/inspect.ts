@@ -176,18 +176,88 @@ export function registerCardsInspectable(h: CardsHandle): () => void {
     return h2;
   };
 
+  /* Two modes. While the sheet is open the overlay is the full viewport and lines up with the real sheet underneath.
+     Once it has closed there is nothing to line up with, and drawing in viewport coordinates would scribble over the
+     homepage text: the replay moves into a framed mini-stage (a cropped viewBox of the same coordinates) that sits
+     above the dock. */
+  let VB: { x: number; y: number; w: number; h: number } | null = null;
+
+  function stageBox(a: Analysis) {
+    const { rec, claim } = a;
+    const d = rec.decision!;
+    const r = rec.meta.sheetRect;
+    const c = claim!;
+    let x0 = Infinity;
+    let x1 = -Infinity;
+    let maxOff = 0;
+    for (const s of rec.samples) {
+      x0 = Math.min(x0, s.x);
+      x1 = Math.max(x1, s.x);
+      if (s.t >= c.t) maxOff = Math.max(maxOff, dragOffset(a.base + (s.y - c.y)));
+    }
+    const rel = a.release;
+    if (rel) {
+      x1 = Math.max(x1, rel.x + 18 + 150, rel.x + Math.min(220, Math.hypot(rel.vx, rel.vy) * VEC_PX_PER_PXMS) + 90);
+    }
+    x0 = Math.max(r.x, x0 - 190);
+    x1 = Math.min(r.x + r.w, Math.max(x1 + 80, x0 + 340));
+    const top = Math.max(0, r.y - 22);
+    const yProj = c.y - a.base + d.projected;
+    const yLine = c.y + d.threshold - a.base;
+    const bottom = Math.max(yProj, yLine, c.y + 40, r.y + maxOff + 70) + 48;
+    const maxW = Math.min(620, innerWidth - 24);
+    const maxH = Math.max(150, innerHeight - h.dock.offsetHeight - 40);
+    // a very fast flick projects thousands of px: crop (the lines run out of the frame) instead of shrinking to nothing
+    const raw = { x: x0, y: top, w: Math.min(maxW / 0.6, Math.max(Math.min(maxW, 380), x1 - x0)), h: Math.min(maxH / 0.6, Math.max(180, bottom - top)) };
+    const sc = Math.min(1, maxW / raw.w, maxH / raw.h);
+    return { vb: raw, sc };
+  }
+
+  function applyMode() {
+    const staged = !!A?.claim && !h.isOpen();
+    o.classList.toggle('is-stage', staged);
+    if (!staged) {
+      VB = null;
+      o.removeAttribute('viewBox');
+      o.style.removeProperty('--u');
+      o.style.removeProperty('width');
+      o.style.removeProperty('height');
+      return;
+    }
+    const { vb, sc } = stageBox(A!);
+    VB = vb;
+    o.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+    o.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    o.style.setProperty('--u', String(1 / sc));
+    o.style.width = `${Math.round(vb.w * sc)}px`;
+    o.style.height = `${Math.round(vb.h * sc)}px`;
+  }
+
   function build() {
     o.replaceChildren();
     parts = null;
     if (!A || !A.claim) return;
+    applyMode();
     const { rec, claim } = A;
     const d = rec.decision!;
     const r = rec.meta.sheetRect;
     const ghost = svg('rect', { class: 'ov-ghost', x: r.x, y: r.y, width: r.w, height: r.h, rx: 10 });
     const lineY = claim.y + d.threshold - A.base;
     const thr = svg('g', { class: 'ov-thr' });
-    const l = svg('line', { x1: Math.max(0, r.x - 24), x2: Math.min(innerWidth, r.x + r.w + 24), y1: lineY, y2: lineY, class: 'ov-line' });
-    thr.append(halo(l), l, svg('text', { x: Math.max(8, r.x), y: lineY - 6, class: 'ov-text' }, `close line · ${px(d.threshold)}`));
+    const lx0 = VB ? VB.x : Math.max(0, r.x - 24);
+    const lx1 = VB ? VB.x + VB.w : Math.min(innerWidth, r.x + r.w + 24);
+    const l = svg('line', { x1: lx0, x2: lx1, y1: lineY, y2: lineY, class: 'ov-line' });
+    thr.append(halo(l), l, svg('text', { x: VB ? VB.x + VB.w - 8 : Math.max(8, r.x), y: lineY - 6, class: 'ov-text ov-lbl-thr', ...(VB ? { 'text-anchor': 'end' } : {}) }, `close line · ${px(d.threshold)}`));
+    for (const t of thr.querySelectorAll<SVGTextElement>('text')) {
+      t.dataset.x = t.getAttribute('x')!;
+      t.dataset.y = t.getAttribute('y')!;
+    }
+    if (VB) {
+      const cap = svg('text', { x: VB.x + 8, y: VB.y + 14, class: 'ov-text ov-caption' }, 'Replay · sheet closed');
+      cap.dataset.x = String(VB.x + 8);
+      cap.dataset.y = String(VB.y + 14);
+      thr.append(cap);
+    }
     const trajHalo = svg('polyline', { class: 'ov-traj halo', fill: 'none' });
     const traj = svg('polyline', { class: 'ov-traj', fill: 'none' });
     const start = svg('circle', { class: 'ov-pt', r: 4, cx: rec.samples[0].x, cy: rec.samples[0].y });
@@ -247,7 +317,7 @@ export function registerCardsInspectable(h: CardsHandle): () => void {
         const head = `M${x2 - 9 * Math.cos(ang - 0.45)} ${y2 - 9 * Math.sin(ang - 0.45)}L${x2} ${y2}L${x2 - 9 * Math.cos(ang + 0.45)} ${y2 - 9 * Math.sin(ang + 0.45)}`;
         const ln = svg('line', { x1: release.x, y1: release.y, x2, y2, class: 'ov-line ov-vecline' });
         const hd = svg('path', { d: head, class: 'ov-line ov-vecline', fill: 'none' });
-        P.vec.append(halo(ln), ln, halo(hd), hd, svg('text', { x: x2 + 8, y: y2 + 4, class: 'ov-text' }, `${d.velocity.toFixed(1)} px/ms`));
+        P.vec.append(halo(ln), ln, halo(hd), hd, svg('text', { x: x2 + 8, y: y2 + 4, class: 'ov-text ov-lbl' }, `${d.velocity.toFixed(1)} px/ms`));
       }
       // projected travel: from where the pull started, straight down to where it was heading
       const x = release.x + 18;
@@ -257,13 +327,57 @@ export function registerCardsInspectable(h: CardsHandle): () => void {
       const solid = svg('line', { x1: x, x2: x, y1: y0, y2: yr, class: 'ov-line ov-travel' });
       const ghostLine = svg('line', { x1: x, x2: x, y1: yr, y2: y1, class: 'ov-line ov-projline' });
       const end = svg('circle', { cx: x, cy: y1, r: 5, class: 'ov-pt ov-projend' });
-      P.proj.append(halo(solid), solid, halo(ghostLine), ghostLine, end, svg('text', { x: x + 10, y: y1 + 4, class: 'ov-text' }, `projected ${px(d.projected)}`));
+      P.proj.append(halo(solid), solid, halo(ghostLine), ghostLine, end, svg('text', { x: x + 10, y: y1 + 4, class: 'ov-text ov-lbl' }, `projected ${px(d.projected)}`));
       if (t >= A.tRelease + TAIL_MS / 2 - 1 && !d.cancelled) {
-        P.tag.setAttribute('x', String(Math.max(12, release.x - 96)));
-        P.tag.setAttribute('y', String(Math.max(24, claim.y - A.base - 14)));
+        P.tag.setAttribute('x', String(Math.max(VB ? VB.x + 12 : 12, release.x - 96)));
+        P.tag.setAttribute('y', String(Math.max(VB ? VB.y + 40 : 24, claim.y - A.base - 14)));
         P.tag.textContent = d.close ? 'CLOSE' : 'STAY OPEN';
         P.tag.setAttribute('class', `ov-text ov-verdict ${d.close ? 'is-close' : 'is-stay'}`);
       }
+    }
+    avoidCollisions();
+  }
+
+  /* Labels get fixed lanes: placed in priority order (verdict, close line, projected, speed), each nudged down in
+     small steps until it clears everything placed before it, and kept inside the stage frame. */
+  function avoidCollisions() {
+    if (!parts) return;
+    const labels = ['.ov-caption', '.ov-verdict', '.ov-lbl-thr', '.ov-proj .ov-text', '.ov-vec .ov-text']
+      .flatMap((q) => [...o.querySelectorAll<SVGTextElement>(q)])
+      .filter((t) => t.textContent);
+    for (const t of labels) {
+      // statics go back to where they were built before being nudged again
+      if (t.dataset.x) {
+        t.setAttribute('x', t.dataset.x);
+        t.setAttribute('y', t.dataset.y!);
+      }
+    }
+    const placed: DOMRect[] = [];
+    const u = VB ? Number(o.style.getPropertyValue('--u') || 1) : 1;
+    const gap = 3 * u;
+    for (const t of labels) {
+      let b = t.getBBox();
+      let tries = 0;
+      const hit = (r: DOMRect) => placed.some((p) => r.x < p.x + p.width + gap && r.x + r.width + gap > p.x && r.y < p.y + p.height + gap && r.y + r.height + gap > p.y);
+      let dy = 0;
+      let dx = 0;
+      if (VB && b.x + b.width > VB.x + VB.w - 6 * u) dx = VB.x + VB.w - 6 * u - (b.x + b.width);
+      if (VB && b.x + dx < VB.x + 4 * u) dx = VB.x + 4 * u - b.x;
+      if (VB && b.y + b.height > VB.y + VB.h - 4 * u) dy = VB.y + VB.h - 4 * u - (b.y + b.height);
+      const probe = (): DOMRect => new DOMRect(b.x + dx, b.y + dy, b.width, b.height);
+      while (hit(probe()) && tries++ < 12) dy += b.height + gap;
+      if (VB && probe().y + b.height > VB.y + VB.h - 4 * u) {
+        // no room below: search upwards instead
+        dy = 0;
+        tries = 0;
+        while (hit(probe()) && tries++ < 12) dy -= b.height + gap;
+      }
+      if (dx || dy) {
+        t.setAttribute('x', String(Number(t.getAttribute('x')) + dx));
+        t.setAttribute('y', String(Number(t.getAttribute('y')) + dy));
+        b = t.getBBox();
+      }
+      placed.push(b);
     }
   }
 
@@ -285,11 +399,18 @@ export function registerCardsInspectable(h: CardsHandle): () => void {
       o.style.display = A ? 'block' : 'none';
       build();
       draw(A?.duration ?? 0);
-      ro = new ResizeObserver(dockH);
+      ro = new ResizeObserver(() => {
+        dockH();
+        if (o.classList.contains('is-stage') && A) {
+          build();
+          draw(inspect.scrub);
+        }
+      });
       ro.observe(h.dock);
     },
     onExit() {
       o.style.display = 'none';
+      o.classList.remove('is-stage');
       o.replaceChildren();
       ro?.disconnect();
       layer?.style.removeProperty('--dock-h');
@@ -307,7 +428,17 @@ export function registerCardsInspectable(h: CardsHandle): () => void {
         build();
         inspect.notifyTimeline();
       } else inspect.refresh();
-    } else inspect.refresh();
+    } else {
+      // opening or closing the sheet switches between the full-page overlay and the framed stage
+      if (inspect.active?.id === 'cards' && A) {
+        const staged = !h.isOpen();
+        if (staged !== o.classList.contains('is-stage')) {
+          build();
+          draw(inspect.scrub);
+        }
+      }
+      inspect.refresh();
+    }
   });
 
   return () => {

@@ -253,6 +253,18 @@ html.cards-dragging * {
   z-index: 2; /* under the dock: the panel stays readable, the lines show on the page above it */
   pointer-events: none;
 }
+/* sheet closed: the replay lives in a framed mini-stage above the dock instead of over the page */
+.cards-overlay.is-stage {
+  inset: auto;
+  left: 50%;
+  bottom: calc(var(--dock-h, 0px) + 12px);
+  translate: -50% 0;
+  max-width: calc(100vw - 24px);
+  background-color: var(--paper);
+  border: 1px solid var(--bp-line-on-paper);
+  box-shadow: 0 10px 30px -14px rgb(0 0 0 / 0.4);
+  overflow: hidden;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .sheet {

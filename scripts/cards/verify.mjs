@@ -442,6 +442,22 @@ for (const vp of [
     });
     check(`${tag} Inspect: overlay shows trajectory, close line, velocity vector, projected ghost`, ov.shown === 'block' && ov.poly > 3 && ov.thr && ov.proj && ov.vec, ov);
 
+    // sheet closed: replay lives in the framed stage, inside the viewport, with no overlapping labels
+    const stage = await page.evaluate(() => {
+      const o = document.querySelector('[data-inspect-overlay]');
+      const b = o.getBoundingClientRect();
+      const dock = document.querySelector('[data-inspect-dock]').getBoundingClientRect();
+      const t = [...o.querySelectorAll('text')].filter((x) => x.textContent).map((x) => x.getBoundingClientRect());
+      let overlaps = 0;
+      for (let i = 0; i < t.length; i++)
+        for (let j = i + 1; j < t.length; j++) {
+          const a = t[i], c = t[j];
+          if (a.left < c.right - 1 && a.right > c.left + 1 && a.top < c.bottom - 1 && a.bottom > c.top + 1) overlaps++;
+        }
+      return { stage: o.classList.contains('is-stage'), inView: b.left >= 0 && b.right <= innerWidth && b.top >= 0 && b.bottom <= dock.top + 1, labels: t.length, overlaps, box: [Math.round(b.width), Math.round(b.height)] };
+    });
+    check(`${tag} Inspect: closed-sheet replay is a framed stage, in view, labels do not collide`, stage.stage && stage.inView && stage.overlaps === 0 && stage.labels >= 3, stage);
+
     // replay
     await page.locator('.inspect-play').click();
     await page.waitForTimeout(120);
