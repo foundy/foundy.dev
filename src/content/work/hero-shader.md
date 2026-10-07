@@ -27,7 +27,7 @@ The constraints I set before writing any shader code:
 
 - The largest contentful paint is text and SVG, never the canvas.
 - Every stage of the effect renders as a standalone image, so it can be shown in isolation later.
-- The same page works with WebGPU, with WebGL2 only, and with no GL at all.
+- The same page works with WebGL2 and with no GL at all (a static poster).
 - A mid-range phone holds 60 fps at the default quality tier.
 
 ## Choices and alternatives
@@ -77,7 +77,7 @@ The hero holds its frame budget on the devices I tested, the text is always the 
 
 Limits worth stating plainly:
 
-- WebGL2 and WebGPU do not produce pixel-identical ink. The difference is small, but it is there, and I treat WebGL2 as the reference.
+- The WebGPU prototype and the shipped WebGL2 renderer did not produce pixel-identical ink. The difference was small, and WebGL2 is both the reference and the only path the page ships.
 - The flow field is low resolution on purpose. Pushing it higher added detail nobody asked for.
 - `prefers-reduced-motion` freezes the flow and keeps a single static frame, which is a decision about comfort, not about performance.
 - Numbers marked mock are placeholders until a measurement pass on a real phone.

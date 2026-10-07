@@ -1,22 +1,12 @@
 # 콘텐츠 TODO: 공개 전에 실제 정보로 바꿔야 하는 것
 
-사이트의 모든 "사람에 관한 정보"와 "측정/실험 수치"는 아직 **mock**입니다. 화면에서는 `MOCK` 배지(섹션) 또는 숫자 바로 뒤의 작은 `mock` 표식(`<span class="mock-tag">`)으로 표시되어 있어서, 표식이 붙은 것은 사실처럼 읽히지 않습니다. 이 문서는 그 목록과, 바꾸려면 어떤 실제 정보가 필요한지입니다. 새 사실은 지어내지 않았습니다. 확인되지 않은 것은 그대로 mock으로 남겼습니다. (줄 번호는 Phase 7 시점 기준)
+"측정/실험 수치"는 아직 **mock**입니다(사람/연락처 정보는 A에서 완료). 화면에서는 `MOCK` 배지(섹션) 또는 숫자 바로 뒤의 작은 `mock` 표식(`<span class="mock-tag">`)으로 표시되어 있어서, 표식이 붙은 것은 사실처럼 읽히지 않습니다. 이 문서는 그 목록과, 바꾸려면 어떤 실제 정보가 필요한지입니다. 새 사실은 지어내지 않았습니다. 확인되지 않은 것은 그대로 mock으로 남겼습니다. (줄 번호는 Phase 7 시점 기준)
 
-모두 교체한 뒤: `src/data/site.ts`의 `export const mock = true`를 `false`로, `src/content/work/*.md` frontmatter의 `mock: true`를 제거하고, 이 문서의 항목을 지웁니다. 표식은 `grep -rn "mock-tag\|\[mock\]" src`로 찾을 수 있습니다.
+B~D를 모두 교체한 뒤: `src/data/site.ts`의 `labMock`을 `false`로, `src/content/work/*.md` frontmatter의 `mock: true`를 제거하고, 이 문서의 항목을 지웁니다. 표식은 `grep -rn "mock-tag\|\[mock\]" src`로 찾을 수 있습니다.
 
-## A. 사람/연락처 정보 (`src/data/site.ts`)
+## A. 사람/연락처 정보: 완료
 
-| 위치 | 현재 값 | 필요한 실제 정보 |
-|---|---|---|
-| `site.ts:12-14` `role`, `tagline`, `description` | "Frontend developer working on graphics, shaders and interaction." | 본인이 쓰고 싶은 한 줄 소개 |
-| `site.ts:16` `availability` | "Open to select projects" | 실제 구직/의뢰 상태 |
-| `site.ts:17` `location` | "Seoul, KR (UTC+9)" | 공개해도 되는 지역/시간대 |
-| `site.ts:29-41` `about.lede`, `paragraphs`, `skills` | 일반적인 소개 문단과 기술 목록 | 본인의 소개, 실제 사용 기술 |
-| `site.ts:44-50` `now.updatedAt`, `now.items` | "Building / Reading / Testing / Writing" 항목 | 현재 하고 있는 일 (갱신 날짜 포함) |
-| `site.ts:54` `contact.email` | `hello@example.com` (가짜 주소) | **실제 이메일** |
-| `site.ts:56-60` `contact.socials` | GitHub는 실제(`github.com/foundy`), LinkedIn/Bluesky/Read.cv는 `example` 자리표시 | 쓰는 계정만 남기고 실제 URL/핸들로 교체, 안 쓰는 것은 삭제 |
-
-홈의 About/Contact 섹션 머리에는 `Mock content` 배지가, 모든 페이지 푸터에는 "Placeholder content" 문구가 붙어 있습니다(`mock = true`일 때).
+`src/data/site.ts`의 소개, 위치, About, Now, 연락처는 실제 정보로 교체되었습니다(`availability`는 정보가 없어 필드와 UI를 제거하고 Hero의 STATUS 칸을 `Focus`로 대체). 홈 About/Contact의 `Mock content` 배지와 푸터의 "Placeholder content" 문구도 제거되었습니다. Lab은 아직 mock 수치가 있어 `labMock = true`(`site.ts`)로 자체 배지를 유지합니다.
 
 ## B. Hero Shader 케이스 스터디 (`src/content/work/hero-shader.md`)
 
@@ -29,7 +19,7 @@
 | `:35-41` 본문 | "I tried drawing the letters analytically ...", "Particles ... most common move" 등 시행착오 서술 | 실제로 시도한 것과 이유. 표식은 없지만 **본인 경험과 맞는지 본인이 확인해야 하는 서술**입니다 |
 | `:66-67` 표의 "Render-blocking JS 0 / 0", "GL chunk gzipped 15 KB / 8.2 KB" | 실제 빌드 값(`node scripts/hero/sizes.mjs`) | mock 아님. 빌드가 바뀌면 다시 확인 |
 
-참고: 스택 표기와 Renderer 문단은 실제 구현(raw WebGL2 + GLSL, three.js TSL은 참고 구현만 보존)에 맞게 이미 바로잡았습니다. 이전에는 three.js TSL/WebGPU로 적혀 있었습니다.
+참고: 제약 목록(`:30`)과 Limits(`:80`)에 남아 있던 "출시 페이지가 WebGPU로도 동작" 표현을 바로잡았습니다. 출시 렌더러는 raw WebGL2 + no-GL 포스터 폴백이고 WebGPU는 프로토타입뿐입니다. 스택 표기와 Renderer 문단은 실제 구현(raw WebGL2 + GLSL, three.js TSL은 참고 구현만 보존)에 맞게 이미 바로잡았습니다. 이전에는 three.js TSL/WebGPU로 적혀 있었습니다.
 
 ## C. Card Interaction Study 케이스 스터디 (`src/content/work/card-study.md`)
 

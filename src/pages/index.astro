@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import HeroPoster from '../components/HeroPoster.astro';
 import WorkVisual from '../components/WorkVisual.astro';
-import { about, contact, mock, now, site } from '../data/site';
+import { about, contact, now, site } from '../data/site';
 
 const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -18,8 +18,8 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
         <p class="statement">{site.role}</p>
         <dl class="facts">
           <div>
-            <dt class="label">Status</dt>
-            <dd>{site.availability}</dd>
+            <dt class="label">Focus</dt>
+            <dd>{site.focus}</dd>
           </div>
           <div>
             <dt class="label">Based</dt>
@@ -85,7 +85,6 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
     <section id="about" class="section wrap" aria-labelledby="about-h">
       <header class="section-head">
         <h2 id="about-h" class="label">About</h2>
-        {mock && <span class="badge">Mock content</span>}
       </header>
       <div class="split grid">
         <p class="lede">{about.lede}</p>
@@ -123,7 +122,6 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
     <section id="contact" class="section wrap" aria-labelledby="contact-h">
       <header class="section-head">
         <h2 id="contact-h" class="label">Contact</h2>
-        {mock && <span class="badge">Mock content: placeholder address and links</span>}
       </header>
       <div class="split grid contact">
         <a class="email" href={`mailto:${contact.email}`}>{contact.email}</a>
