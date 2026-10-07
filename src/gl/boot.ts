@@ -91,7 +91,18 @@ export function bootHero() {
           // already interacting: no point animating a fade the user is pushing through
           if (hero.interacted) poster.classList.add('gl-instant');
           poster.classList.add('gl-on');
-          setTimeout(() => poster.classList.add('gl-done'), FADE_MS + 40);
+          // gl-done = the canvas is fully opaque: wait for the real transitionend, with a timer as the fallback
+          const cv = canvas;
+          let finished = false;
+          const finish = () => {
+            if (finished) return;
+            finished = true;
+            cv?.removeEventListener('transitionend', onEnd);
+            poster.classList.add('gl-done');
+          };
+          const onEnd = (e: TransitionEvent) => e.propertyName === 'opacity' && finish();
+          cv?.addEventListener('transitionend', onEnd);
+          setTimeout(finish, FADE_MS + 250);
         }),
       );
 

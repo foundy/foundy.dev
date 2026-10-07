@@ -56,13 +56,15 @@ for (const vp of [
     await heroReady(page);
     const fadeStart = await page.evaluate(() => document.querySelector('[data-hero-poster]').classList.contains('gl-on'));
     await done(page);
+    // the crossfade ends on an exact 1, but compositor timing can leave 0.99x for a frame: wait for it
+    await page.waitForFunction(() => +getComputedStyle(document.querySelector('.hero-gl')).opacity >= 0.99, null, { timeout: 5000 });
     const t = await page.evaluate(() => {
       const m = (n) => performance.getEntriesByName(n)[0]?.startTime;
       const s = window.__hero.stats();
       const op = getComputedStyle(document.querySelector('.hero-gl')).opacity;
       return { chunkMs: m('hero:chunk'), readyMs: m('hero:ready'), mountMs: s.readyMs, tier: s.tier, canvas: s.canvas, op, gpu: s.gpu };
     });
-    check(`${tag} GL ready + crossfade`, +t.op === 1, { ...t, fadeAlreadyOnAtReady: fadeStart });
+    check(`${tag} GL ready + crossfade`, +t.op >= 0.99, { ...t, fadeAlreadyOnAtReady: fadeStart });
     const js = await page.evaluate(() => performance.getEntriesByType('resource').filter((e) => /\.js(\?|$)/.test(e.name)).map((e) => [e.name.split('/').pop(), e.encodedBodySize]));
     check(`${tag} no console errors`, errors.length === 0, { errors: errors.slice(0, 3), js });
     await ctx.close();

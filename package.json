@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "test": "vitest run",
     "bake:sdf": "node scripts/bake-sdf.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "verify": "node scripts/verify-all.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
