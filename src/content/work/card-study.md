@@ -7,6 +7,14 @@ year: 2026
 role: Interaction design and engineering
 stack: [TypeScript, Pointer Events, CSS, Web Animations API]
 mock: true
+facts:
+  - { label: 'Iterations', value: '40+ across v1 to v20' }
+  - { label: 'Close rule', value: 'Projected travel past 35% of the sheet' }
+  - { label: 'Motion', value: 'Time-based springs, one owner per property' }
+preview:
+  - 'A card that grows into a sheet and pulls down to close. Nothing about it is new; getting the decision at the moment of release right is the whole study.'
+  - 'Pull this sheet down from its top edge, slowly and then in a quick flick, and open Inspect: it replays your gesture and shows why it closed, or why it did not.'
+  - 'Close needs the sheet scrolled to the top, so a pull never fights reading. Escape, the close button, a tap outside and the browser Back button all close it too, and focus returns to the card.'
 ---
 
 ## Problem
@@ -33,12 +41,12 @@ I kept a numbered log of every change, v1 to v20, with roughly two attempts per 
 
 A tap or Enter on a card expands it into the hero layout. Pulling the hero down follows the finger with resistance past the threshold. On release, the close decision is made from velocity and distance, and the card either springs back open or flies to its slot in the deck. Escape and a visible close button do the same without a gesture.
 
-<figure class="placeholder" aria-label="Placeholder for the interactive card study">
+<figure class="placeholder" aria-label="Where to try the card study live">
   <div class="placeholder__frame">
-    <span class="label">Interactive figure</span>
-    <p>Live demo arrives in Phase 5. This slot will hold the card deck with a gesture recorder, so you can replay your own pull against the v12 and v20 rules.</p>
+    <span class="label">Live demo (mock copy)</span>
+    <p>The real thing is on the <a href="/#work/card-study">home page</a>: open the card, pull the sheet down, then switch on Inspect to replay your own gesture and see the close decision. Replaying one recording against the v12 and v20 rules arrives with the Lab.</p>
   </div>
-  <figcaption>Fig. 1. The deck and hero, with decision overlay. Placeholder until the card component ships.</figcaption>
+  <figcaption>Fig. 1. The preview sheet with Inspect, on the home page. Copy around it is still mock.</figcaption>
 </figure>
 
 ### How the versions moved

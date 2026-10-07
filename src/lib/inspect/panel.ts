@@ -7,7 +7,7 @@ import { inspect, type DetailRow, type Inspectable } from './core';
 
 const DETAIL_MS = 250; // developer numbers refresh at most 4x/s, and only while Details is open
 
-const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) => {
+export const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) => {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
   if (text != null) e.textContent = text;

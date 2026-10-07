@@ -15,6 +15,9 @@ const work = defineCollection({
     kicker: z.string().optional(),
     /** MOCK: true while the entry holds placeholder copy and numbers. */
     mock: z.boolean().default(false),
+    /** Preview sheet (home): three key facts and a few short paragraphs. MOCK while `mock` is true. */
+    facts: z.array(z.object({ label: z.string(), value: z.string() })).max(3).default([]),
+    preview: z.array(z.string()).default([]),
   }),
 });
 

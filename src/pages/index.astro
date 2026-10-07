@@ -37,14 +37,16 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
 
       {
         work.map((entry, i) => (
-          <article class:list={['entry', i % 2 === 1 && 'flip']}>
+          <article class:list={['entry', i % 2 === 1 && 'flip']} data-card={entry.id}>
             <a
               class="entry-visual"
               href={`/work/${entry.id}`}
               tabindex="-1"
               aria-hidden="true"
+              data-card-trigger
             >
               <WorkVisual slug={entry.id} vtName={`work-visual-${entry.id}`} />
+              <span class="peek mono" aria-hidden="true">Quick look</span>
             </a>
             <div class="entry-text">
               <p class="label">
@@ -52,7 +54,9 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
                 {entry.data.mock && <span class="badge">Mock</span>}
               </p>
               <h3 style={`view-transition-name: work-title-${entry.id}`}>
-                <a href={`/work/${entry.id}`}>{entry.data.title}</a>
+                <a href={`/work/${entry.id}`} data-card-trigger data-card-title>
+                  {entry.data.title}
+                </a>
               </h3>
               <p class="summary">{entry.data.summary}</p>
               <dl class="meta">
@@ -137,13 +141,80 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
       </div>
     </section>
   </main>
+
+    <div id="cards-layer" class="cards-layer" data-cards-layer>
+      <div id="work-sheet" class="sheet-dialog" role="dialog" aria-modal="true" hidden>
+        <div class="sheet-scrim" data-scrim></div>
+        <div class="sheet" data-sheet>
+          <div class="sheet-bg" data-fade></div>
+          <div class="sheet-scroll" data-scroll></div>
+          <div class="sheet-bar" data-fade>
+            <button type="button" class="sheet-btn" data-inspect-toggle aria-pressed="false" aria-keyshortcuts="I">
+              <span>Inspect</span>
+            </button>
+            <button type="button" class="sheet-btn sheet-close" data-sheet-close aria-label="Close preview">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" fill="none"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="cards-dock" data-inspect-dock></div>
+      <svg class="cards-overlay" data-inspect-overlay aria-hidden="true" style="display:none"></svg>
+      {
+        work.map((entry, i) => (
+          <template data-sheet-for={entry.id}>
+            <div class="sh">
+              <p class="label sh-meta">
+                {String(i + 1).padStart(2, '0')} / {entry.data.year}{' '}
+                {entry.data.mock && <span class="badge">Mock</span>}
+              </p>
+              <h2 class="sh-title" tabindex="-1" data-sheet-title>
+                {entry.data.title}
+              </h2>
+              <div class="sh-hero" data-sheet-hero>
+                <WorkVisual slug={entry.id} variant="-sheet" />
+              </div>
+              <div class="sh-text">
+                <p class="sh-summary">{entry.data.summary}</p>
+                <dl class="sh-facts">
+                  {entry.data.facts.map((f) => (
+                    <div>
+                      <dt class="label">{f.label}</dt>
+                      <dd>{f.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {entry.data.preview.map((p) => <p class="sh-p">{p}</p>)}
+                <dl class="sh-meta2">
+                  <div>
+                    <dt class="label">Role</dt>
+                    <dd>{entry.data.role}</dd>
+                  </div>
+                  <div>
+                    <dt class="label">Stack</dt>
+                    <dd class="mono">{entry.data.stack.join(', ')}</dd>
+                  </div>
+                </dl>
+                <a class="sh-read" href={`/work/${entry.id}`} data-sheet-read>
+                  Read the full case study <span aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          </template>
+        ))
+      }
+    </div>
 </Base>
 
 <script>
   import { bootHero } from '../gl/boot';
   import { initInspectToggle } from '../lib/inspect/toggle';
+  import { initCards } from '../lib/cards/boot';
   bootHero();
   initInspectToggle();
+  initCards();
 </script>
 
 <style>
@@ -205,7 +276,33 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
     grid-column: 1 / span 7;
     grid-row: 1;
     display: block;
+    position: relative;
     text-decoration: none;
+  }
+  /* the "Quick look" chip only exists once the card script is on the page */
+  .peek {
+    display: none;
+    position: absolute;
+    right: var(--space-2xs);
+    bottom: var(--space-2xs);
+    padding: 0.15em 0.6em;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: var(--step--2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  :global(html[data-cards]) .peek {
+    display: block;
+  }
+  :global(html[data-cards]) .entry-visual {
+    cursor: pointer;
+  }
+  :global(html[data-cards]) .entry-visual:hover .peek {
+    border-color: var(--accent);
+    color: var(--ink);
   }
   .entry-text {
     grid-column: 9 / -1;
