@@ -26,6 +26,7 @@ import { GestureRecorder } from '../motion/recorder';
 import { Spring, springFromRatio } from '../motion/spring';
 import { bridge } from '../inspect/bridge';
 import { CLOSE_FRACTION, decideClose, dragOffset, MIN_DISTANCE_PX, RUBBER_PX, TAU_MS } from './decision';
+import { CLOSE_CFG, SCRIM_GRACE_MS, SNAP_CFG } from './tuning';
 import type { CardsHandle, PullDecision, PullMeta, PullRecording, SheetState } from './types';
 
 type Ev = 'open' | 'settled' | 'drag' | 'release-stay' | 'release-close' | 'cancel' | 'close';
@@ -39,8 +40,6 @@ const TABLE: Record<SheetState, Partial<Record<Ev, SheetState>>> = {
   closing: { settled: 'idle', open: 'opening' },
 };
 
-/** a tap on the scrim this soon after opening is a ghost click from the tap that opened it */
-const SCRIM_GRACE_MS = 260;
 const HASH_RE = /^#work\/([a-z0-9-]+)$/;
 
 interface Xf {
@@ -55,8 +54,6 @@ const clamp = (v: number, a: number, b: number) => Math.min(Math.max(v, a), b);
 const css = (t: Xf) => `translate(${t.tx.toFixed(2)}px,${t.ty.toFixed(2)}px) scale(${t.s.toFixed(5)})`;
 
 const OPEN_CFG = springFromRatio(260, 0.86);
-const CLOSE_CFG = springFromRatio(300, 1); // critical: no bounce past the card
-const SNAP_CFG = springFromRatio(380, 0.78);
 const BLEND_CFG = springFromRatio(420, 1);
 /** reduced motion: the same springs, just so stiff the change is over in ~60 ms (opacity only, no travel) */
 const QUICK_CFG = springFromRatio(2400, 1);
