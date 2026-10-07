@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import HeroPoster from '../components/HeroPoster.astro';
 import WorkVisual from '../components/WorkVisual.astro';
-import { about, contact, mock, now, site } from '../data/site';
+import { about, contact, now, site } from '../data/site';
 
 const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -18,8 +18,8 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
         <p class="statement">{site.role}</p>
         <dl class="facts">
           <div>
-            <dt class="label">Status</dt>
-            <dd>{site.availability}</dd>
+            <dt class="label">Focus</dt>
+            <dd>{site.focus}</dd>
           </div>
           <div>
             <dt class="label">Based</dt>
@@ -85,12 +85,25 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
     <section id="about" class="section wrap" aria-labelledby="about-h">
       <header class="section-head">
         <h2 id="about-h" class="label">About</h2>
-        {mock && <span class="badge">Mock content</span>}
       </header>
       <div class="split grid">
         <p class="lede">{about.lede}</p>
         <div class="body">
           {about.paragraphs.map((p) => <p>{p}</p>)}
+          <p>{about.aiIntro}</p>
+          <h3 id="ai-h" class="label ai-title">AI in practice</h3>
+          <dl class="ai" aria-labelledby="ai-h">
+            {
+              about.ai.map(([k, v, where]) => (
+                <div>
+                  <dt>
+                    {k} <span class="mono ai-tag">{where}</span>
+                  </dt>
+                  <dd>{v}</dd>
+                </div>
+              ))
+            }
+          </dl>
         </div>
         <dl class="skills">
           {
@@ -123,7 +136,6 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
     <section id="contact" class="section wrap" aria-labelledby="contact-h">
       <header class="section-head">
         <h2 id="contact-h" class="label">Contact</h2>
-        {mock && <span class="badge">Mock content: placeholder address and links</span>}
       </header>
       <div class="split grid contact">
         <a class="email" href={`mailto:${contact.email}`}>{contact.email}</a>
@@ -371,6 +383,34 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
     gap: var(--space-s);
     max-width: 38rem;
     color: var(--ink-soft);
+  }
+  .ai-title {
+    margin-top: var(--space-s);
+  }
+  .ai {
+    display: grid;
+    margin: 0;
+  }
+  .ai > div {
+    display: grid;
+    gap: 0.15rem;
+    padding-block: var(--space-xs);
+    border-top: 1px solid var(--rule);
+  }
+  .ai dt {
+    color: var(--ink);
+    font-weight: 560;
+  }
+  .ai dd {
+    margin: 0;
+  }
+  .ai-tag {
+    margin-left: 0.5em;
+    font-size: var(--step--2);
+    font-weight: 400;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
   .skills {
     grid-column: 10 / -1;
