@@ -90,6 +90,20 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
         <p class="lede">{about.lede}</p>
         <div class="body">
           {about.paragraphs.map((p) => <p>{p}</p>)}
+          <p>{about.aiIntro}</p>
+          <h3 id="ai-h" class="label ai-title">AI in practice</h3>
+          <dl class="ai" aria-labelledby="ai-h">
+            {
+              about.ai.map(([k, v, where]) => (
+                <div>
+                  <dt>
+                    {k} <span class="mono ai-tag">{where}</span>
+                  </dt>
+                  <dd>{v}</dd>
+                </div>
+              ))
+            }
+          </dl>
         </div>
         <dl class="skills">
           {
@@ -369,6 +383,34 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
     gap: var(--space-s);
     max-width: 38rem;
     color: var(--ink-soft);
+  }
+  .ai-title {
+    margin-top: var(--space-s);
+  }
+  .ai {
+    display: grid;
+    margin: 0;
+  }
+  .ai > div {
+    display: grid;
+    gap: 0.15rem;
+    padding-block: var(--space-xs);
+    border-top: 1px solid var(--rule);
+  }
+  .ai dt {
+    color: var(--ink);
+    font-weight: 560;
+  }
+  .ai dd {
+    margin: 0;
+  }
+  .ai-tag {
+    margin-left: 0.5em;
+    font-size: var(--step--2);
+    font-weight: 400;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
   .skills {
     grid-column: 10 / -1;

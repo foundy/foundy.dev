@@ -28,13 +28,24 @@ export const about = {
   lede: 'I am a frontend developer in Korea. I like interfaces that respond: shaders, gestures that feel physical, and pages that stay fast while they do it.',
   paragraphs: [
     'This site is the clearest example. The hero is a WebGL2 shader written in GLSL, the cards run on Pointer Events and springs, and the page is plain TypeScript and Astro with a poster fallback when GL is not available.',
-    'I also experiment with AI in my own workflow: a development environment managed with Claude Code, an AI agent I can task remotely through Discord, AI-assisted codebase analysis, and smaller experiments such as scheduling with Google Calendar and a game data analyzer.',
   ],
+  aiIntro:
+    'AI is part of how I work, not a side project. Most of it happens at work; a little of it at home.',
+  ai: [
+    ['Agent harness', "Setting up the harness the team's coding agents run in.", 'work'],
+    ['Workflow marketplace', 'Shared AI workflows the team installs and reuses: cross-analysis, code review, release management and visualization.', 'work'],
+    ['Work knowledge base', 'A team knowledge base that agents build and query. It is the base for the next two items.', 'work'],
+    ['Repetitive work to AI', 'Routine tasks moved to AI (AI transformation, AX), grounded in the work knowledge base.', 'work'],
+    ['Work personas', 'Role-based AI personas built on the same knowledge base.', 'work'],
+    ['AI back office', 'Back-office operations automated with AI.', 'work'],
+    ['Personal knowledge base', 'My own notes, compiled by an agent into a wiki I can query.', 'personal'],
+    ['Remote agent', 'Tasks handed to an agent from Discord, running on my own machine.', 'personal'],
+  ] as [string, string, 'work' | 'personal'][],
   skills: [
     ['Graphics', 'WebGL2, GLSL, SDFs, noise'],
     ['Interaction', 'Pointer Events, springs, gesture models'],
     ['Front end', 'TypeScript, Astro, CSS'],
-    ['AI workflows', 'Claude Code, MCP, LLM-assisted review'],
+    ['AI workflows', 'Claude Code, MCP, agent harnesses, plugin marketplaces'],
   ] as [string, string][],
 };
 
@@ -42,8 +53,8 @@ export const now = {
   updatedAt: '2026-10-07',
   items: [
     ['Building', 'This site: the hero shader and its Inspect view, live'],
-    ['Exploring', 'AI-augmented dev workflows'],
-    ['Testing', 'An LLM-driven code review pipeline'],
+    ['Exploring', 'Agent harnesses and a shared AI workflow marketplace'],
+    ['Testing', 'AI-assisted code review and release management'],
   ] as [string, string][],
 };
 
