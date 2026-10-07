@@ -148,7 +148,8 @@ export function bindPointerGesture(el: HTMLElement, o: BindOptions): () => void 
   let kind: PointerKind = 'mouse';
   let target: EventTarget | null = null;
 
-  const sample = (e: PointerEvent, type: Sample['type']): Sample => ({ t: e.timeStamp - t0, x: e.clientX, y: e.clientY, type });
+  let lastT = 0;
+  const sample = (e: PointerEvent, type: Sample['type']): Sample => ({ t: (lastT = e.timeStamp - t0), x: e.clientX, y: e.clientY, type });
   const feed = (s: Sample) => {
     o.onSample?.(s, { pointerType: kind });
     pipe?.feed(s);
@@ -169,7 +170,7 @@ export function bindPointerGesture(el: HTMLElement, o: BindOptions): () => void 
   };
   const abort = () => {
     if (!pipe) return;
-    feed({ t: performance.now() - t0, x: lastX, y: lastY, type: 'cancel' });
+    feed({ t: lastT, x: lastX, y: lastY, type: 'cancel' });
     end();
   };
   let lastX = 0;
@@ -223,8 +224,10 @@ export function bindPointerGesture(el: HTMLElement, o: BindOptions): () => void 
     end();
   };
   const lost = (e: PointerEvent) => {
-    // capture ends on its own after up/cancel (pipe is already gone by then); anything else is a hijack
-    if (pipe && e.pointerId === pid && pipe.claimed) abort();
+    // Capture ends on its own after up/cancel (pipe is already gone by then); anything else is a hijack.
+    // lostpointercapture bubbles, and touch has an implicit capture on the original target that is released when we
+    // capture on `el` ourselves: only capture lost ON el counts.
+    if (pipe && e.target === el && e.pointerId === pid && pipe.claimed) abort();
   };
   // Pointer events run first, so by the time the browser would start a scroll `pipe.claimed` is already settled
   const touchmove = (e: TouchEvent) => {

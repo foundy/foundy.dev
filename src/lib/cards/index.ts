@@ -364,8 +364,7 @@ function setup() {
   }
 
   /** every UI route out (button, Escape, scrim) goes through here; history is part of closing */
-  function requestClose() {
-    if (state === 'idle' || state === 'closing') return;
+  function closeHistory() {
     if (hist.pushed) {
       hist.pushed = false;
       hist.pending++;
@@ -373,6 +372,10 @@ function setup() {
     } else if (HASH_RE.test(location.hash)) {
       history.replaceState(history.state, '', location.pathname + location.search);
     }
+  }
+  function requestClose() {
+    if (state === 'idle' || state === 'closing') return;
+    closeHistory();
     beginClose('close');
   }
 
@@ -502,8 +505,10 @@ function setup() {
           const dec: PullDecision = { ...d, ...input, samples: ev.samples };
           lastRec = recorder.finish(dec) as PullRecording | null;
           if (lastRec) emit('recording');
-          if (d.close) beginClose('release-close', -Math.min(3, Math.abs(ev.vy * 1000) / (0.9 * M.P.h)));
-          else {
+          if (d.close) {
+            closeHistory();
+            beginClose('release-close', -Math.min(3, Math.abs(ev.vy * 1000) / (0.9 * M.P.h)));
+          } else {
             G.set(G.value, ev.vy * 1000);
             G.retarget(0, SNAP_CFG);
             go('release-stay');

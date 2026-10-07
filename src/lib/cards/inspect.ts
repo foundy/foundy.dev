@@ -87,7 +87,11 @@ function analyse(rec: PullRecording): Analysis {
       label: 'Release',
       explain: `You let go. Speed is measured over the last ${VELOCITY_WINDOW_MS} ms before this moment: ${d.velocity.toFixed(2)} px/ms downward, from ${d.samples} pointer samples. Projected travel = ${px(d.distance)} + ${d.velocity.toFixed(2)} × ${TAU_MS} ms = ${px(d.projected)}.`,
     });
-    markers.push({ at: tRelease + TAIL_MS / 2, label: 'Verdict', explain: verdict + contrast });
+    markers.push({
+      at: tRelease + TAIL_MS / 2,
+      label: 'Verdict',
+      explain: `The rule: close if the pull is at least ${MIN_DISTANCE_PX} px and the projected travel passes ${Math.round(CLOSE_FRACTION * 100)}% of the sheet. ${d.close ? 'Yours did' : 'Yours did not'}.${contrast}`,
+    });
   }
 
   const sampleMs = rec.samples.length > 1 ? tRelease / (rec.samples.length - 1) : 0;
@@ -113,7 +117,7 @@ function analyse(rec: PullRecording): Analysis {
     crossedAt,
     duration: tRelease + TAIL_MS,
     markers,
-    summary: verdict + contrast,
+    summary: verdict,
     detail,
   };
 }
