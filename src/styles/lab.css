@@ -60,6 +60,28 @@
   font-size: var(--step--1);
   color: var(--ink-muted);
 }
+/* stand-in for the live controls: server-rendered, shown only when scripts can run, replaced in place on hydration */
+.lab-pre {
+  display: none;
+}
+@media (scripting: enabled) {
+  .lab-ui .lab-static {
+    display: none;
+  }
+  .lab-tau-ui .lab-static {
+    display: none;
+  }
+  .lab-tau-ui .lab-pre {
+    display: contents; /* its children are the flex items, exactly where the live controls go */
+  }
+  .lab-ui .lab-pre {
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .lab-bar.lab-pre {
+    display: block;
+  }
+}
 .lab-chips {
   display: flex;
   flex-wrap: wrap;
@@ -77,7 +99,8 @@
   min-height: 2.5rem;
   cursor: pointer;
 }
-.lab-chip[aria-pressed='true'] {
+.lab-chip[aria-pressed='true'],
+.lab-pre .lab-chip[data-on] {
   background: var(--ink);
   color: var(--paper);
   border-color: var(--ink);
@@ -199,7 +222,7 @@
 }
 .lab-detail {
   text-align: center;
-  min-height: 2.6em;
+  min-height: 3.2em; /* two lines: the static final-state numbers and the blank start of a replay take the same room */
   max-width: 16rem;
   margin-inline: auto;
   font-size: var(--step--2);

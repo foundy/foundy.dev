@@ -10,6 +10,7 @@ import { bindPointerGesture, SLOP_MOUSE, SLOP_TOUCH } from '../motion/gesture';
 import { GestureRecorder, parseRecording, type Recording } from '../motion/recorder';
 import { TAU_MS } from '../cards/decision';
 import { SHEET, VIEW, releaseTable, simulate, type DecisionId, type Side, type Track } from './rules';
+import { HINT_LEAD, UNIT_NOTE, hintBody } from './copy';
 import { chartMarkup, paintChart, paintStage, stageMarkup, tauTableRows } from './stage';
 const TAU = { min: 0, max: 200, step: 5 };
 
@@ -79,19 +80,22 @@ export async function mountSection(root: HTMLElement) {
   const row = h('div', 'lab-row');
   row.append(play, scrub, time);
   const hint = h('p', 'lab-hint');
-  hint.append(h('strong', undefined, 'Your turn. '), document.createTextNode(`Drag on either phone to record your own gesture; both rules replay it. ${dec.tryIt} `));
-  // one unit everywhere: the phone is a 390 × 720 px screen drawn smaller, so a drag on it is scaled up to that size
-  const unit = h('span', 'lab-unit', 'Distances and speeds are in phone px: the little phone stands for a 390 × 720 px screen, so your drag is scaled up to that size before it is measured.');
-  hint.append(unit);
+  hint.append(h('strong', undefined, HINT_LEAD), document.createTextNode(hintBody(dec.tryIt)), h('span', 'lab-unit', UNIT_NOTE));
   const live = h('p', 'visually-hidden');
   live.setAttribute('aria-live', 'polite');
   live.setAttribute('aria-atomic', 'true');
   ui.replaceChildren(chips, hint, live);
   ui.classList.add('on');
   // play + scrubber live in their own bar: pinned to the top on narrow screens while you scroll between the two stacked phones
-  const bar = h('div', 'lab-bar');
-  bar.append(row);
-  ui.after(bar);
+  // (the page server-renders a same-sized placeholder bar so that hydrating moves nothing)
+  let bar = root.querySelector<HTMLElement>('[data-bar]');
+  if (!bar) {
+    bar = h('div', 'lab-bar');
+    ui.after(bar);
+  }
+  bar.classList.remove('lab-pre');
+  bar.removeAttribute('aria-hidden');
+  bar.replaceChildren(row);
 
   const renderChips = () => {
     chips.replaceChildren(

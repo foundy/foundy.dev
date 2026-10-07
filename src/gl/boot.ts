@@ -2,7 +2,7 @@
  * Progressive enhancement for the home hero. The SVG poster is the first paint and the permanent fallback; this
  * tiny script (the only JS on the page) decides whether to load the GL chunk at all, then cross-fades to it.
  *
- *   load -> requestIdleCallback (timeout) -> [conditions] -> import('./hero') + SDF fetch in parallel -> mount -> fade
+ *   load -> first-contentful-paint -> requestIdleCallback (timeout) -> [conditions] -> import('./hero') + SDF fetch in parallel -> mount -> fade
  *
  * Conditions: WebGL2 present, no `?gl=none`, not prefers-reduced-motion (the poster stays, no canvas is created),
  * not Save-Data. Any failure leaves the poster in place (one console.warn).
@@ -39,7 +39,27 @@ export function bootHero() {
 
   const whenIdle = (fn: () => void) => {
     if (forced) return fn();
-    const go = () => ('requestIdleCallback' in window ? window.requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 250));
+    const idle = () => ('requestIdleCallback' in window ? window.requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 250));
+    // never compete with the first paint: wait for FCP (the text is the LCP element), with a timer as the fallback
+    const afterPaint = (cb: () => void) => {
+      if (performance.getEntriesByName('first-contentful-paint').length) return cb();
+      let done = false;
+      const once = () => {
+        if (done) return;
+        done = true;
+        cb();
+      };
+      try {
+        new PerformanceObserver((l, o) => {
+          if (l.getEntriesByName('first-contentful-paint').length) {
+            o.disconnect();
+            once();
+          }
+        }).observe({ type: 'paint', buffered: true });
+      } catch {}
+      setTimeout(once, 1500);
+    };
+    const go = () => afterPaint(idle);
     if (document.readyState === 'complete') go();
     else addEventListener('load', go, { once: true });
   };
