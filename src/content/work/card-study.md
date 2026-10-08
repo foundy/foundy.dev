@@ -70,3 +70,5 @@ What it does not solve:
 - Eight testers <span class="mock-tag">mock</span> is a sanity check, not a study, and the figures above are placeholders until the final write-up.
 
 The four decisions that carried the most weight are collected on the [Lab](/lab) page, each replayed side by side on the old rule and the new one.
+
+Live demo: [the rebuilt product deck](/bonnet/), a swipeable card deck that opens into a detail page and pulls back down.

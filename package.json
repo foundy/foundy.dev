@@ -5,12 +5,13 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && npm run build:bonnet",
     "preview": "astro preview",
-    "test": "vitest run",
+    "test": "vitest run --exclude bonnet/** --exclude **/node_modules/**",
     "bake:sdf": "node scripts/bake-sdf.mjs",
     "astro": "astro",
-    "verify": "node scripts/verify-all.mjs"
+    "verify": "node scripts/verify-all.mjs",
+    "build:bonnet": "npm run build -w bonnet -- --outDir ../dist/bonnet --emptyOutDir"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
@@ -31,5 +32,8 @@
     "typescript": "^6.0.3",
     "vitest": "^5.0.3",
     "wawoff2": "^2.0.1"
-  }
+  },
+  "workspaces": [
+    "bonnet"
+  ]
 }
