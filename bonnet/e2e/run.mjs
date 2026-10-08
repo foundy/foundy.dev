@@ -197,6 +197,31 @@ async function suite(kind) {
     let s = await state(h.page);
     check(`${tag} pull: partial pull scrubs p directly (mode=dragging, 0<p<1)`, mid.mode === 'dragging' && mid.p < 0.95 && mid.p > 0.5, mid);
     check(`${tag} pull: partial slow pull springs back and stays open`, s.p === 1 && s.hash === '#ivory', s);
+    for (const dy of [45, 150, 260]) {
+      let r;
+      await drag(h, [[hx, hy], [hx, hy + dy, 500]], {
+        hold: 150,
+        onHold: async () =>
+          (r = await h.page.evaluate(() => {
+            const vis = (el) => {
+              const cs = getComputedStyle(el);
+              return cs.visibility !== 'hidden' && +cs.opacity > 0.05;
+            };
+            const rect = (el) => el.getBoundingClientRect();
+            const hit = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+            const chrome = [...document.querySelectorAll('.top, .controls, .hint, .foot')];
+            const ops = chrome.map((e) => +getComputedStyle(e).opacity);
+            const text = [...document.querySelectorAll('.body .rv, .close')].filter(vis);
+            let overlap = 0;
+            for (const c of chrome.filter(vis)) for (const t of text) if (hit(rect(c), rect(t))) overlap++;
+            return { p: __bonnet.p, maxOp: Math.max(...ops), overlap, inert: document.querySelector('#page').inert };
+          })),
+      });
+      check(`${tag} pull: deck chrome hidden as a function of p (p=${r.p.toFixed(2)}) and never overlaps body/close`, r.overlap === 0 && r.inert && (r.p > 0.2 ? r.maxOp < 0.01 : true), r);
+      await sleep(1300);
+      if ((await state(h.page)).mode === 'closed') await open(); // a deep pull legitimately closes
+      await waitMode(h.page, 'open');
+    }
     await drag(h, [[hx, hy], [hx + 10, hy + 300, 500]]);
     await waitMode(h.page, 'closed');
     s = await state(h.page);

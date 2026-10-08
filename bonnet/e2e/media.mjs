@@ -108,13 +108,13 @@ await session('3-pull-down-close', async (h) => {
   await sleep(1000);
   await drag(h, [[cx, 300], [cx + 20, 600, 700]], D); // slow, far: closes
   await waitMode(h.page, 'closed');
-  await sleep(900);
+  await sleep(1800); // the full way back to the deck
   await tapAt(h, cx, cy);
   await waitMode(h.page, 'open');
   await sleep(800);
   await drag(h, [[cx, 300], [cx + 6, 390, 80]], D); // short fast flick: closes
   await waitMode(h.page, 'closed');
-  await sleep(900);
+  await sleep(1800);
   await tapAt(h, cx, cy);
   await sleep(160);
   await drag(h, [[cx, 300], [cx - 12, 440, 300]], { ...D, hold: 120 }); // grab it mid-open and send it back

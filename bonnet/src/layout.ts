@@ -46,7 +46,7 @@ export function cardLook(d: number, spacing: number, p: number, reduced: boolean
     rot,
     rotY,
     scale,
-    opacity: fade * (1 - smoothstep(0.05, 0.65, p)),
+    opacity: fade * (1 - smoothstep(0.03, 0.35, p)),
     shade: Math.min(0.5, 0.2 * (1 - Math.exp(-1.6 * ad)) + 0.3 * p),
     shadow: 1 - 0.55 * Math.min(1, ad),
     px: -0.036 * Math.tanh(d),

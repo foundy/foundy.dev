@@ -209,6 +209,8 @@ function computeFrom() {
 /* ---------- render: everything is a function of (pos, p, angle, groups) ---------- */
 const rgb = (c: number[]) => `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
 let rvLast: string[] = [];
+let chromeLast = '';
+const chrome = [...document.querySelectorAll<HTMLElement>('.top, .controls, .hint, .foot')];
 let sheetBits = '';
 function render() {
   const P = p.value;
@@ -241,6 +243,17 @@ function render() {
   const deep = smoothstep(0, 1, P) * 0.92;
   const col = [0, 1, 2].map((k) => lerp(lerp(COLORS[i0].tint[k], COLORS[i1].tint[k], f), lerp(COLORS[i0].deep[k], COLORS[i1].deep[k], f), deep));
   document.body.style.backgroundColor = rgb(col);
+  /* deck chrome (header pill, arrows, dots, hint, footer) is a function of p: gone by p ~0.2, eases back at the end of a close */
+  const co = open ? 1 - smoothstep(0.02, 0.2, clamp(P, 0, 1)) : 1;
+  const cs = co.toFixed(3);
+  if (cs !== chromeLast) {
+    chromeLast = cs;
+    for (const el of chrome) {
+      el.style.opacity = co >= 1 ? '' : cs;
+      el.style.visibility = co <= 0.002 ? 'hidden' : '';
+      el.style.pointerEvents = co < 1 ? 'none' : '';
+    }
+  }
   if (!open) return;
 
   /* hero */
