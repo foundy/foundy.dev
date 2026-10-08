@@ -1,0 +1,23 @@
+{
+  "name": "bonnet",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Interaction-first product card deck demo (sample product).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "images": "node scripts/make-images.mjs",
+    "e2e": "node e2e/run.mjs",
+    "media": "node e2e/media.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0",
+    "sharp": "^0.35.5",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}
