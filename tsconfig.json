@@ -6,6 +6,7 @@
   ],
   "exclude": [
     "dist",
-    "bonnet"
+    "bonnet",
+    "experiments"
   ]
 }

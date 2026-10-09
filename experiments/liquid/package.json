@@ -1,0 +1,10 @@
+{
+  "name": "liquid-experiment",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "check": "tsc --noEmit"
+  }
+}
