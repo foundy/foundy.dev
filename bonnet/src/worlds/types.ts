@@ -84,6 +84,8 @@ export interface World {
   slotPx(): number;
   /** the product nearest to the current position (captions follow this) */
   nearest(): number;
+  /** at rest on its target and not held by a finger */
+  settled(): boolean;
   /** debug/test: screen centre of the product the finger holds (or the current one) */
   probe(): { x: number; y: number } | null;
   /** advance the world's own physics by dt and draw one frame into `to` */

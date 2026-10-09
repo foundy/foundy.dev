@@ -492,7 +492,10 @@ export function boot() {
     const w = curWorld();
     const keyboard = !e.clientX && !e.clientY;
     const hit = keyboard || !w || glMode !== 'on' ? 'open' : w.hit(e.clientX, e.clientY);
-    if (hit === 'open') openDetail(true, true);
+    if (hit === 'open') {
+      if (w && glMode === 'on' && w.nearest() !== core.state.index) commitIndex(w.nearest()); // open what is on screen
+      openDetail(true, true);
+    }
     else if (hit === 'prev') go(-1);
     else if (hit === 'next') go(1);
   });
@@ -511,6 +514,7 @@ export function boot() {
     if (core.state.page !== 'browse' || id === core.state.world) return;
     const nw = glOk() ? makeWorld(id) : null;
     if (!core.switchWorld(id)) return;
+    if (!nw) core.state.sw = null; // no GL: nothing to crossfade
     saveWorld(id);
     history.replaceState(history.state, '', buildUrl(location, { world: id }));
     if (nw) {
@@ -582,7 +586,7 @@ export function boot() {
     },
     () => (G ? `${G.gpu.slice(0, 44)} dpr ${G.dpr.toFixed(2)} ${G.canvas.width}x${G.canvas.height}\ntex ${textures?.count}/${N} ~${textures?.mb.toFixed(1)}MB\n` : 'gl: none\n'),
   );
-  if (DEBUG) {
+  if (DEBUG || query.has('probe')) {
     Object.defineProperty(window, '__bonnet', {
       get: () => {
         const s = core.state;
@@ -596,6 +600,7 @@ export function boot() {
           gl: glMode,
           animating: core.transitioning || !!s.sw || dragging || !!raf,
           near: w && glMode === 'on' ? w.nearest() : s.index,
+          settled: w && glMode === 'on' ? w.settled() : true,
           probe: w && glMode === 'on' ? w.probe() : null,
           slotPx: w && glMode === 'on' ? w.slotPx() : 0,
           scrollY,

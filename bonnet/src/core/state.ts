@@ -128,7 +128,7 @@ export class Core {
       const r = spring(s.p, s.pv, T, dt, T ? cfg.open : cfg.close);
       s.p = r.x;
       s.pv = r.v;
-      if (Math.abs(s.p - T) < cfg.snap && Math.abs(s.pv) < 0.004) (s.p = T), (s.pv = 0);
+      if (Math.abs(s.p - T) < cfg.snap && Math.abs(s.pv) < Math.max(0.004, cfg.snap * 5)) (s.p = T), (s.pv = 0);
       s.p = Math.min(1, Math.max(0, s.p));
       if (s.p !== T || s.pv !== 0) more = true;
     }

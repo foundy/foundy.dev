@@ -14,7 +14,7 @@ const SIM_HZ = 200, C2 = 0.42, DAMP = 0.9978;
 const GRAB_FOLLOW = 18; // 1/s: how fast the product settles into / out of the finger's hold
 const RUBBER = 0.35; // over-drag at the ends of the list
 const TILT_V = 0.011; // rad per (slot/s) of velocity
-export const WATER_SPRING: SpringCfg = { open: 5.4, close: 5.4, snap: 0.0006 };
+export const WATER_SPRING: SpringCfg = { open: 5.4, close: 5.4, snap: 0.002 };
 
 type Mode = 'f32' | 'f16' | 'u8';
 
@@ -133,7 +133,7 @@ export class WaterWorld implements World {
     const fh = Math.min(H * 0.56, (W * 0.78) / 0.8, 760);
     const fw = fh * 0.8;
     this.pool = [W / 2, H * 0.465, fw, fh];
-    this.spacing = clamp(W / 2 - 46 + 0.4 * fw, fw * 0.62, fw * 1.05);
+    this.spacing = clamp(W / 2 - 66 + 0.38 * fw, fw * 0.62, fw * 1.05);
     const area = this.mobile ? 72000 : 150000;
     this.cell = Math.sqrt((W * H) / area);
     this.simW = Math.max(32, Math.round(W / this.cell));
@@ -262,6 +262,9 @@ export class WaterWorld implements World {
   nearest() {
     return clamp(Math.round(this.s), 0, this.N - 1);
   }
+  settled() {
+    return !this.dragging && this.s === this.sTarget && this.sv === 0;
+  }
   probe() {
     const i = this.dragging ? this.idx0 : this.nearest();
     return { x: this.pool[0] + (i - this.s) * this.spacing, y: this.pool[1] };
@@ -272,7 +275,7 @@ export class WaterWorld implements World {
     const i = this.nearest();
     const px = cx + (i - this.s) * this.spacing;
     if (Math.abs(y - cy) > h / 2 + 8) return 'none';
-    if (Math.abs(x - px) < w / 2 + 6) return Math.abs(this.s - i) < 0.25 ? 'open' : 'none';
+    if (Math.abs(x - px) < w / 2 + 6) return 'open'; // tapping what you see opens what you see, even mid-settle
     return x < px ? 'prev' : 'next';
   }
 

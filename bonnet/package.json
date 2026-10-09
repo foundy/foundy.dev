@@ -1,9 +1,9 @@
 {
   "name": "bonnet",
   "private": true,
-  "version": "2.0.0-m0a",
+  "version": "2.1.0-worlds",
   "type": "module",
-  "description": "bonnet v2 - M0a: DOM-only input skeleton (sample product demo).",
+  "description": "bonnet v2 - one product, two worlds (Light / Water) over a shared core.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -11,7 +11,7 @@
     "test": "vitest run",
     "e2e": "node e2e/run.mjs",
     "size": "node e2e/size.mjs",
-    "media": "node e2e/sketch-media.mjs"
+    "media": "node e2e/worlds-media.mjs"
   },
   "devDependencies": {
     "playwright": "^1.63.0",

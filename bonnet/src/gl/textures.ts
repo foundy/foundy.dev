@@ -17,9 +17,9 @@ export class Textures {
   readonly avg: [number, number, number][];
   private listeners = new Set<(i: number) => void>();
   private blockUntil = 0;
-  private cv: HTMLCanvasElement | OffscreenCanvas;
-  private c2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
-  private small: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+  private cv: HTMLCanvasElement;
+  private c2: CanvasRenderingContext2D;
+  private small: CanvasRenderingContext2D;
   uploads = 0;
   mb = 0;
 
@@ -35,10 +35,11 @@ export class Textures {
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    const mk = (w: number, h: number) => (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : Object.assign(document.createElement('canvas'), { width: w, height: h }));
+    // plain canvases (not OffscreenCanvas): the widest Safari support for createImageBitmap(canvas)
+    const mk = (w: number, h: number) => Object.assign(document.createElement('canvas'), { width: w, height: h });
     this.cv = mk(LAYER_W, LAYER_H);
-    this.c2 = this.cv.getContext('2d') as CanvasRenderingContext2D;
-    this.small = mk(16, 16).getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D;
+    this.c2 = this.cv.getContext('2d')!;
+    this.small = mk(16, 16).getContext('2d', { willReadFrequently: true })!;
   }
 
   has(i: number) {
@@ -93,7 +94,7 @@ export class Textures {
     }
     this.avg[i] = [r / ws / 255, gg / ws / 255, b / ws / 255];
     bm.close();
-    const layer = await createImageBitmap(this.cv as ImageBitmapSource);
+    const layer = await createImageBitmap(this.cv);
     this.queue.push({ i, bmp: layer });
     this.listeners.forEach((f) => f(-1)); // wake the loop so the upload gets a frame
   }

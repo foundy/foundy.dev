@@ -171,7 +171,7 @@ vec4 sub(int i, vec2 px, vec2 slope, float flowA, float C){
   if (m<=.001 || al<=.001) return vec4(0);
   vec2 uv = rp/(2.*hs)+.5;
   float t = 1.-exp(-z/170.);
-  float lod = max(0., log2(uLayerW/(2.*hs.x*uPx))-.75) + t*4.2 + flowA*1.1;
+  float lod = max(0., log2(uLayerW/(2.*hs.x*uPx))-.75) + t*3.0 + flowA*1.1;
   vec3 tex;
   float sl = length(slope);
   if (sl>.035 && z<120.){
@@ -184,7 +184,7 @@ vec4 sub(int i, vec2 px, vec2 slope, float flowA, float C){
   vec3 ink = uInk[i];
   vec3 deep = mix(vec3(.012,.04,.06), ink*.30, .35);
   tex *= mix(vec3(1.), vec3(.50,.70,.95), t);
-  tex = mix(tex, deep, pow(t,1.25)*.88);
+  tex = mix(tex, deep, pow(t,1.25)*.66);
   float near = 1.-t;
   float ein = -sd;
   tex *= mix(.74, 1., smoothstep(0., 26., ein));

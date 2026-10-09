@@ -262,6 +262,9 @@ export class LightWorld implements World {
   nearest() {
     return clamp(Math.round(this.pos), 0, this.N - 1);
   }
+  settled() {
+    return !this.dragging && this.pos === this.target && this.vel === 0;
+  }
   probe() {
     const i = this.dragging ? this.idx0 : this.nearest();
     const [x, y] = this.slideXY(i, this.pos);
