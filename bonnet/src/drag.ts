@@ -66,7 +66,8 @@ export function attachDrag(el: HTMLElement, h: DragHandlers) {
   });
 
   el.addEventListener('pointercancel', () => clean(true));
-  el.addEventListener('lostpointercapture', () => clean(true));
+  // lostpointercapture bubbles: moving capture from the inner <button> to `el` fires it on the button, which is not a loss for us
+  el.addEventListener('lostpointercapture', (e) => e.target === el && e.pointerId === id && clean(true));
 
   // a drag that ends on this element must not also "tap" it: swallow that one click here, and only here
   el.addEventListener(
