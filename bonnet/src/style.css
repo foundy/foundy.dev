@@ -1,0 +1,385 @@
+:root {
+  --tone: rgb(222, 230, 213);
+  --ink: #27302a;
+  --ink-2: #566058;
+  --sw: min(88vw, 560px, calc(100svh - 270px));
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--tone);
+}
+body {
+  margin: 0;
+  background: var(--tone);
+  color: var(--ink);
+  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+html[data-page='detail'] body,
+html[data-page='opening'] body {
+  transition: background-color 200ms linear;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 3px;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  margin: 0;
+}
+
+/* ---- deck (S1) ------------------------------------------------------------------------- */
+#deck {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--tone);
+  padding: max(14px, env(safe-area-inset-top)) 0 max(14px, env(safe-area-inset-bottom));
+}
+.top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 max(20px, 6vw);
+}
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-size: 18px;
+}
+.demo {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.mid {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+.stage {
+  position: relative;
+  width: var(--sw);
+  aspect-ratio: 1;
+  border-radius: 28px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.05);
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  isolation: isolate;
+}
+.slides {
+  position: absolute;
+  inset: 0;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  will-change: opacity;
+}
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+.open {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  touch-action: pan-y pinch-zoom;
+  z-index: 2;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.cname {
+  min-width: 9ch;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+}
+.nav {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 26px;
+  line-height: 1;
+  padding: 0 0 3px;
+  transition: transform 120ms;
+}
+.nav:active,
+.yarn:active,
+.swatch:active,
+.dot:active,
+.close:active {
+  transform: scale(0.96);
+  transition-duration: 80ms;
+}
+.nav[aria-disabled='true'] {
+  opacity: 0.35;
+}
+.rail {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding-top: 6px;
+}
+.yarn,
+.swatch {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  transition: transform 120ms;
+}
+.yarn::before,
+.swatch::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.6), transparent 46%),
+    repeating-linear-gradient(32deg, rgba(0, 0, 0, 0.09) 0 2px, transparent 2px 6px), var(--y);
+  box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.yarn[aria-pressed='true']::after,
+.swatch[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+}
+.yarn:disabled,
+.swatch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- detail (S4): normal document flow, window scroll ----------------------------------- */
+#detail {
+  position: relative;
+  min-height: 100svh;
+  background: var(--tone);
+}
+#detail[hidden] {
+  display: none;
+}
+.sheet {
+  max-width: 640px;
+  margin: 0 auto;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+.close {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 20;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 28px;
+  line-height: 1;
+  padding: 0 0 3px;
+  transition: transform 120ms;
+}
+.hero {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.05);
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  isolation: isolate;
+}
+.hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+.hero img.on {
+  opacity: 1;
+  transition: opacity var(--d, 180ms) linear;
+}
+.dots {
+  display: flex;
+  justify-content: center;
+}
+.dot {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+.dot::before {
+  content: '';
+  position: absolute;
+  inset: 17px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.28);
+}
+.dot[aria-pressed='true']::before {
+  background: var(--ink);
+}
+.body {
+  padding: 4px max(20px, 6vw) 0;
+}
+h1 {
+  margin: 8px 0 0;
+  font-size: 28px;
+  line-height: 1.2;
+}
+h1:focus {
+  outline: none;
+}
+h2 {
+  margin: 28px 0 4px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.body p,
+.body ul {
+  margin: 0;
+}
+.body ul {
+  padding-left: 1.2em;
+}
+.sub {
+  color: var(--ink-2);
+  margin-top: 2px !important;
+}
+.swatches {
+  display: flex;
+  gap: 4px;
+  margin: 10px -6px 0;
+}
+.note {
+  margin-top: 32px !important;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+/* ---- page transitions: opacity / transform only, never gate input ------------------------ */
+html[data-page='opening'] #deck {
+  animation: fade-out 200ms linear forwards;
+  pointer-events: none;
+}
+html[data-page='detail'] #deck {
+  visibility: hidden;
+}
+html[data-page='closing'] #deck {
+  animation: fade-in 140ms linear;
+}
+html[data-page='opening'] .sheet {
+  animation: rise 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---- ?debug overlay ----------------------------------------------------------------------- */
+#dbg {
+  position: fixed;
+  left: 0;
+  top: env(safe-area-inset-top);
+  z-index: 99999;
+  pointer-events: none;
+  font: 10px/1.25 ui-monospace, Menlo, monospace;
+}
+#dbg button {
+  pointer-events: auto;
+  font: inherit;
+  padding: 3px 7px;
+  border: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: #9f9;
+  touch-action: manipulation;
+}
+#dbg pre {
+  margin: 0;
+  padding: 4px 6px;
+  max-width: 100vw;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.72);
+  color: #9f9;
+}
+#dbg.off pre {
+  display: none;
+}
