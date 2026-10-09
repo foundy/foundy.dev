@@ -1,0 +1,18 @@
+{
+ "face_bicubic": {
+  "mean_abs_luma_diff": 2.685,
+  "ssim": 0.9688
+ },
+ "face_esrgan": {
+  "mean_abs_luma_diff": 2.897,
+  "ssim": 0.9614
+ },
+ "stitch_bicubic": {
+  "mean_abs_luma_diff": 22.897,
+  "ssim": 0.6392
+ },
+ "stitch_esrgan": {
+  "mean_abs_luma_diff": 23.784,
+  "ssim": 0.6147
+ }
+}
