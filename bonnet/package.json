@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "e2e": "node e2e/run.mjs",
-    "size": "node e2e/size.mjs"
+    "size": "node e2e/size.mjs",
+    "media": "node e2e/sketch-media.mjs"
   },
   "devDependencies": {
     "playwright": "^1.63.0",
