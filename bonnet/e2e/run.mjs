@@ -148,13 +148,12 @@ for (const bname of names) {
   };
 
   // ---------- deck ----------
-  await check('boot: deck, moss selected, ivory disabled, 5 rail buttons', async () => {
+  await check('boot: deck, moss selected, 5 rail buttons', async () => {
     const t = await fresh();
     const s = await t.st();
     eq([s.page, s.color], ['deck', 1], 'state');
     eq(await t.page.locator('.yarn').count(), 5, 'rail');
-    eq(await t.page.locator('.yarn:disabled').count(), 1, 'disabled');
-    eq(await t.page.locator('.yarn[aria-pressed="true"]').getAttribute('aria-label'), 'Moss', 'pressed');
+    eq(await t.page.locator('.yarn[aria-pressed="true"]').getAttribute('aria-label'), 'Moss bonnet', 'pressed');
     eq(t.errors, [], 'console errors');
     await t.context.close();
   });
@@ -244,8 +243,7 @@ for (const bname of names) {
     await t.tapSel('#prev', 4);
     eq((await t.settled()).color, 1, 'prev');
     await t.tapSel('#stage', 3);
-    await sleep(350);
-    eq((await t.st()).page, 'detail', 'detail');
+    eq((await t.settled()).page, 'detail', 'detail');
     await t.context.close();
   });
 
@@ -273,8 +271,8 @@ for (const bname of names) {
     const t = await fresh();
     await t.tapSel('#next');
     await t.settled();
-    eq(await t.page.locator('#live').textContent(), 'Poppy, 3 of 5', 'live');
-    eq(await t.page.locator('.slide:not([aria-hidden])').getAttribute('aria-label'), 'Poppy, 3 of 5', 'slide');
+    eq(await t.page.locator('#live').textContent(), 'Poppy bonnet, 3 of 5', 'live');
+    eq(await t.page.locator('.slide:not([aria-hidden])').getAttribute('aria-label'), 'Poppy bonnet, 3 of 5', 'slide');
     await t.context.close();
   });
 
@@ -380,21 +378,7 @@ for (const bname of names) {
     eq((await t.st()).angle, 3, 'dot');
     await sleep(300);
     eq(await t.page.evaluate(() => document.querySelectorAll('.hero img.on').length), 1, 'one visible hero');
-    eq(await t.page.locator('.dot[aria-pressed="true"]').getAttribute('aria-label'), 'Left view', 'aria');
-    await t.context.close();
-  });
-
-  await check('swatch changes color, updates hash and deck color; close lands on it', async () => {
-    const t = await fresh();
-    await t.tapSel('#stage');
-    await t.settled();
-    await t.tapSel('.swatch[data-i="4"]');
-    await sleep(300);
-    eq(new globalThis.URL(t.page.url()).hash, '#butter', 'hash');
-    await t.tapSel('#close');
-    const s = await t.settled();
-    eq([s.page, s.color], ['deck', 4], 'deck on butter');
-    eq(await t.page.evaluate(() => getComputedStyle(document.querySelectorAll('.slide')[4]).opacity), '1', 'butter visible');
+    eq(await t.page.locator('.dot[aria-pressed="true"]').getAttribute('aria-label'), 'Photo 4 of 4', 'aria');
     await t.context.close();
   });
 
@@ -444,7 +428,7 @@ for (const bname of names) {
   });
 
   await check('bad hash falls back to the deck', async () => {
-    const t = await fresh('#ivory');
+    const t = await fresh('#nope');
     eq((await t.st()).page, 'deck', 'deck');
     await t.context.close();
   });

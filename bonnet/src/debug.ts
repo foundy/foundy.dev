@@ -28,7 +28,7 @@ export function markVisual() {
   );
 }
 
-export function initDebug(getState: () => State) {
+export function initDebug(getState: () => State, extra: () => string = () => '', onReset: () => void = () => {}) {
   if (!DEBUG) return;
   const root = document.createElement('div');
   root.id = 'dbg';
@@ -54,6 +54,7 @@ export function initDebug(getState: () => State) {
   requestAnimationFrame(frame);
   root.querySelector('[data-r]')!.addEventListener('click', () => {
     longest = 0;
+    onReset();
     deltas.length = 0;
     lat.length = 0;
     lastLat = 0;
@@ -86,7 +87,11 @@ export function initDebug(getState: () => State) {
     const la = lat.length ? lat.reduce((a, b) => a + b, 0) / lat.length : 0;
     const s = getState();
     const now = performance.now();
+    const sorted = [...deltas].sort((a, b) => a - b);
+    const q = (x: number) => (sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * x))] : 0);
     pre.textContent =
+      extra() +
+      `raf p50 ${q(0.5).toFixed(1)} p95 ${q(0.95).toFixed(1)}ms\n` +
       `fps ${(1000 / (avg || 16.7)).toFixed(0)}  >33ms ${(slow * 100).toFixed(1)}%  stall ${longest.toFixed(0)}ms\n` +
       `input->visual ${lastLat.toFixed(0)}ms (${lastKind}) avg ${la.toFixed(0)} max ${Math.max(0, ...lat).toFixed(0)}\n` +
       `${s.page} c${s.color} a${s.angle} dye ${s.dye.from}>${s.dye.to} p${s.dye.p.toFixed(2)} o${Math.round(s.dye.origin.x)},${Math.round(s.dye.origin.y)}\n` +

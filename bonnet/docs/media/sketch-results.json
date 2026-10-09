@@ -1,0 +1,74 @@
+{
+ "lift-bonnet": {
+  "heroH": 488,
+  "hero": {
+   "mean": 0.982,
+   "max": 36
+  },
+  "full": {
+   "mean": 3.555,
+   "max": 119
+  },
+  "frames": "p50 16.7 p95 16.7ms  >33 0.0%  stall 17ms"
+ },
+ "optic-bonnet": {
+  "heroH": 488,
+  "hero": {
+   "mean": 0.967,
+   "max": 36
+  },
+  "full": {
+   "mean": 0.596,
+   "max": 121
+  },
+  "frames": "p50 16.7 p95 16.7ms  >33 0.0%  stall 17ms"
+ },
+ "tunnel-bonnet": {
+  "heroH": 488,
+  "hero": {
+   "mean": 0.939,
+   "max": 36
+  },
+  "full": {
+   "mean": 1.978,
+   "max": 108
+  },
+  "frames": "p50 16.7 p95 16.8ms  >33 0.0%  stall 17ms"
+ },
+ "lift-mixed": {
+  "heroH": 488,
+  "hero": {
+   "mean": 0.547,
+   "max": 113
+  },
+  "full": {
+   "mean": 6.303,
+   "max": 246
+  },
+  "frames": "p50 16.7 p95 16.8ms  >33 0.0%  stall 17ms"
+ },
+ "optic-mixed": {
+  "heroH": 488,
+  "hero": {
+   "mean": 0.426,
+   "max": 83
+  },
+  "full": {
+   "mean": 0.252,
+   "max": 83
+  },
+  "frames": "p50 16.7 p95 16.7ms  >33 0.0%  stall 17ms"
+ },
+ "tunnel-mixed": {
+  "heroH": 488,
+  "hero": {
+   "mean": 0.406,
+   "max": 83
+  },
+  "full": {
+   "mean": 1.742,
+   "max": 83
+  },
+  "frames": "p50 16.7 p95 16.7ms  >33 0.0%  stall 17ms"
+ }
+}

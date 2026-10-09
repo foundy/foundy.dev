@@ -7,7 +7,7 @@ const run = (b: Bonnet, from: number, ms: number) => {
   for (let t = from; t <= from + ms; t += 16) if (!b.tick(t)) return t;
   return from + ms;
 };
-// colors: 0 ivory (unavailable), 1 moss, 2 poppy, 3 sky, 4 butter
+// products (bonnet set): 0 ivory, 1 moss, 2 poppy, 3 sky, 4 butter - all available since the products re-model
 const make = (c = 2) => new Bonnet(c);
 
 describe('drag', () => {
@@ -46,16 +46,16 @@ describe('drag', () => {
     run(b, 0, 1000);
     expect(b.state.color).toBe(1);
   });
-  it('never skips the unavailable ivory slot and does not go past the ends', () => {
-    const b = make(1);
+  it('does not go past the ends (over-drag is resisted)', () => {
+    const b = make(0);
     b.dragStart(O);
-    b.dragMove(0.7); // toward prev: ivory is unavailable
-    expect(b.state.dye.to).toBe(1);
+    b.dragMove(0.7); // toward prev: nothing before the first product
+    expect(b.state.dye.to).toBe(0);
     expect(b.state.edge).toBe(1);
     expect(b.state.dye.p).toBeLessThan(0.2);
     b.dragEnd(2, 400, 0);
     run(b, 0, 1000);
-    expect(b.state.color).toBe(1);
+    expect(b.state.color).toBe(0);
   });
   it('cancel returns to the committed color', () => {
     const b = make();
@@ -110,9 +110,9 @@ describe('buttons never queue', () => {
     run(b, 0, 400);
     expect(b.state.color).toBe(4);
   });
-  it('unavailable or current targets are ignored', () => {
+  it('out-of-range or current targets are ignored', () => {
     const b = make();
-    expect(b.go(0, O, 0)).toBe(false);
+    expect(b.go(5, O, 0)).toBe(false);
     expect(b.go(2, O, 0)).toBe(false);
     expect(b.animating).toBe(false);
   });
