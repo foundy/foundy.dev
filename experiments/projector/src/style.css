@@ -1,0 +1,45 @@
+:root{--room:#0b0908;--paper:#f3ede2;--ink:#1b1612;--ui:1;--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--room);color:#e9dfcf;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+html.solid{background:var(--paper)}
+body{margin:0;min-height:100%;font-family:var(--serif)}
+#gl{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block;pointer-events:none;z-index:0}
+#fb{display:none}
+#stage{position:fixed;inset:0;z-index:1;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+#stage:active{cursor:grabbing}
+html.open #stage{pointer-events:none}
+.hud{position:fixed;z-index:2;left:0;right:0;top:0;display:flex;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 18px 0;font:10px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:#e9dfcf55;pointer-events:none;opacity:var(--ui)}
+#hint{position:fixed;z-index:2;left:0;right:0;bottom:calc(32px + env(safe-area-inset-bottom));margin:0;text-align:center;font:9px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:#e9dfcf55;pointer-events:none;transition:opacity 1.2s ease;opacity:var(--ui)}
+html.touched #hint{opacity:0!important}
+#cap{position:fixed;z-index:2;left:0;right:0;top:5.4vh;top:5.4dvh;text-align:center;pointer-events:none;opacity:0}
+#cap.on{opacity:var(--ui)}
+#cap .idx{display:block;font:10px/1 var(--mono);letter-spacing:.3em;color:#e9dfcf88;margin-bottom:7px}
+#cap .ttl{display:block;font:italic 400 17px/1.2 var(--serif);letter-spacing:.02em;color:#f1e6d0;text-shadow:0 0 18px #000a}
+.nav{position:fixed;z-index:3;bottom:calc(18px + env(safe-area-inset-bottom));width:44px;height:44px;border-radius:50%;border:1px solid #e9dfcf30;background:#0b090866;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:0;cursor:pointer;opacity:var(--ui);touch-action:manipulation}
+#prev{left:16px}#next{right:16px}
+.nav svg{width:20px;height:20px;fill:none;stroke:#e9dfcfcc;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+html.open .nav,html.open .hud,html.open #cap{pointer-events:none}
+#close{position:fixed;z-index:6;top:calc(12px + env(safe-area-inset-top));left:12px;width:44px;height:44px;border-radius:50%;border:1px solid #1b161226;background:#f3ede2cc;display:none;place-items:center;padding:0;cursor:pointer;touch-action:manipulation;opacity:var(--tp,0)}
+#close svg{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:1.4;stroke-linecap:round}
+html.open #close{display:grid}
+#detail{display:none;position:relative;z-index:5;min-height:100vh;padding:calc(72px + env(safe-area-inset-top)) 16px 96px;color:var(--ink);--tp:0}
+html.open #detail{display:block}
+html.solid #detail{background:var(--paper)}
+#slot{position:relative;margin:0 auto;width:300px;height:300px}
+#hero{position:absolute;inset:0;width:100%;height:100%;display:block;visibility:hidden}
+#detail article{max-width:520px;margin:28px auto 0;opacity:var(--tp);transform:translateY(calc((1 - var(--tp))*14px))}
+.mono{font:11px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:#1b161299;margin:0 0 14px}
+#d-title{font:italic 400 34px/1.08 var(--serif);margin:0 0 14px;letter-spacing:-.005em}
+#d-price{margin:0 0 20px;color:#1b1612cc}
+#d-desc{font:17px/1.55 var(--serif);margin:0 0 26px;color:#1b1612dd}
+dl{margin:0 0 28px;border-top:1px solid #1b161226}
+dt{font:10px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:#1b161299;padding-top:14px}
+dd{margin:8px 0 14px;font-size:15px;line-height:1.45;border-bottom:1px solid #1b161214;padding-bottom:14px}
+#d-extra{display:grid;gap:12px}
+#d-extra img{width:100%;height:auto;display:block;background:#e8e0d1}
+#dbg{position:fixed;z-index:20;left:6px;bottom:70px;margin:0;padding:6px 8px;font:10px/1.35 var(--mono);color:#9f9;background:#000a;pointer-events:none;white-space:pre}
+/* DOM fallback when WebGL is unavailable / context lost */
+.nogl #gl{display:none}
+.nogl body{background:var(--room)}
+.nogl #fb{display:block;position:fixed;z-index:0;left:50%;top:14vh;width:min(84vw,520px);max-height:46vh;object-fit:contain;transform:translateX(-50%)}
+@media (prefers-reduced-motion:reduce){#hint{transition:none}}
