@@ -377,7 +377,7 @@ for (const bname of names) {
       assert(s.index === 2, 'product kept');
       if (hasGl) await T.until((x) => x.sw === null, 3000, 'switch done');
       assert((await T.page.evaluate(() => location.search)).includes('world=water'), 'URL ?world=water');
-      assert((await T.page.evaluate(() => localStorage.getItem('bonnet.world'))) === 'water', 'localStorage');
+      assert((await T.page.evaluate(() => localStorage.getItem('bonnet.world.bonnet'))) === 'water', 'localStorage');
       assert((await T.page.getAttribute('[data-w=water]', 'aria-pressed')) === 'true', 'pressed state');
       await T.page.click('[data-w=light]');
       s = await T.until((x) => x.world === 'light', 2000, 'light');
@@ -388,7 +388,7 @@ for (const bname of names) {
     }),
   );
 
-  await check('world switch is a ~600 ms crossfade, can be reversed mid-way, and works with the keyboard', () =>
+  await check('world switch is the ~1.1 s signature transition, can be reversed mid-way, and works with the keyboard', () =>
     withApp('world=light', async (T) => {
       if (!hasGl) return 'skip';
       await T.rest();
@@ -398,7 +398,7 @@ for (const bname of names) {
       assert(mid.world === 'water', 'target world');
       await T.until((x) => x.sw === null, 2500, 'switch done');
       const ms = Date.now() - t0;
-      assert(ms > 450 && ms < 1500, `crossfade duration ${ms} ms`);
+      assert(ms > 900 && ms < 2200, `transition duration ${ms} ms`);
       // reverse mid-way
       await T.page.click('[data-w=light]');
       await sleep(250);
@@ -413,21 +413,37 @@ for (const bname of names) {
     }),
   );
 
-  await check('?world= wins over the remembered world; a remembered world is used without the param', () =>
-    withApp('world=water', async (T) => {
-      assert((await T.st()).world === 'water', 'param');
+  await check('default world per catalogue; ?world= wins; a switch click is remembered per catalogue (a ?world= visit is not)', () =>
+    withApp('', async (T) => {
       const page = T.page;
-      await page.goto(`${BASE}?debug`);
-      await page.waitForFunction(() => window.__bonnet);
-      assert((await T.st()).world === 'water', 'remembered');
-      await page.goto(`${BASE}?debug&world=light`);
-      await page.waitForFunction(() => window.__bonnet);
-      assert((await T.st()).world === 'light', 'param over storage');
+      const go = async (q) => {
+        await page.goto('about:blank');
+        await page.goto(`${BASE}?debug${q}`);
+        await page.waitForFunction(() => window.__bonnet && window.__bonnet.gl !== 'boot');
+        return T.st();
+      };
+      assert((await go('')).world === 'light', 'bonnet defaults to light');
+      assert((await go('&set=bonnet')).world === 'light', 'set=bonnet defaults to light');
+      assert((await go('&set=mixed')).world === 'water', 'set=mixed defaults to water');
+      assert((await go('&set=mixed&world=light')).world === 'light', 'explicit ?world= overrides the default');
+      assert((await go('&set=mixed')).world === 'water', 'a ?world= visit is not remembered');
+      // a real choice on the mixed catalogue is remembered there only
+      await page.click('[data-w=light]');
+      assert((await go('&set=mixed')).world === 'light', 'remembered for mixed');
+      assert((await go('&set=bonnet')).world === 'light', 'bonnet untouched (default)');
+      await go('&set=bonnet');
+      await page.click('[data-w=water]');
+      assert((await go('&set=bonnet')).world === 'water', 'remembered for bonnet');
+      assert((await go('&set=mixed')).world === 'light', 'mixed keeps its own choice');
+      assert((await go('&set=mixed&world=water')).world === 'water', 'param over storage');
+      // the catalogue links do not force the current world on the other catalogue
+      assert(!(await page.getAttribute('[data-set=bonnet]', 'href')).includes('world='), 'catalogue link carries no world');
     }),
   );
 
   await check('deep link #moss opens the detail at once; close goes to browse in the chosen world', () =>
     withApp('world=water', async (T) => {
+      await T.page.goto('about:blank');
       await T.page.goto(`${BASE}?debug&world=water#moss`);
       await T.page.waitForFunction(() => window.__bonnet);
       const s = await T.st();
@@ -459,6 +475,157 @@ for (const bname of names) {
         }),
       );
     }
+  }
+
+  for (const [from, to] of [['light', 'water'], ['water', 'light']]) {
+    await check(`signature switch ${from} -> ${to}: same product throughout, ~1.1 s, reverse mid-way returns, no errors`, () =>
+      withApp(`world=${from}`, async (T) => {
+        if (!hasGl) return 'skip';
+        await T.rest();
+        await T.page.click('#next');
+        await T.rest();
+        const t0 = Date.now();
+        await T.page.click(`[data-w=${to}]`);
+        const kind = `${from[0]}2${to[0]}`;
+        let s = await T.until((x) => x.sw !== null && x.sw > 0.05, 1000, 'running');
+        assert(s.swKind === kind, `kind ${s.swKind}`);
+        const seen = new Set();
+        while ((s = await T.st()).sw !== null) {
+          seen.add(s.index);
+          await sleep(40);
+        }
+        const ms = Date.now() - t0;
+        assert(seen.size === 1 && [...seen][0] === 2, 'product stays the same during the whole transition');
+        assert(ms > 900 && ms < 2200, `duration ${ms} ms`);
+        assert(s.world === to && s.index === 2, 'ended on the target world, same product');
+        // reverse in the middle: ends on the original world
+        await T.page.click(`[data-w=${from}]`);
+        await T.until((x) => x.sw !== null && x.sw > 0.3 && x.sw < 0.7, 1500, 'middle');
+        await T.page.click(`[data-w=${to}]`);
+        await sleep(150);
+        await T.page.click(`[data-w=${from}]`);
+        s = await T.until((x) => x.sw === null, 3000, 'settled after reversals');
+        assert(s.world === from && s.index === 2, `reversals end on ${from}, same product (${s.world})`);
+        assert(T.errors.length === 0, 'console errors: ' + T.errors.join(' | '));
+      }),
+    );
+  }
+
+  // ---- detail: photo slide and drag-down-to-close ------------------------------------------------
+  const openDetailFor = async (T) => {
+    await T.rest();
+    await T.tapOpen();
+    await T.until((x) => x.page === 'detail', 8000, 'detail');
+    await sleep(120);
+    return T.st();
+  };
+  for (const world of ['light', 'water']) {
+    await check(`${world}: detail photo slide sticks to the finger (<= 2 px), snaps on release, reverts when short`, () =>
+      withApp(`world=${world}`, async (T) => {
+        if (!touch) return 'skip';
+        await openDetailFor(T);
+        const hr = (await T.st()).heroRect;
+        const x0 = hr.x + hr.w / 2 + 40, y = hr.y + hr.h / 2;
+        await T.cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y }] });
+        const worst = [];
+        for (const dx of [-3, -7, -14, -26, -44, -70, -100, -128]) {
+          await sleep(22);
+          await T.cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + dx, y: y + 1 }] });
+          await sleep(35);
+          const d = (await T.st()).det;
+          worst.push(Math.abs(d.curX - dx));
+        }
+        const mid = (await T.st()).det;
+        assert(mid.incX !== null && Math.abs(mid.incX - (mid.curX + hr.w)) <= 2, 'the next photo is coupled to the current one');
+        await T.lift();
+        await sleep(900);
+        let d = (await T.st()).det;
+        assert(Math.max(...worst) <= 2, `tracking error px: ${worst.map((v) => v.toFixed(2)).join(',')}`);
+        assert(d.cur === 1 && d.x === 0 && !d.anim, `snapped to the next photo (cur ${d.cur})`);
+        assert((await T.st()).page === 'detail', 'still on the detail');
+        // short and slow -> reverts
+        await T.drag(x0, y, Array.from({ length: 6 }, (_, i) => [-Math.round((30 * (i + 1)) / 6), 0]), { dt: 40 });
+        await sleep(300);
+        d = (await T.st()).det;
+        await sleep(500);
+        d = (await T.st()).det;
+        assert(d.cur === 1 && d.x === 0, `short slow drag reverts (cur ${d.cur})`);
+        // buttons, dots and keys use the same path
+        await T.page.click('#anext');
+        await sleep(700);
+        assert((await T.st()).det.cur === 2, 'arrow button');
+        await T.page.click('.dot[data-a="0"]');
+        await sleep(700);
+        assert((await T.st()).det.cur === 0, 'dot');
+        await T.page.keyboard.press('ArrowLeft');
+        await sleep(700);
+        assert((await T.st()).det.cur === 3, 'key (wraps)');
+        assert(T.errors.length === 0, 'console errors: ' + T.errors.join(' | '));
+      }),
+    );
+
+    await check(`${world}: drag-down from the hero scrubs the close: partial snaps back, long drag / flick closes, up does nothing`, () =>
+      withApp(`world=${world}`, async (T) => {
+        if (!hasGl) return 'skip';
+        await openDetailFor(T);
+        const hr = (await T.st()).heroRect;
+        const x0 = hr.x + hr.w / 2, y = hr.y + 80;
+        // upward on the hero: nothing at all
+        await T.drag(x0, y, [[0, -20], [0, -50], [0, -90]], { dt: 16 });
+        await sleep(200);
+        let s = await T.st();
+        assert(s.page === 'detail' && s.scrollY === 0 && !s.scrubbing, 'upward drag on the hero does nothing');
+        // partial, slow, held -> snaps back open
+        await T.drag(x0, y, Array.from({ length: 8 }, (_, i) => [Math.round((i + 1) * 1.5), Math.round((70 * (i + 1)) / 8)]), { dt: 40, release: false });
+        await sleep(250);
+        s = await T.st();
+        assert(s.scrubbing && s.page === 'closing', 'scrubbing while the finger is down');
+        assert(s.heroRect.y > hr.y + 40 && s.heroRect.w < hr.w - 4, `hero follows the finger and shrinks (y ${s.heroRect.y.toFixed(1)} vs ${hr.y.toFixed(1)}, w ${s.heroRect.w.toFixed(1)})`);
+        await T.lift();
+        s = await T.until((x) => x.page === 'detail', 8000, 'snapped back open');
+        assert(s.scrollY === 0 && !s.scrubbing, 'back on the detail');
+        await sleep(300);
+        // long drag -> closes
+        await T.drag(x0, y, Array.from({ length: 10 }, (_, i) => [0, Math.round((260 * (i + 1)) / 10)]), { dt: 30 });
+        s = await T.until((x) => x.page === 'browse', 8000, 'closed by a long drag');
+        assert(s.index === 1 && s.world === world, 'same product and world');
+        assert((await T.page.evaluate(() => location.hash)) === '', 'hash cleared');
+        // flick -> closes
+        await T.rest();
+        await T.tapOpen();
+        await T.until((x) => x.page === 'detail', 8000, 'detail again');
+        await sleep(120);
+        await T.drag(x0, y, [[0, 14], [0, 40], [0, 80], [0, 130]], { dt: 8 });
+        await T.until((x) => x.page === 'browse', 8000, 'closed by a flick');
+        assert(T.errors.length === 0, 'console errors: ' + T.errors.join(' | '));
+      }),
+    );
+
+    await check(`${world}: the body text area scrolls natively and never closes; a drag down on a scrolled hero does not close`, () =>
+      withApp(`world=${world}`, async (T) => {
+        if (!touch) return 'skip';
+        await openDetailFor(T);
+        // vertical swipe starting on the body text (below the hero), downward and upward
+        await T.drag(195, 700, [[0, -40], [0, -120], [0, -260], [0, -420]], { dt: 16 });
+        await sleep(400);
+        let s = await T.st();
+        assert(s.scrollY > 150 && s.page === 'detail', `body scrolls natively (scrollY ${s.scrollY})`);
+        await T.drag(195, 300, [[0, 30], [0, 100], [0, 220], [0, 400]], { dt: 16 });
+        await sleep(500);
+        s = await T.st();
+        assert(s.page === 'detail', 'a downward swipe on the body never closes');
+        await T.page.evaluate(() => scrollTo(0, 0));
+        await sleep(200);
+        // a partly scrolled hero: the drag scrolls instead (the hero is a scroll start area again), still no close
+        await T.page.evaluate(() => scrollTo(0, 60));
+        await sleep(200);
+        await T.drag(195, 300, [[0, 40], [0, 120], [0, 240]], { dt: 16 });
+        await sleep(400);
+        s = await T.st();
+        assert(s.page === 'detail' && !s.scrubbing, 'no close from a scrolled hero');
+        assert(T.errors.length === 0, 'console errors: ' + T.errors.join(' | '));
+      }),
+    );
   }
 
   await check('reduced motion: no GL, DOM fallback, buttons + open/close work instantly in both worlds', () =>

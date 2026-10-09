@@ -6,7 +6,7 @@ import { Wake, type DragPoint, type Host, type View, type World } from '../world
 import { GL } from '../gl/context';
 import { Compositor, IMPACT_U, KIND_FADE, KIND_L2W, KIND_W2L, LIGHT_WELCOME_DELAY_MS } from '../gl/switch';
 import { Textures } from '../gl/textures';
-import { LIGHT_DECIDE, WATER_DECIDE, clamp, decideTarget, smooth } from './commit';
+import { LIGHT_DECIDE, WATER_DECIDE, clamp, decideTarget, smooth, spring } from './commit';
 import { DEBUG, initDebug, markInput, markVisual } from './debug';
 import { Detail, detailMarkup, type Rect } from './detail';
 import { attachStage } from './input';
@@ -247,7 +247,7 @@ export function boot() {
     if (DEBUG && (core.state.p > 0 || core.state.sw)) markVisual();
     // schedule
     if (document.hidden) return;
-    if (more || wake === Wake.Active || core.state.sw || handing || core.transitioning) raf = requestAnimationFrame(frame);
+    if (more || wake === Wake.Active || core.state.sw || handing || core.transitioning || scrub || revert) raf = requestAnimationFrame(frame);
     else if (wake === Wake.Idle) tmo = window.setTimeout(() => ((tmo = 0), (raf = requestAnimationFrame(frame))), 34);
   }
 
@@ -291,7 +291,8 @@ export function boot() {
       lastPage = s.page;
       root.dataset.page = s.page;
       browseEl.inert = s.page === 'opening' || s.page === 'detail';
-      detail.el.inert = s.page === 'closing';
+      detail.el.inert = s.page === 'closing' && !scrub; // a finger-scrubbed close keeps the hero live under the finger
+      detail.active = s.page === 'detail';
     }
   }
 
@@ -320,6 +321,7 @@ export function boot() {
       });
     }
     if (s.page === 'closing' && s.p === 0 && now >= fadeUntil) finishClose();
+    stepRevert(now);
   }
 
   const onScreen = (r: Rect) => Math.min(r.y + r.h, innerHeight) - Math.max(r.y, 0) > r.h * 0.5;
@@ -329,6 +331,9 @@ export function boot() {
     root.classList.add('solid');
   }
   function finishCloseDom() {
+    detail.fake = null;
+    scrub = null;
+    core.hold = false;
     detail.el.hidden = true;
     detail.el.classList.remove('gl-hero', 'fadeout');
     root.classList.remove('solid', 'fadeclose');
@@ -354,6 +359,7 @@ export function boot() {
     else if (!push) history.replaceState(history.state, '', url);
     detail.fill(idx);
     root.style.setProperty('--tone', rgbCss(PRODUCTS[idx].tone));
+    detail.world = core.state.world;
     detail.show(idx, 0, 0);
     detail.el.hidden = false;
     detail.el.classList.remove('fadeout');
@@ -411,6 +417,104 @@ export function boot() {
     return true;
   }
 
+  // ---- drag-down-to-close (hero only) ---------------------------------------------------------------
+  // The hero follows the finger (translate + scale toward the world) and the world answers: while the finger is down the page
+  // spring is held and `p` is scrubbed directly (core.hold), the GL draws the hero at the finger's rect (detail.fake).
+  // Release: velocity-projected decision. Close -> the normal closing spring continues from the scrubbed p and velocity (Light: the lamp
+  // dims and the picture returns to the wall; Water: it sinks with a splash). Otherwise -> the page springs back open.
+  const SCRUB_P = 0.55; // how much of p a full-length drag takes away
+  let scrub: { base: Rect; prog: number; rect: Rect; lastProg: number; lastT: number; pvs: number } | null = null;
+  let revert: { from: Rect; base: Rect; k: number; kv: number } | null = null;
+  const scrubLen = () => innerHeight * 0.5;
+  function beginScrub(): boolean {
+    if (core.state.page !== 'detail' || !glOk() || !curWorld() || scrub || revert) return false;
+    const w = curWorld()!;
+    const base = detail.rect();
+    if (!onScreen(base)) return false;
+    core.close(true);
+    core.hold = true;
+    scrub = { base, prog: 0, rect: base, lastProg: 0, lastT: performance.now(), pvs: 0 };
+    detail.fake = base;
+    if (glMode === 'hidden') setGl('on');
+    w.wake();
+    drawGl(performance.now(), 1 / 60);
+    requestAnimationFrame(() => {
+      detail.el.classList.add('gl-hero');
+      root.classList.remove('solid');
+    });
+    renderPage();
+    kick();
+    return true;
+  }
+  function scrubTo(dx: number, dy: number) {
+    const s = scrub;
+    if (!s) return;
+    const prog = clamp(dy / scrubLen());
+    const sc = 1 - 0.3 * prog;
+    const b = s.base;
+    const w = b.w * sc, h = b.h * sc;
+    s.rect = { x: b.x + b.w / 2 + dx * 0.9 - w / 2, y: b.y + b.h / 2 + Math.max(0, dy) * 0.95 - h / 2, w, h };
+    detail.fake = s.rect;
+    const now = performance.now();
+    const dtp = Math.max(1, now - s.lastT);
+    s.pvs += ((((prog - s.lastProg) / dtp) * 1000) - s.pvs) * 0.4; // prog/s, smoothed
+    s.lastProg = prog;
+    s.lastT = now;
+    s.prog = prog;
+    core.state.p = 1 - SCRUB_P * prog;
+    core.state.pv = 0;
+    kick();
+  }
+  /** close = true: finish closing into the world; false: spring back open */
+  function endScrub(close: boolean, _dy: number, _vy: number) {
+    void _dy;
+    void _vy;
+    const s = scrub;
+    if (!s) return;
+    scrub = null;
+    core.hold = false;
+    if (close) {
+      core.state.pv = clamp(-SCRUB_P * s.pvs, -6, 0);
+    } else {
+      revert = { from: s.rect, base: s.base, k: 1, kv: 0 };
+      core.state.pv = clamp(-SCRUB_P * s.pvs, 0, 3) ;
+      core.open(true);
+    }
+    renderPage();
+    kick();
+  }
+  function stepRevert(_now: number) {
+    void _now;
+    const r = revert;
+    if (!r) return;
+    const q = spring(r.k, r.kv, 0, 1 / 60, 18);
+    r.k = q.x;
+    r.kv = q.v;
+    if (r.k < 0.004 || core.state.page !== 'opening') {
+      revert = null;
+      detail.fake = null;
+      return;
+    }
+    const f = r.k, b = r.base;
+    detail.fake = { x: b.x + (r.from.x - b.x) * f, y: b.y + (r.from.y - b.y) * f, w: b.w + (r.from.w - b.w) * f, h: b.h + (r.from.h - b.h) * f };
+  }
+  detail.closeHooks = {
+    start: beginScrub,
+    move: (dx, dy) => scrubTo(dx, dy),
+    end(_dx, dy, vy) {
+      const fire = dy > 8 && (dy + vy * 160 > innerHeight * 0.22 || vy > 0.7);
+      if (fire) {
+        endScrub(true, dy, vy);
+        const own = history.state && history.state.bonnet === 1;
+        if (own) history.back();
+        else history.replaceState(null, '', buildUrl(location, { id: null }));
+        openBtn.focus({ preventScroll: true });
+      } else endScrub(false, dy, vy);
+    },
+    cancel: () => endScrub(false, 0, 0),
+  };
+  addEventListener('scroll', () => detail.setScrolled(scrollY > 2), { passive: true });
+
   function closeDetail() {
     if (!(core.state.page === 'opening' || core.state.page === 'detail')) return;
     const own = history.state && history.state.bonnet === 1;
@@ -428,7 +532,8 @@ export function boot() {
     const i = indexFromHash(location.hash, IDS);
     const pg = core.state.page;
     if (i < 0) {
-      if (pg === 'opening' || pg === 'detail') startClose();
+      if (scrub) endScrub(true, 0, 0);
+      else if (pg === 'opening' || pg === 'detail') startClose();
       return;
     }
     if (i !== core.state.index) {
@@ -537,6 +642,7 @@ export function boot() {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const pg = core.state.page;
     if (e.key === 'Escape' && (pg === 'opening' || pg === 'detail')) closeDetail();
+    else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && pg === 'detail') detail.step(e.key === 'ArrowRight' ? 1 : -1);
     else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && pg === 'browse') {
       markInput('key', e.timeStamp);
       go(e.key === 'ArrowRight' ? 1 : -1);
@@ -613,6 +719,7 @@ export function boot() {
     core.open(false);
     detail.fill(start.detail);
     root.style.setProperty('--tone', rgbCss(PRODUCTS[start.detail].tone));
+    detail.world = core.state.world;
     detail.show(start.detail, 0, 0);
     detail.el.hidden = false;
     finishOpenDom();
@@ -653,6 +760,9 @@ export function boot() {
           swKind: s.sw ? s.sw.kind : null,
           swU: s.sw ? s.sw.u : null,
           cost,
+          det: detail.probe(),
+          scrubbing: !!scrub,
+          heroRect: detail.rect(),
         };
       },
     });
