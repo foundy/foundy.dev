@@ -1,0 +1,27 @@
+{
+ "threshold": 40.0,
+ "otsu": 50.036598205566406,
+ "mask_area_px": 50767,
+ "mask_area_frac": 0.12996352,
+ "feather_support_px": 55897,
+ "skin_leak_all4_px": 368,
+ "skin_leak_all4_frac_of_mask": 0.007248803356511119,
+ "per_colour": {
+  "green": {
+   "dropped_px": 1547,
+   "area_px": 50158
+  },
+  "red": {
+   "dropped_px": 1777,
+   "area_px": 49517
+  },
+  "skyblue": {
+   "dropped_px": 1674,
+   "area_px": 49927
+  },
+  "yellow": {
+   "dropped_px": 2800,
+   "area_px": 48627
+  }
+ }
+}

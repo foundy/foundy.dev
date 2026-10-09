@@ -1,0 +1,217 @@
+{
+ "green": {
+  "face": {
+   "phase_dx": 0.036,
+   "phase_dy": -0.171,
+   "phase_resp": 0.892,
+   "ecc_affine": [
+    [
+     0.98862,
+     0.0011,
+     0.91528
+    ],
+    [
+     -0.00645,
+     1.00177,
+     -0.06256
+    ]
+   ],
+   "ecc_shift": [
+    0.915,
+    -0.063
+   ],
+   "mean_abs_diff": 5.488
+  },
+  "bg_left": {
+   "phase_dx": 0.037,
+   "phase_dy": 0.012,
+   "phase_resp": 0.306,
+   "ecc_affine": [
+    [
+     1.14524,
+     -0.04212,
+     -3.02429
+    ],
+    [
+     -0.012,
+     1.00094,
+     1.54521
+    ]
+   ],
+   "ecc_shift": [
+    -3.024,
+    1.545
+   ],
+   "mean_abs_diff": 2.069
+  },
+  "bg_right": {
+   "phase_dx": 0.634,
+   "phase_dy": -0.195,
+   "phase_resp": 0.287,
+   "ecc_error": "OpenCV(5.0.0) /Users/xperience/GHA-OpenCV-Python/_work/openc",
+   "mean_abs_diff": 1.57
+  },
+  "clothes": {
+   "phase_dx": -1.533,
+   "phase_dy": -0.621,
+   "phase_resp": 0.14,
+   "ecc_affine": [
+    [
+     1.02921,
+     -0.04991,
+     -12.06727
+    ],
+    [
+     0.09998,
+     1.09491,
+     -47.16764
+    ]
+   ],
+   "ecc_shift": [
+    -12.067,
+    -47.168
+   ],
+   "mean_abs_diff": 15.176
+  }
+ },
+ "red": {
+  "face": {
+   "phase_dx": 0.356,
+   "phase_dy": -0.427,
+   "phase_resp": 0.939,
+   "ecc_affine": [
+    [
+     0.98422,
+     -0.00503,
+     2.22063
+    ],
+    [
+     -0.01276,
+     1.00744,
+     -0.97778
+    ]
+   ],
+   "ecc_shift": [
+    2.221,
+    -0.978
+   ],
+   "mean_abs_diff": 9.729
+  },
+  "bg_left": {
+   "phase_dx": 0.001,
+   "phase_dy": 1.534,
+   "phase_resp": 0.296,
+   "ecc_affine": [
+    [
+     20.95853,
+     -2.34883,
+     -1281.80359
+    ],
+    [
+     -6.60476,
+     1.45568,
+     477.457
+    ]
+   ],
+   "ecc_shift": [
+    -1281.804,
+    477.457
+   ],
+   "mean_abs_diff": 1.821
+  },
+  "bg_right": {
+   "phase_dx": 0.489,
+   "phase_dy": 0.016,
+   "phase_resp": 0.323,
+   "ecc_error": "OpenCV(5.0.0) /Users/xperience/GHA-OpenCV-Python/_work/openc",
+   "mean_abs_diff": 1.237
+  },
+  "clothes": {
+   "phase_dx": 0.399,
+   "phase_dy": -0.962,
+   "phase_resp": -0.079,
+   "ecc_error": "OpenCV(5.0.0) /Users/xperience/GHA-OpenCV-Python/_work/openc",
+   "mean_abs_diff": 24.199
+  }
+ },
+ "skyblue": {
+  "face": {
+   "phase_dx": 0.081,
+   "phase_dy": -0.267,
+   "phase_resp": 0.9,
+   "ecc_affine": [
+    [
+     1.00185,
+     -0.00465,
+     0.28647
+    ],
+    [
+     -0.00224,
+     1.0033,
+     -0.61837
+    ]
+   ],
+   "ecc_shift": [
+    0.286,
+    -0.618
+   ],
+   "mean_abs_diff": 6.482
+  },
+  "bg_left": {
+   "phase_dx": 0.079,
+   "phase_dy": 0.0,
+   "phase_resp": 0.276,
+   "ecc_error": "OpenCV(5.0.0) /Users/xperience/GHA-OpenCV-Python/_work/openc",
+   "mean_abs_diff": 0.824
+  },
+  "bg_right": {
+   "phase_dx": 0.514,
+   "phase_dy": -0.136,
+   "phase_resp": 0.355,
+   "ecc_error": "OpenCV(5.0.0) /Users/xperience/GHA-OpenCV-Python/_work/openc",
+   "mean_abs_diff": 1.068
+  },
+  "clothes": {
+   "phase_dx": -0.233,
+   "phase_dy": -0.293,
+   "phase_resp": 0.807,
+   "ecc_affine": [
+    [
+     1.0017,
+     0.00063,
+     -0.62826
+    ],
+    [
+     0.00142,
+     1.00348,
+     -1.11009
+    ]
+   ],
+   "ecc_shift": [
+    -0.628,
+    -1.11
+   ],
+   "mean_abs_diff": 6.998
+  }
+ },
+ "_global_masked_ecc_translation": {
+  "green": {
+   "dx": -0.065,
+   "dy": -0.013,
+   "ecc_cc": 0.9927,
+   "residual_px": 0.066
+  },
+  "red": {
+   "dx": 0.139,
+   "dy": -0.556,
+   "ecc_cc": 0.9616,
+   "residual_px": 0.573
+  },
+  "skyblue": {
+   "dx": -0.058,
+   "dy": -0.275,
+   "ecc_cc": 0.9869,
+   "residual_px": 0.281
+  }
+ }
+}

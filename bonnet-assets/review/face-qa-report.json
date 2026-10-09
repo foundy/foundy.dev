@@ -1,0 +1,56 @@
+{
+ "green-red-p25": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 54955
+ },
+ "green-red-p50": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 54985
+ },
+ "green-red-p75": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 55077
+ },
+ "skyblue-ivory-p25": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 54814
+ },
+ "skyblue-ivory-p50": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 54663
+ },
+ "skyblue-ivory-p75": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 54481
+ },
+ "yellow-green-p25": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 2439
+ },
+ "yellow-green-p50": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 11306
+ },
+ "yellow-green-p75": {
+  "changed_px_outside_support": 0,
+  "max_diff_outside": 0,
+  "max_diff_face_box": 0,
+  "changed_px_inside_support": 23007
+ }
+}

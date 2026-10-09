@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:,">
+<title>Live Dye — M0b asset feasibility</title>
+<style>
+  :root { --bg:#17151a; --fg:#ece7df; --muted:#8d877e; --dye:#d3202a; color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.45 -apple-system, "SF Pro Text", system-ui, sans-serif; }
+  body { min-height:100svh; display:flex; flex-direction:column; align-items:center; padding:max(14px, env(safe-area-inset-top)) 0 max(18px, env(safe-area-inset-bottom)); }
+  h1 { font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:6px 0 12px; }
+  #stage { position:relative; width:min(88vw, 480px); aspect-ratio:1/1; border-radius:22px; overflow:hidden; background:#000;
+           touch-action: pan-y pinch-zoom; user-select:none; -webkit-user-select:none; box-shadow:0 18px 50px -18px rgba(0,0,0,.7); }
+  #gl { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #rail { display:flex; gap:14px; margin:18px 0 6px; }
+  .sw { width:46px; height:46px; border-radius:50%; border:2px solid transparent; padding:0; background:var(--c); cursor:pointer;
+        box-shadow:inset 0 0 0 2px rgba(0,0,0,.25); transition:transform 80ms, border-color 120ms; }
+  .sw:active { transform:scale(.94); }
+  .sw[aria-pressed="true"] { border-color:var(--fg); }
+  #hint { color:var(--muted); font-size:12px; margin:6px 0 10px; text-align:center; padding:0 24px; }
+  details { width:min(88vw, 480px); font-size:13px; color:var(--muted); }
+  summary { cursor:pointer; padding:8px 0; }
+  .dbg label { display:flex; align-items:center; gap:8px; padding:6px 0; color:var(--fg); }
+  .dbg input { width:20px; height:20px; }
+  #read { font:12px/1.4 ui-monospace, Menlo, monospace; color:var(--muted); padding:4px 0; }
+</style>
+</head>
+<body>
+  <h1>Live Dye · front · M0b</h1>
+  <div id="stage"><canvas id="gl"></canvas></div>
+  <div id="rail" role="group" aria-label="Yarn colour"></div>
+  <div id="hint">사진을 가로로 드래그하면 터치한 지점에서 파면이 번지며 보닛이 한 코씩 다시 염색됩니다. 아래 실타래를 탭하면 해당 색으로 220ms.</div>
+  <details class="dbg">
+    <summary>debug</summary>
+    <label><input type="checkbox" id="dbgMask"> mask (magenta, green = feather)</label>
+    <label><input type="checkbox" id="dbgCells"> cells (false colour)</label>
+    <label><input type="checkbox" id="dbgDist"> distance field + wavefront</label>
+    <div id="read"></div>
+  </details>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
