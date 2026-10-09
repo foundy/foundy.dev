@@ -6,7 +6,7 @@ import { gzipSync } from 'node:zlib';
 const dir = path.resolve(process.argv[2] ?? 'dist', 'assets');
 let js = 0;
 let css = 0;
-for (const f of readdirSync(dir)) {
+for (const f of readdirSync(dir).filter((n) => /\.(js|css)$/.test(n))) {
   const gz = gzipSync(readFileSync(path.join(dir, f))).length;
   if (f.endsWith('.js')) js += gz;
   if (f.endsWith('.css')) css += gz;
