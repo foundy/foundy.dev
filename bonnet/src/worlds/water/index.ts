@@ -7,12 +7,13 @@ import type { Release } from '../../core/commit';
 import type { SpringCfg } from '../../core/state';
 import { FULLSCREEN_VS, type Prog, type Target } from '../../gl/context';
 import { LAYER_W } from '../../gl/textures';
-import { Wake, type DragPhase, type DragPoint, type Host, type View, type World } from '../types';
+import { Wake, type Anchor, type DragPhase, type DragPoint, type Host, type View, type World } from '../types';
 import { DERIVE, RENDER, SIM } from './shaders';
 
 const SIM_HZ = 200, C2 = 0.42, DAMP = 0.9978;
 const GRAB_FOLLOW = 18; // 1/s: how fast the product settles into / out of the finger's hold
 const RUBBER = 0.35; // over-drag at the ends of the list
+const CALM_DAMP = 0.962; // per sim step while the switch transition asks the sea to settle (~0.3 s to flat)
 const TILT_V = 0.011; // rad per (slot/s) of velocity
 export const WATER_SPRING: SpringCfg = { open: 5.4, close: 5.4, snap: 0.002 };
 
@@ -69,6 +70,7 @@ export class WaterWorld implements World {
   private entered = -1;
   private flat = true;
   fmt = '';
+  private calmOn = false;
 
   init(host: Host) {
     this.h = host;
@@ -226,7 +228,7 @@ export class WaterWorld implements World {
     gl.viewport(0, 0, this.simW, this.simH);
     gl.uniform2f(P.u.uSize, this.simW, this.simH);
     gl.uniform1f(P.u.uC2, C2);
-    gl.uniform1f(P.u.uDamp, DAMP);
+    gl.uniform1f(P.u.uDamp, this.calmOn ? CALM_DAMP : DAMP);
     gl.uniform1i(P.u.uState, 0);
     for (let s = 0; s < steps; s++) {
       const n = Math.min(16, this.drops.length / 4);
@@ -324,8 +326,27 @@ export class WaterWorld implements World {
     }
   }
 
-  enter() {
-    this.entered = 0;
+  enter(o?: { delayMs?: number; quiet?: boolean }) {
+    this.calmOn = false;
+    this.entered = o?.quiet ? -1 : 0;
+    this.wake();
+  }
+  anchor(): Anchor {
+    const [cx, cy, w, h] = this.pool;
+    return { x: cx + (this.nearest() - this.s) * this.spacing, y: cy, w, h };
+  }
+  /** a ring burst: a pressed-down centre and a ring of raised crests that travel outward (used by the switch transition) */
+  impulse(x: number, y: number, radius: number, strength: number) {
+    this.drop(x, y, radius, strength);
+    const n = 10;
+    for (let k = 0; k < n; k++) {
+      const a = (k / n) * Math.PI * 2 + 0.3;
+      this.drop(x + Math.cos(a) * radius * 1.05, y + Math.sin(a) * radius * 1.05, radius * 0.5, -strength * 0.5);
+    }
+    this.wake();
+  }
+  calm(on: boolean) {
+    this.calmOn = on;
     this.wake();
   }
   wake() {

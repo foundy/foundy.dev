@@ -3,14 +3,15 @@
 import { LightWorld } from '../worlds/light';
 import { WaterWorld } from '../worlds/water';
 import { Wake, type DragPoint, type Host, type View, type World } from '../worlds/types';
-import { Compositor, GL } from '../gl/context';
+import { GL } from '../gl/context';
+import { Compositor, IMPACT_U, KIND_FADE, KIND_L2W, KIND_W2L, LIGHT_WELCOME_DELAY_MS } from '../gl/switch';
 import { Textures } from '../gl/textures';
 import { LIGHT_DECIDE, WATER_DECIDE, clamp, decideTarget, smooth } from './commit';
 import { DEBUG, initDebug, markInput, markVisual } from './debug';
 import { Detail, detailMarkup, type Rect } from './detail';
 import { attachStage } from './input';
 import { BRAND, DEMO, PRODUCTS, SET, SETS, imgInfo, imgUrl, padCss, rgbCss } from './products';
-import { buildUrl, indexFromHash, loadWorld, resolveStart, saveWorld } from './router';
+import { buildUrl, indexFromHash, loadWorld, resolveStart, saveWorld, setOf } from './router';
 import { Core, DEFAULT_SPRING, WORLDS, type WorldId } from './state';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -59,7 +60,7 @@ export function boot() {
   // -------------------------------------------------------------------------------------------
   // state
   // -------------------------------------------------------------------------------------------
-  const start = resolveStart(location.search, location.hash, IDS, loadWorld());
+  const start = resolveStart(location.search, location.hash, IDS, loadWorld(setOf(location.search)));
   const core = new Core(N, start.world, start.detail >= 0 ? start.detail : Math.min(1, N - 1));
   core.reduced = reducedMq.matches;
   const pointerMark = (e: Event) => markInput('button', e.timeStamp);
@@ -167,6 +168,12 @@ export function boot() {
     const pr = PRODUCTS[s.index];
     return { index: s.index, p: s.p, pv: s.pv, hero: s.page === 'browse' && s.p === 0 ? ZERO : detail.rect(), tone: pr.tone, ink: pr.ink, time: now / 1000 };
   };
+  const TSCALE = (DEBUG || query.has('probe')) && query.has('tscale') ? Math.max(0.02, +query.get('tscale')!) : 1;
+  let vclock = 0;
+  const OUT_SCALE = query.has('osc') ? +query.get('osc')! : null;
+  let swU = 0;
+  const COST = DEBUG && query.has('cost');
+  const cost = { sw: [] as number[], one: [] as number[] };
   let firstDrawn = false;
   let fadeUntil = 0;
   let handing = false;
@@ -178,14 +185,38 @@ export function boot() {
     const w = worlds[st.world];
     if (!w) return Wake.Sleep;
     let wake: Wake;
-    if (st.sw && worlds[st.sw.from] && comp) {
-      const [ta, tb] = comp.targets();
-      worlds[st.sw.from]!.render(dt, v, ta);
-      w.render(dt, v, tb);
-      comp.draw(core.mix, G.screen());
+    const sw = st.sw;
+    if (sw && worlds.light && worlds.water && comp) {
+      // the signature transition: both worlds into their own target, one full-screen pass composes them
+      const lightFirst = sw.kind === 'l2w';
+      const first = (lightFirst ? worlds.light : worlds.water)!, second = (lightFirst ? worlds.water : worlds.light)!;
+      const kind = comp.failed ? KIND_FADE : lightFirst ? KIND_L2W : KIND_W2L;
+      const heavy = G.W * G.H * G.dpr * G.dpr > 1.5e6;
+      const [ta, tb] = comp.targets(OUT_SCALE ?? (heavy ? 0.75 : 1));
+      const t0 = COST ? performance.now() : 0;
+      first.render(dt, v, ta);
+      second.render(dt, v, tb);
+      // l2w impact: the beam's footprint hits the surface at the product -> a ring burst goes into the water sim
+      if (lightFirst && sw.dir === 1 && swU < IMPACT_U && sw.u >= IMPACT_U) {
+        const a = worlds.water.anchor();
+        worlds.water.impulse?.(a.x, a.y, a.w * 0.22, -0.55);
+      }
+      swU = sw.u;
+      comp.draw(kind, sw.u, sw.u * sw.u * (3 - 2 * sw.u), { water: worlds.water.anchor(), wall: worlds.light.anchor(), W: G.W, H: G.H, time: v.time }, G.screen());
+      if (COST) {
+        // opt-in measurement (?debug&cost): finish() makes the GPU time visible to the CPU clock
+        G.gl.finish();
+        cost.sw.push(performance.now() - t0);
+      }
       wake = Wake.Active;
     } else {
+      swU = 0;
+      const t0 = COST ? performance.now() : 0;
       wake = w.render(dt, v, G.screen());
+      if (COST && st.page === 'browse' && st.p === 0) {
+        G.gl.finish();
+        cost.one.push(performance.now() - t0);
+      }
       comp?.tickIdle(dt);
     }
     if (!firstDrawn) {
@@ -197,18 +228,21 @@ export function boot() {
 
   function frame(now: number) {
     raf = 0;
-    const dt = last ? clamp((now - last) / 1000, 0, 0.05) : 1 / 60;
+    const dtr = last ? clamp((now - last) / 1000, 0, 0.05) : 1 / 60;
     last = now;
+    // ?tscale=0.2 (debug/probe only) runs every animation at 1/5 speed, so a transition can be inspected frame by frame
+    const dt = dtr * TSCALE;
+    vclock += dtr * 1000 * TSCALE;
     const w = curWorld();
     let more = core.tick(dt, w?.spring ?? DEFAULT_SPRING);
     if (textures) more = textures.pump(now) || more;
     let wake: Wake = Wake.Sleep;
-    if (glMode === 'on') wake = drawGl(now, dt);
+    if (glMode === 'on') wake = drawGl(TSCALE === 1 ? now : vclock, dt);
     renderPage();
     stepHandoff(now);
     if (core.state.sw) {
       // swap the chrome theme at the midpoint of the crossfade
-      if (core.state.sw.t > 0.45) root.dataset.world = core.state.world;
+      if (core.state.sw.t > 0.5) root.dataset.world = core.state.world;
     }
     if (DEBUG && (core.state.p > 0 || core.state.sw)) markVisual();
     // schedule
@@ -513,14 +547,24 @@ export function boot() {
   function setWorld(id: WorldId) {
     if (core.state.page !== 'browse' || id === core.state.world) return;
     const nw = glOk() ? makeWorld(id) : null;
+    const reversing = !!core.state.sw;
     if (!core.switchWorld(id)) return;
-    if (!nw) core.state.sw = null; // no GL: nothing to crossfade
-    saveWorld(id);
+    if (!nw) core.state.sw = null; // no GL: nothing to composite
+    saveWorld(id, SET); // the user's own choice: remembered for this catalogue
     history.replaceState(history.state, '', buildUrl(location, { world: id }));
-    if (nw) {
+    if (nw && core.state.sw) {
+      const old = worlds[core.state.sw.from];
       nw.setIndex(core.state.index, true);
-      nw.enter?.();
-      curWorld() === nw && worlds[core.state.sw?.from ?? id]?.wake();
+      if (!reversing) {
+        // Light -> Water: the burst comes from the impact, not from a hello ripple. Water -> Light: the sea calms while the glints
+        // gather, and the lamp's welcome (shutter + focus pull) waits until the draining line has revealed the wall.
+        if (id === 'light') {
+          nw.enter?.({ delayMs: LIGHT_WELCOME_DELAY_MS });
+          old?.calm?.(true);
+        } else nw.enter?.({ quiet: true });
+      } else worlds.water?.calm?.(core.state.sw.kind === 'w2l');
+      old?.wake();
+      nw.wake();
     } else root.dataset.world = id;
     renderPage();
     kick();
@@ -532,7 +576,7 @@ export function boot() {
     }),
   );
   document.querySelectorAll<HTMLAnchorElement>('[data-set]').forEach((a) => {
-    a.href = `?set=${a.dataset.set}&world=${core.state.world}${DEBUG ? '&debug' : ''}`;
+    a.href = `?set=${a.dataset.set}${DEBUG ? '&debug' : ''}`; // the other catalogue opens in ITS default / remembered world
   });
 
   // ---- environment ------------------------------------------------------------------------------
@@ -574,8 +618,7 @@ export function boot() {
     finishOpenDom();
     renderPage();
     history.replaceState({ bonnet: 0 }, '', buildUrl(location, { id: PRODUCTS[start.detail].id }));
-  } else history.replaceState(history.state, '', buildUrl(location, { world: core.state.world }));
-  saveWorld(core.state.world);
+  }
   if (core.reduced || query.has('nogl')) fallback();
   else requestAnimationFrame(() => setTimeout(initGl, 0));
 
@@ -607,6 +650,9 @@ export function boot() {
           hero: detail.heroKey,
           uploads: textures?.uploads ?? 0,
           fmt: (worlds.water as WaterWorld | undefined)?.fmt ?? '',
+          swKind: s.sw ? s.sw.kind : null,
+          swU: s.sw ? s.sw.u : null,
+          cost,
         };
       },
     });

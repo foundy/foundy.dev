@@ -33,6 +33,20 @@ export interface View {
   time: number;
 }
 
+/**
+ * Where a world puts the product, in viewport css px (y DOWN). The world-switch transition anchors itself to it:
+ *   light: the footprint of the projector beam on the wall (x,y = centre, w,h = size of the projected picture) and the lens
+ *   water: the product under the surface (x,y = centre, w,h = its card)
+ */
+export interface Anchor {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** light only: the projector lens */
+  lens?: { x: number; y: number };
+}
+
 export type DragPhase = 'start' | 'move' | 'end' | 'cancel';
 export interface DragPoint {
   /** absolute finger position (viewport css px) */
@@ -71,8 +85,17 @@ export interface World {
   readonly textRange: [number, number];
   /** compile programs, allocate buffers (never on a tap frame) */
   init(host: Host): void;
-  /** the world has just become the visible one (switch-in / first show): play its welcome (lamp on, hello ripple) */
-  enter?(): void;
+  /**
+   * the world has just become the visible one (switch-in / first show): play its welcome (lamp on, hello ripple).
+   * `delayMs`: hold the welcome back (the switch transition reveals this world later); `quiet`: skip the hello ripple.
+   */
+  enter?(o?: { delayMs?: number; quiet?: boolean }): void;
+  /** where the product is right now (see Anchor); valid after the first render */
+  anchor(): Anchor;
+  /** inject a ripple burst into the world's liquid (css px, y DOWN; strength < 0 presses the surface down). No-op for dry worlds. */
+  impulse?(x: number, y: number, radius: number, strength: number): void;
+  /** water: damp the waves out quickly (true) or let them live again (false). Light: no-op. */
+  calm?(on: boolean): void;
   resize(W: number, H: number, dpr: number): void;
   /** make `i` the target product; immediate snaps, otherwise a critically damped spring from the current position and velocity */
   setIndex(i: number, immediate?: boolean): void;

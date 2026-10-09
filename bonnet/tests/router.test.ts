@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_WORLD, buildUrl, indexFromHash, parseWorld, resolveStart } from '../src/core/router';
+import { DEFAULT_WORLD, buildUrl, indexFromHash, parseWorld, resolveStart, setOf } from '../src/core/router';
 
 const IDS = ['ivory', 'moss', 'poppy'];
 
@@ -9,6 +9,16 @@ describe('resolveStart', () => {
     expect(resolveStart('', '', IDS, 'water').world).toBe('water');
     expect(resolveStart('', '', IDS, null).world).toBe(DEFAULT_WORLD);
     expect(resolveStart('?world=nope', '', IDS, 'bogus').world).toBe(DEFAULT_WORLD);
+  });
+  it('each catalogue has its own default world; a stored choice and ?world= override it', () => {
+    expect(resolveStart('?set=bonnet', '', IDS, null).world).toBe('light');
+    expect(resolveStart('', '', IDS, null).world).toBe('light');
+    expect(resolveStart('?set=mixed', '', IDS, null).world).toBe('water');
+    expect(resolveStart('?set=mixed', '', IDS, 'light').world).toBe('light');
+    expect(resolveStart('?set=bonnet', '', IDS, 'water').world).toBe('water');
+    expect(resolveStart('?set=mixed&world=light', '', IDS, 'water').world).toBe('light');
+    expect(setOf('?set=mixed')).toBe('mixed');
+    expect(setOf('?set=zzz')).toBe('bonnet');
   });
   it('a product hash opens that detail, an unknown or empty hash does not', () => {
     expect(resolveStart('', '#poppy', IDS, null).detail).toBe(2);

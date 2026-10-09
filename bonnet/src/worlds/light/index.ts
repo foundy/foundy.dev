@@ -8,7 +8,7 @@ import type { Release } from '../../core/commit';
 import { innerRect, imgInfo } from '../../core/products';
 import type { SpringCfg } from '../../core/state';
 import { setU, type Prog, type Target } from '../../gl/context';
-import { Wake, type DragPhase, type DragPoint, type Host, type View, type World } from '../types';
+import { Wake, type Anchor, type DragPhase, type DragPoint, type Host, type View, type World } from '../types';
 import { BEAM, BG, COMP, DUST_FS, DUST_VS, POST, PROJ, QVS, SL_FS, SL_VS, TRAY_FS, TRAY_VS } from './shaders';
 
 export const LIGHT_SPRING: SpringCfg = { open: 7.5, close: 9, snap: 0.01 };
@@ -122,6 +122,10 @@ export class LightWorld implements World {
   private lastTouch = 0;
   private avgS: [number, number, number] = [0.6, 0.55, 0.5];
   private lens: [number, number] = [0, 0];
+  /** the wall footprint of the beam: centre x,y and size (css px, y down) */
+  private wall: [number, number, number, number] = [0, 0, 1, 1];
+  private introDelay = 0;
+  private holdUntil = -1;
 
   init(host: Host) {
     this.h = host;
@@ -301,9 +305,16 @@ export class LightWorld implements World {
     return undefined;
   }
 
-  enter() {
+  enter(o?: { delayMs?: number; quiet?: boolean }) {
     this.wantIntro = true;
+    this.introDelay = o?.delayMs ?? 0;
+    this.holdUntil = -1;
+    this.introT0 = -1;
     this.wake();
+  }
+  anchor(): Anchor {
+    const [x, y, w, h] = this.wall;
+    return { x, y, w, h, lens: { x: this.lens[0], y: this.lens[1] } };
   }
   wake() {
     this.lastTouch = performance.now();
@@ -355,7 +366,13 @@ export class LightWorld implements World {
     }
     if (v.p > 0 && this.shown !== v.index) this.shown = this.pending = v.index;
     const ready = this.h.textures.has(this.shown);
-    if (this.wantIntro && ready) {
+    // the switch transition can ask for the welcome to wait until the room is revealed
+    let hold = false;
+    if (this.wantIntro && ready && this.introDelay > 0) {
+      if (this.holdUntil < 0) this.holdUntil = now + this.introDelay;
+      hold = now < this.holdUntil;
+    }
+    if (this.wantIntro && ready && !hold) {
       this.introT0 = now;
       this.wantIntro = false;
       this.chT = now;
@@ -382,7 +399,7 @@ export class LightWorld implements World {
         scale = 1 + 0.02 * blur;
       }
     }
-    if (!ready) bright = 0;
+    if (!ready || hold) bright = 0;
     const intro = this.introT0 >= 0 ? smooth(0, 1.3, (now - this.introT0) / 1000) : 0;
     const flick = (0.012 * Math.sin(t * 61) + 0.008 * Math.sin(t * 23.7 + 1.3) + 0.006 * Math.sin(t * 97.3) + 0.01 * Math.sin(t * 0.9)) * (1 - gm);
 
@@ -392,6 +409,7 @@ export class LightWorld implements World {
     let ww = bw, wh = ww / a;
     if (wh > bh) (wh = bh), (ww = wh * a);
     const cyW = H * 0.345, cx = W / 2;
+    this.wall = [cx, cyW, ww, wh];
     const wTop: [number, number, number] = [cx - (ww * 1.045) / 2, cx + (ww * 1.045) / 2, cyW - wh / 2];
     const wBot: [number, number, number] = [cx - (ww * 0.985) / 2, cx + (ww * 0.985) / 2, cyW + wh / 2];
     const hero = v.hero;
@@ -557,7 +575,7 @@ export class LightWorld implements World {
 
     // ---- sleep policy
     const moving = this.dragging || this.pos !== this.target || this.vel !== 0 || (v.p > 0 && v.p < 1) || v.pv !== 0;
-    const recent = age < 900 || (this.introT0 >= 0 && now - this.introT0 < 2200) || this.wantIntro;
+    const recent = hold || age < 900 || (this.introT0 >= 0 && now - this.introT0 < 2200) || this.wantIntro;
     if (moving || recent || now - this.lastTouch < 400) return Wake.Active;
     if (now - this.lastTouch < 10000 && v.p === 0) return Wake.Idle; // the lamp hums: dust + flicker at ~30 fps
     return Wake.Sleep;

@@ -3,15 +3,25 @@
 //   index : committed product index (what the page is "on")
 //   page  : browse | opening | detail | closing
 //   p/pv  : open progress 0 (browse) .. 1 (detail) and its velocity; ONE spring for both worlds
-//   sw    : world switch in flight (crossfade), t = 0..1 fraction of the NEW world
+//   sw    : world switch in flight. `kind` picks the signature transition (l2w: the beam plunges into the water,
+//           w2l: the water gives its light back), `u` is progress along that transition's own timeline (0 = Light only for l2w,
+//           Water only for w2l... see below), `dir` is +1 forward / -1 when the user reversed it mid-way (the same picture played
+//           backwards, so reversing is always continuous). t = 0..1 fraction of the NEW world (what the debug state and tests read)
 import { spring } from './commit';
 
 export type WorldId = 'light' | 'water';
 export const WORLDS: WorldId[] = ['light', 'water'];
 export type Page = 'browse' | 'opening' | 'detail' | 'closing';
+export type SwitchKind = 'l2w' | 'w2l';
 export interface Switch {
+  /** the world that is being left (the outgoing layer) */
   from: WorldId;
+  /** fraction of the new world, 0..1 */
   t: number;
+  kind: SwitchKind;
+  /** progress along the kind's timeline: 0 = the kind's first world only, 1 = its second world only */
+  u: number;
+  dir: 1 | -1;
 }
 export interface CoreState {
   world: WorldId;
@@ -28,12 +38,15 @@ export interface SpringCfg {
   snap: number;
 }
 export const DEFAULT_SPRING: SpringCfg = { open: 7, close: 9, snap: 0.0006 };
-export const SWITCH_S = 0.6;
+/** the signature world-switch transitions take about this long (seconds) */
+export const SWITCH_S = 1.1;
 
 export class Core {
   state: CoreState;
   /** reduced motion: no animation, pages change instantly */
   reduced = false;
+  /** the page spring is paused: a finger scrubs `p` directly (drag-down-to-close) */
+  hold = false;
 
   constructor(readonly n: number, world: WorldId, index: number) {
     this.state = { world, index: Math.max(0, Math.min(n - 1, index)), page: 'browse', p: 0, pv: 0, sw: null };
@@ -107,8 +120,11 @@ export class Core {
       s.sw = null;
       return true;
     }
-    if (s.sw && w === s.sw.from) s.sw = { from: s.world, t: 1 - s.sw.t }; // reverse in place: the mix stays continuous
-    else s.sw = { from: s.world, t: 0 };
+    if (s.sw) {
+      // reverse in place: same timeline, played the other way, so the picture is continuous
+      const dir = (s.sw.dir === 1 ? -1 : 1) as 1 | -1;
+      s.sw = { from: s.world, t: 1 - s.sw.t, kind: s.sw.kind, u: s.sw.u, dir };
+    } else s.sw = { from: s.world, t: 0, kind: w === 'water' ? 'l2w' : 'w2l', u: 0, dir: 1 };
     s.world = w;
     return true;
   }
@@ -119,12 +135,13 @@ export class Core {
     const s = this.state;
     let more = false;
     if (s.sw) {
-      s.sw.t += dt / SWITCH_S;
-      if (s.sw.t >= 1) s.sw = null;
+      s.sw.u += (s.sw.dir * dt) / SWITCH_S;
+      s.sw.t = s.sw.dir === 1 ? s.sw.u : 1 - s.sw.u;
+      if (s.sw.u >= 1 || s.sw.u <= 0) s.sw = null;
       else more = true;
     }
     const T = this.target;
-    if (s.p !== T || s.pv !== 0) {
+    if (!this.hold && (s.p !== T || s.pv !== 0)) {
       const r = spring(s.p, s.pv, T, dt, T ? cfg.open : cfg.close);
       s.p = r.x;
       s.pv = r.v;

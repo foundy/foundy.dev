@@ -106,7 +106,7 @@ export class GL {
   }
 }
 
-/** a colour+depth offscreen target (used to composite two worlds during a switch) */
+/** a colour+depth offscreen target (used to composite two worlds during a switch; see switch.ts) */
 export class RenderTarget {
   readonly tex: WebGLTexture;
   readonly fbo: WebGLFramebuffer;
@@ -150,65 +150,3 @@ export function setU(gl: WebGL2RenderingContext, pr: Prog, name: string, v: numb
 
 export const FULLSCREEN_VS = `#version 300 es
 void main(){ vec2 p = vec2(float((gl_VertexID<<1)&2), float(gl_VertexID&2)); gl_Position = vec4(p*2.-1., 0., 1.); }`;
-
-/** crossfade of two worlds rendered to offscreen targets (Phase A switch; Phase B swaps in the signature transition) */
-export class Compositor {
-  private pr: Prog;
-  private a: RenderTarget | null = null;
-  private b: RenderTarget | null = null;
-  private idle = 0;
-  constructor(private g: GL) {
-    this.pr = g.program(
-      FULLSCREEN_VS,
-      `#version 300 es
-precision highp float;
-uniform sampler2D uA, uB; uniform vec2 uRes; uniform float uM;
-out vec4 o;
-void main(){
-  vec2 uv = gl_FragCoord.xy / uRes;
-  vec2 c = uv - .5;
-  // a slow push through the water/light: the outgoing world drifts toward the viewer while it fades, the incoming settles
-  vec3 A = texture(uA, .5 + c / (1. + .035 * uM)).rgb;
-  vec3 B = texture(uB, .5 + c / (1.035 - .035 * uM)).rgb;
-  o = vec4(mix(A, B, uM), 1.);
-}`,
-    );
-  }
-  /** targets for the outgoing (a) and incoming (b) world, (re)allocated to the canvas size */
-  targets(): [Target, Target] {
-    const s = this.g.screen();
-    if (this.a && (this.a.target.w !== s.w || this.a.target.h !== s.h)) this.free();
-    if (!this.a) {
-      this.a = new RenderTarget(this.g.gl, s.w, s.h);
-      this.b = new RenderTarget(this.g.gl, s.w, s.h);
-    }
-    this.idle = 0;
-    return [this.a.target, this.b!.target];
-  }
-  /** release the offscreen memory a few seconds after the last switch */
-  tickIdle(dt: number) {
-    if (this.a && (this.idle += dt) > 4) this.free();
-  }
-  free() {
-    this.a?.dispose();
-    this.b?.dispose();
-    this.a = this.b = null;
-  }
-  draw(mix: number, screen: Target) {
-    const gl = this.g.gl;
-    if (!this.a || !this.b) return;
-    this.g.reset();
-    this.g.bind(screen);
-    gl.useProgram(this.pr.p);
-    gl.uniform2f(this.pr.u.uRes, screen.w, screen.h);
-    gl.uniform1f(this.pr.u.uM, mix);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.a.tex);
-    gl.uniform1i(this.pr.u.uA, 0);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.b.tex);
-    gl.uniform1i(this.pr.u.uB, 1);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    gl.activeTexture(gl.TEXTURE0);
-  }
-}

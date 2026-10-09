@@ -101,11 +101,11 @@ describe('page', () => {
 });
 
 describe('world switch', () => {
-  it('keeps the product and runs a ~600 ms crossfade', () => {
+  it('keeps the product and runs the ~1.1 s signature transition', () => {
     const c = new Core(5, 'light', 3);
     expect(c.switchWorld('water')).toBe(true);
     expect(c.state).toMatchObject({ world: 'water', index: 3 });
-    expect(c.state.sw).toMatchObject({ from: 'light', t: 0 });
+    expect(c.state.sw).toMatchObject({ from: 'light', t: 0, kind: 'l2w', u: 0, dir: 1 });
     let t = 0;
     while (c.state.sw && t < 2) (c.tick(1 / 60), (t += 1 / 60));
     expect(t).toBeGreaterThanOrEqual(SWITCH_S - 0.05);
@@ -128,6 +128,34 @@ describe('world switch', () => {
     expect(c.state.world).toBe('light');
     expect(c.state.sw!.from).toBe('water');
     expect(c.state.sw!.t).toBeCloseTo(1 - t, 6);
+    // same timeline, played backwards: the progress u is unchanged at the reversal and then runs down to 0
+    expect(c.state.sw).toMatchObject({ kind: 'l2w', dir: -1 });
+    expect(c.state.sw!.u).toBeCloseTo(t, 6);
+    let n = 0;
+    while (c.state.sw && n++ < 200) c.tick(1 / 60);
+    expect(c.state.sw).toBeNull();
+    expect(c.state.world).toBe('light');
+  });
+  it('a w2l switch is its own timeline; reversing twice goes forward again', () => {
+    const c = new Core(5, 'water', 1);
+    c.switchWorld('light');
+    expect(c.state.sw).toMatchObject({ kind: 'w2l', u: 0 });
+    for (let i = 0; i < 10; i++) c.tick(1 / 60);
+    c.switchWorld('water');
+    c.switchWorld('light');
+    expect(c.state.sw).toMatchObject({ kind: 'w2l', dir: 1 });
+  });
+  it('the page spring can be held for a scrubbing finger', () => {
+    const c = new Core(5, 'light', 1);
+    c.open(false);
+    c.close(true);
+    c.hold = true;
+    c.state.p = 0.7;
+    c.tick(0.5);
+    expect(c.state.p).toBe(0.7);
+    c.hold = false;
+    c.tick(0.1);
+    expect(c.state.p).toBeLessThan(0.7);
   });
   it('mix is a smoothstep of the switch progress', () => {
     const c = new Core(5, 'light', 1);
