@@ -257,7 +257,7 @@ export class Detail {
         s.filter = light && this.x ? `brightness(${(1 - 0.28 * prog).toFixed(3)})` : '';
         s.zIndex = '1';
       } else if (i === this.inc && this.x !== 0) {
-        const off = this.x + (this.x < 0 ? W : -W);
+        const off = this.x + (this.x < 0 ? W - 1 : -(W - 1)); // 1 px overlap: no hairline gap between the two photos
         s.opacity = '1';
         s.visibility = '';
         s.transform = `translate3d(${off}px,0,0)`;
@@ -321,7 +321,7 @@ export class Detail {
         }
       }
     };
-    const curOff = this.x, incOff = this.x + (this.x < 0 ? W : -W);
+    const curOff = this.x, incOff = this.x + (this.x < 0 ? W - 1 : -(W - 1));
     if (this.x < 0) {
       paint(a, this.infos[this.cur], curOff, 0, seam);
       paint(b, this.infos[this.inc], incOff, seam, W);
@@ -403,13 +403,13 @@ export class Detail {
     this.ys = [{ y: e.clientY, t: e.timeStamp }];
     this.closing = false;
     this.canClose = scrollY <= 2 && !this.hero.hasAttribute('data-scrolled');
+    this.capture(e); // the hero has nothing clickable: capture at once so a mouse release outside it still ends the gesture
     // catch a slide in flight: the photo stays exactly where it is and follows from there
     if (this.raf || this.x !== 0) {
       this.stop();
       this.base = this.x;
       if (this.inc < 0) this.base = 0;
       this.axis = this.n > 1 ? 'x' : 'pending';
-      if (this.axis === 'x') this.capture(e);
     } else this.base = 0;
   }
   private capture(e: PointerEvent) {
@@ -429,7 +429,6 @@ export class Detail {
       if (Math.abs(dx) >= Math.abs(dy)) this.axis = this.n > 1 ? 'x' : 'none';
       else if (dy > 0 && this.canClose && this.closeHooks?.start()) this.axis = 'y', (this.closing = true);
       else this.axis = 'none';
-      if (this.axis === 'x' || this.axis === 'y') this.capture(e);
       if (this.axis !== 'x') this.resetX();
     }
     if (this.axis === 'x' || (this.axis === 'pending' && this.n > 1 && Math.abs(dx) > Math.abs(dy))) {

@@ -136,6 +136,12 @@ describe('world switch', () => {
     expect(c.state.sw).toBeNull();
     expect(c.state.world).toBe('light');
   });
+  it('a zero-length first frame (equal timestamps) does not end the switch', () => {
+    const c = new Core(5, 'light', 1);
+    c.switchWorld('water');
+    c.tick(0);
+    expect(c.state.sw).not.toBeNull();
+  });
   it('a w2l switch is its own timeline; reversing twice goes forward again', () => {
     const c = new Core(5, 'water', 1);
     c.switchWorld('light');

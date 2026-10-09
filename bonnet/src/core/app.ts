@@ -178,6 +178,8 @@ export function boot() {
   let fadeUntil = 0;
   let handing = false;
 
+  const px4 = new Uint8Array(4);
+  const sync = () => G!.gl.readPixels(0, 0, 1, 1, G!.gl.RGBA, G!.gl.UNSIGNED_BYTE, px4);
   function drawGl(now: number, dt: number): Wake {
     if (!G || G.lost) return Wake.Sleep;
     const st = core.state;
@@ -204,8 +206,8 @@ export function boot() {
       swU = sw.u;
       comp.draw(kind, sw.u, sw.u * sw.u * (3 - 2 * sw.u), { water: worlds.water.anchor(), wall: worlds.light.anchor(), W: G.W, H: G.H, time: v.time }, G.screen());
       if (COST) {
-        // opt-in measurement (?debug&cost): finish() makes the GPU time visible to the CPU clock
-        G.gl.finish();
+        // opt-in measurement (?debug&cost): reading one pixel back makes the GPU time visible to the CPU clock
+        sync();
         cost.sw.push(performance.now() - t0);
       }
       wake = Wake.Active;
@@ -214,7 +216,7 @@ export function boot() {
       const t0 = COST ? performance.now() : 0;
       wake = w.render(dt, v, G.screen());
       if (COST && st.page === 'browse' && st.p === 0) {
-        G.gl.finish();
+        sync();
         cost.one.push(performance.now() - t0);
       }
       comp?.tickIdle(dt);
@@ -285,7 +287,8 @@ export function boot() {
     const chrome = (1 - smooth(0, 0.28, s.p)).toFixed(3);
     set('chrome', chrome, () => root.style.setProperty('--chrome', chrome));
     const tr = w?.textRange ?? [0.5, 0.9];
-    const tp = (s.page === 'detail' ? 1 : smooth(tr[0], tr[1], s.p)).toFixed(3);
+    // a finger-scrubbed close clears the text away at once: the hero must not float over it
+    const tp = (s.page === 'detail' ? 1 : Math.min(smooth(tr[0], tr[1], s.p), scrub ? 1 - smooth(0, 0.22, scrub.prog) : 1)).toFixed(3);
     set('tp', tp, () => root.style.setProperty('--tp', tp));
     if (s.page !== lastPage) {
       lastPage = s.page;

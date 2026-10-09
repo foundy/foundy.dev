@@ -137,7 +137,7 @@ export class Core {
     if (s.sw) {
       s.sw.u += (s.sw.dir * dt) / SWITCH_S;
       s.sw.t = s.sw.dir === 1 ? s.sw.u : 1 - s.sw.u;
-      if (s.sw.u >= 1 || s.sw.u <= 0) s.sw = null;
+      if ((s.sw.dir === 1 && s.sw.u >= 1) || (s.sw.dir === -1 && s.sw.u <= 0)) s.sw = null;
       else more = true;
     }
     const T = this.target;
