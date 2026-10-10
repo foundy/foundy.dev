@@ -1,0 +1,22 @@
+{
+  "name": "bonnet",
+  "private": true,
+  "version": "2.1.0-worlds",
+  "type": "module",
+  "description": "bonnet v2 - one product, two worlds (Light / Water) over a shared core.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "e2e": "node e2e/run.mjs",
+    "size": "node e2e/size.mjs",
+    "media": "node e2e/worlds-media.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}

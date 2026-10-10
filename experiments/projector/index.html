@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0908" />
+<title>Slide Projector</title>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+<img id="fb" alt="" />
+<div id="stage" role="group" aria-label="Slide carousel: drag to spin, tap the light to open"></div>
+<header class="hud">
+  <span>slide projector</span><span id="setname"></span>
+</header>
+<p id="hint">drag to spin &middot; tap the light</p>
+<div id="cap" aria-live="polite"><span class="idx">01 / 12</span><span class="ttl">&nbsp;</span></div>
+<button id="prev" class="nav" type="button" aria-label="Previous slide"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+<button id="next" class="nav" type="button" aria-label="Next slide"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+<main id="detail" aria-label="Product detail">
+  <button id="close" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div id="slot"><img id="hero" alt="" decoding="async" /></div>
+  <article>
+    <p class="mono" id="d-idx"></p>
+    <h1 id="d-title"></h1>
+    <p class="mono" id="d-price"></p>
+    <p id="d-desc"></p>
+    <dl id="d-info"></dl>
+    <div id="d-extra"></div>
+  </article>
+</main>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
