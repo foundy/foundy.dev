@@ -166,12 +166,16 @@ export function boot() {
   const view = (now: number): View => {
     const s = core.state;
     const pr = PRODUCTS[s.index];
-    return { index: s.index, p: s.p, pv: s.pv, hero: s.page === 'browse' && s.p === 0 ? ZERO : detail.rect(), tone: pr.tone, ink: pr.ink, time: now / 1000 };
+    return { index: s.index, p: s.p, pv: s.pv, hero: s.page === 'browse' && s.p === 0 ? ZERO : detail.rect(), pin: pinK, tone: pr.tone, ink: pr.ink, time: now / 1000 };
   };
   const TSCALE = (DEBUG || query.has('probe')) && query.has('tscale') ? Math.max(0.02, +query.get('tscale')!) : 1;
   let vclock = 0;
   const OUT_SCALE = query.has('osc') ? +query.get('osc')! : null;
   let swU = 0;
+  /** 1 while a drag-to-close scrub or its snap-back runs (the world holds the hero at the finger's rect), then eases out */
+  let pinK = 0;
+  /** the detail text's opacity cap while a scrub runs (same curve of the scrub progress both ways) */
+  let tcap = 1;
   const COST = DEBUG && query.has('cost');
   const cost = { sw: [] as number[], one: [] as number[] };
   let firstDrawn = false;
@@ -196,12 +200,14 @@ export function boot() {
       const heavy = G.W * G.H * G.dpr * G.dpr > 1.5e6;
       const [ta, tb] = comp.targets(OUT_SCALE ?? (heavy ? 0.75 : 1));
       const t0 = COST ? performance.now() : 0;
+      worlds.water.protect?.(1 - smooth(0.8, 0.96, sw.u));
       first.render(dt, v, ta);
       second.render(dt, v, tb);
       // l2w impact: the beam's footprint hits the surface at the product -> a ring burst goes into the water sim
       if (lightFirst && sw.dir === 1 && swU < IMPACT_U && sw.u >= IMPACT_U) {
         const a = worlds.water.anchor();
-        worlds.water.impulse?.(a.x, a.y, a.w * 0.22, -0.55);
+        // a gentler burst, just below the product: the ring reaches its edges, its face is not stirred
+        worlds.water.impulse?.(a.x, a.y + a.h * 0.58, a.w * 0.16, -0.3);
       }
       swU = sw.u;
       comp.draw(kind, sw.u, sw.u * sw.u * (3 - 2 * sw.u), { water: worlds.water.anchor(), wall: worlds.light.anchor(), W: G.W, H: G.H, time: v.time }, G.screen());
@@ -213,6 +219,7 @@ export function boot() {
       wake = Wake.Active;
     } else {
       swU = 0;
+      worlds.water?.protect?.(0);
       const t0 = COST ? performance.now() : 0;
       wake = w.render(dt, v, G.screen());
       if (COST && st.page === 'browse' && st.p === 0) {
@@ -236,6 +243,7 @@ export function boot() {
     const dt = dtr * TSCALE;
     vclock += dtr * 1000 * TSCALE;
     const w = curWorld();
+    pinK = scrub || revert ? 1 : Math.max(0, pinK - dtr / 0.22);
     let more = core.tick(dt, w?.spring ?? DEFAULT_SPRING);
     if (textures) more = textures.pump(now) || more;
     let wake: Wake = Wake.Sleep;
@@ -249,7 +257,7 @@ export function boot() {
     if (DEBUG && (core.state.p > 0 || core.state.sw)) markVisual();
     // schedule
     if (document.hidden) return;
-    if (more || wake === Wake.Active || core.state.sw || handing || core.transitioning || scrub || revert) raf = requestAnimationFrame(frame);
+    if (more || wake === Wake.Active || core.state.sw || handing || core.transitioning || scrub || revert || pinK > 0) raf = requestAnimationFrame(frame);
     else if (wake === Wake.Idle) tmo = window.setTimeout(() => ((tmo = 0), (raf = requestAnimationFrame(frame))), 34);
   }
 
@@ -288,7 +296,11 @@ export function boot() {
     set('chrome', chrome, () => root.style.setProperty('--chrome', chrome));
     const tr = w?.textRange ?? [0.5, 0.9];
     // a finger-scrubbed close clears the text away at once: the hero must not float over it
-    const tp = (s.page === 'detail' ? 1 : Math.min(smooth(tr[0], tr[1], s.p), scrub ? 1 - smooth(0, 0.22, scrub.prog) : 1)).toFixed(3);
+    // ... and the snap-back brings it back along the same curve (no step when the finger lifts)
+    if (scrub) tcap = 1 - smooth(0, 0.22, scrub.prog);
+    else if (revert) tcap = 1 - smooth(0, 0.22, revert.prog * revert.k);
+    else if (s.page === 'detail' || s.page === 'browse') tcap = 1;
+    const tp = (s.page === 'detail' ? 1 : Math.min(smooth(tr[0], tr[1], s.p), tcap)).toFixed(3);
     set('tp', tp, () => root.style.setProperty('--tp', tp));
     if (s.page !== lastPage) {
       lastPage = s.page;
@@ -427,7 +439,7 @@ export function boot() {
   // dims and the picture returns to the wall; Water: it sinks with a splash). Otherwise -> the page springs back open.
   const SCRUB_P = 0.55; // how much of p a full-length drag takes away
   let scrub: { base: Rect; prog: number; rect: Rect; lastProg: number; lastT: number; pvs: number } | null = null;
-  let revert: { from: Rect; base: Rect; k: number; kv: number } | null = null;
+  let revert: { from: Rect; base: Rect; k: number; kv: number; prog: number } | null = null;
   const scrubLen = () => innerHeight * 0.5;
   function beginScrub(): boolean {
     if (core.state.page !== 'detail' || !glOk() || !curWorld() || scrub || revert) return false;
@@ -456,7 +468,7 @@ export function boot() {
     const sc = 1 - 0.3 * prog;
     const b = s.base;
     const w = b.w * sc, h = b.h * sc;
-    s.rect = { x: b.x + b.w / 2 + dx * 0.9 - w / 2, y: b.y + b.h / 2 + Math.max(0, dy) * 0.95 - h / 2, w, h };
+    s.rect = { x: b.x + b.w / 2 + dx - w / 2, y: b.y + b.h / 2 + Math.max(0, dy) - h / 2, w, h };
     detail.fake = s.rect;
     const now = performance.now();
     const dtp = Math.max(1, now - s.lastT);
@@ -479,7 +491,7 @@ export function boot() {
     if (close) {
       core.state.pv = clamp(-SCRUB_P * s.pvs, -6, 0);
     } else {
-      revert = { from: s.rect, base: s.base, k: 1, kv: 0 };
+      revert = { from: s.rect, base: s.base, k: 1, kv: 0, prog: s.prog };
       core.state.pv = clamp(-SCRUB_P * s.pvs, 0, 3) ;
       core.open(true);
     }
@@ -766,6 +778,7 @@ export function boot() {
           det: detail.probe(),
           scrubbing: !!scrub,
           heroRect: detail.rect(),
+          anchors: worlds.water && worlds.light ? { water: worlds.water.anchor(), wall: worlds.light.anchor() } : null,
         };
       },
     });
