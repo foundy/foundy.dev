@@ -28,6 +28,8 @@ export interface View {
   hero: Rect;
   /** the current product's page tone: the colour the world must land on at p = 1 */
   tone: RGB;
+  /** 0..1: the hero is held at `hero` exactly (1:1 under the finger) whatever p says */
+  pin?: number;
   ink: RGB;
   /** seconds, monotonic */
   time: number;
@@ -96,6 +98,8 @@ export interface World {
   impulse?(x: number, y: number, radius: number, strength: number): void;
   /** water: damp the waves out quickly (true) or let them live again (false). Light: no-op. */
   calm?(on: boolean): void;
+  /** water: keep the product's central region free of surface refraction (0..1) while the world switch plays */
+  protect?(k: number): void;
   resize(W: number, H: number, dpr: number): void;
   /** make `i` the target product; immediate snaps, otherwise a critically damped spring from the current position and velocity */
   setIndex(i: number, immediate?: boolean): void;

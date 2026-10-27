@@ -413,10 +413,11 @@ export class LightWorld implements World {
     const wTop: [number, number, number] = [cx - (ww * 1.045) / 2, cx + (ww * 1.045) / 2, cyW - wh / 2];
     const wBot: [number, number, number] = [cx - (ww * 0.985) / 2, cx + (ww * 0.985) / 2, cyW + wh / 2];
     const hero = v.hero;
-    const top = (v.p > 0 ? [lerp(wTop[0], hero.x, gm), lerp(wTop[1], hero.x + hero.w, gm), lerp(wTop[2], hero.y, gm)] : wTop) as [number, number, number];
-    const bot = (v.p > 0 ? [lerp(wBot[0], hero.x, gm), lerp(wBot[1], hero.x + hero.w, gm), lerp(wBot[2], hero.y + hero.h, gm)] : wBot) as [number, number, number];
+    const gq = lerp(gm, 1, v.pin ?? 0); // a held hero (drag-to-close) is exactly where the finger puts it
+    const top = (v.p > 0 ? [lerp(wTop[0], hero.x, gq), lerp(wTop[1], hero.x + hero.w, gq), lerp(wTop[2], hero.y, gq)] : wTop) as [number, number, number];
+    const bot = (v.p > 0 ? [lerp(wBot[0], hero.x, gq), lerp(wBot[1], hero.x + hero.w, gq), lerp(wBot[2], hero.y + hero.h, gq)] : wBot) as [number, number, number];
     const inn = this.inner[this.shown] ?? [0, 0, 1, 1];
-    const win = [lerp(inn[0], 0, gm), lerp(inn[1], 0, gm), lerp(inn[2], 1, gm), lerp(inn[3], 1, gm)];
+    const win = [lerp(inn[0], 0, gq), lerp(inn[1], 0, gq), lerp(inn[2], 1, gq), lerp(inn[3], 1, gq)];
     // colour of the current slide
     const av = this.h.textures.avg[this.shown] ?? [0.6, 0.55, 0.5];
     for (let i = 0; i < 3; i++) this.avgS[i] += (av[i] - this.avgS[i]) * (1 - Math.exp(-5 * 0.048));
@@ -474,7 +475,7 @@ export class LightWorld implements World {
       setU(gl, pr.proj, 'uTint', tint);
       setU(gl, pr.proj, 'uWin', win);
       setU(gl, pr.proj, 'uLayer', this.shown);
-      setU(gl, pr.proj, 'uRad', 12 * gm);
+      setU(gl, pr.proj, 'uRad', 12 * gq);
       const vig = 1 - smooth(0.2, 1, pvis);
       const U: Record<string, number> = { uBlur: blur, uBright: fb, uVig: vig, uFringe: 1 - gm, uExpo: (1 + 0.5 * flash + rush) * (1 + 0.5 * (1 - intro)), uBloom: (0.85 + 1.2 * flash) * (1 - smooth(0.8, 1, pvis)), uDy: (dy + 0.3 * Math.sin(t * 41) + 0.2 * Math.sin(t * 17.3)) * (1 - gm), uScale: scale, uAlpha: 1, uFlick: flick, uSeed: this.shown / this.N, uTime: t };
       for (const k in U) setU(gl, pr.proj, k, U[k]);
