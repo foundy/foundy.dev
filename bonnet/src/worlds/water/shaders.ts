@@ -74,7 +74,7 @@ export const RENDER = `#version 300 es
 precision highp float; precision highp sampler2DArray;
 uniform sampler2D uSurf; uniform sampler2DArray uProd;
 uniform vec2 uRes; uniform float uPx, uTime, uSeed;
-uniform float uS, uSv, uP, uSlopeK, uLapK, uLayerW, uHeroRad, uPoolRad, uRestZ, uSpacing, uDith, uTilt, uGrab;
+uniform float uS, uSv, uP, uSlopeK, uLapK, uLayerW, uHeroRad, uPoolRad, uRestZ, uSpacing, uDith, uTilt, uGrab, uProt, uPin;
 uniform int uN, uCur;
 uniform vec3 uInk[8];
 uniform vec3 uTone, uBgInk;
@@ -144,7 +144,7 @@ void geom(int i, out vec2 c, out vec2 hs, out float rad, out float z, out float 
   ang = (-.42*d + uTilt)*nearW;
   yaw = clamp(d, -1.4, 1.4)*.30;
   if (i==uCur && uP>0.){
-    float g = uP*uP*(3.-2.*uP);
+    float g = mix(uP*uP*(3.-2.*uP), 1., uPin); // uPin: the hero is held at the finger's rect (drag-down-to-close)
     c = mix(c, uHero.xy, g); hs = mix(hs, .5*uHero.zw, g); rad = mix(rad, uHeroRad, g);
     z *= 1.-smoothstep(0.,.32,uP);
     ang *= 1.-g; yaw *= 1.-g;
@@ -207,6 +207,14 @@ void main(){
   vec2 slope = S.xy*uSlopeK;
   slope /= 1.+1.6*length(slope);
   float lap = S.w*uLapK;
+  {
+    // while the world switch plays, the product's central region keeps its picture: no swirl, edges may ripple
+    vec2 pcn = uPool.xy + vec2((floor(uS+.5)-uS)*uSpacing, 0.);
+    vec2 pd = abs(px-pcn)/(.31*uPool.zw);
+    float pm = 1.-smoothstep(.9,1.2,max(pd.x,pd.y));
+    float k = 1.-uProt*pm;
+    slope *= k; lap *= k;
+  }
   float sl = length(slope);
   vec3 N = normalize(vec3(-slope, 1.));
   float flowA = min(abs(uSv)*.5, 1.);
@@ -330,6 +338,12 @@ void main(){
   }
 
   // ---- finish: vignette-free, dithered
-  if (uDith>0.) outc += (hash(fc+uSeed*17.)-.5)/255.*1.6;
+  // one LSB peak to peak of PCG white noise on the integer pixel (the old fract-hash had a visible lattice that beat against downscaling)
+  if (uDith>0.) {
+    uvec2 q = uvec2(floor(fc)) * 1664525u + 1013904223u;
+    q.x += q.y * 1664525u; q.y += q.x * 1664525u; q ^= q >> 16u;
+    q.x += q.y * 1664525u; q.y += q.x * 1664525u; q ^= q >> 16u;
+    outc += (float(q.x >> 8u) / 16777216. - .5) / 255.;
+  }
   fragColor = vec4(outc, 1.);
 }`;

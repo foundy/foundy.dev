@@ -345,6 +345,11 @@ export class WaterWorld implements World {
     }
     this.wake();
   }
+  /** 0..1: how strongly the product's central region is kept free of surface refraction (the world switch sets it) */
+  prot = 0;
+  protect(k: number) {
+    this.prot = k;
+  }
   calm(on: boolean) {
     this.calmOn = on;
     this.wake();
@@ -491,6 +496,8 @@ export class WaterWorld implements World {
     gl.uniform1f(u.uPoolRad, 12);
     gl.uniform1f(u.uRestZ, 16);
     gl.uniform1f(u.uSpacing, this.spacing);
+    gl.uniform1f(u.uProt, this.prot);
+    gl.uniform1f(u.uPin, v.pin ?? 0);
     gl.uniform1f(u.uDith, v.p < 0.995 ? 1 : 0);
     gl.uniform1f(u.uTilt, this.tiltV * (1 - smooth(0, 0.05, v.p)));
     gl.uniform1f(u.uGrab, this.grab);

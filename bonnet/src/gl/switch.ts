@@ -28,7 +28,7 @@ uniform sampler2D uA, uB;
 uniform vec2 uRes;
 uniform float uAsp, uU, uTime, uMix;
 uniform int uK;
-uniform vec2 uP, uWall, uLens;
+uniform vec2 uP, uWall, uLens, uPS, uWS;
 out vec4 o;
 
 const float PI = 3.14159265;
@@ -55,6 +55,16 @@ float caus(vec2 p, float t){
 }
 float luma(vec3 c){ return dot(c, vec3(.299, .587, .114)); }
 
+// the central region of a product (55% of its width and height, a little more so the soft edge stays outside it): 1 inside
+float cmask(vec2 p, vec2 c, vec2 hs){
+  vec2 d = abs(p - c) / (hs * .62);
+  return 1. - sm(.9, 1.2, max(d.x, d.y));
+}
+// a slow, low-frequency water line offset (2-3 octaves, ~12 css px peak): never a zig-zag
+float swell(float x, float t){
+  return .0085 * sin(x * 5.1 + 1.3 + t * 1.1) + .0045 * sin(x * 9.7 - t * 1.6 + .6) + .0022 * sin(x * 15. + t * 2.1 + 2.);
+}
+
 vec3 l2w(vec2 uv){
   float u = uU;
   vec2 pc = (uv - uP) * vec2(uAsp, 1.);
@@ -70,49 +80,60 @@ vec3 l2w(vec2 uv){
   ua.x += sin((uv.y - uLens.y) * 6.) * .012 * bend * (1. - sm(.3, .45, u));
   float suck = sm(.16, .44, u);
   ua = uP + (ua - uP) * (1. + 2.8 * suck * suck);
-  vec3 a = tx(uA, ua);
-  a *= 1. + .35 * bend * (1. - suck);
+  vec3 a0 = tx(uA, ua);
+  float pmA = cmask(ua, uWall, uWS); // the wall picture's central region, in A's own coordinates
+  vec3 a = a0 * (1. + .2 * bend * (1. - suck));
   float hot = exp(-d * d * mix(26., 140., suck)) * sm(.06, .26, u) * (1. - sm(.30, .44, u));
-  a += vec3(1., .86, .62) * hot * 1.1;
+  a += vec3(1., .86, .62) * hot * .6 * (1. - pmA); // the glow gathers around the picture, not on it
   a *= 1. - .85 * sm(.34, .66, u);
 
   // ---- B: the Water world, revealed by a growing disc and a rising water line ---------------
   float fl = sm(.34, .97, u);
-  float wave = (.012 * sin(uv.x * 17. + uTime * 6.) + .007 * sin(uv.x * 43. - uTime * 9.3) + .02 * sin(uv.x * 5.3 + 1.3)) * lineAmp;
-  float lineY = mix(-.06, 1.1, fl) + wave;
-  float flood = 1. - sm(lineY - .004, lineY + .004, uv.y);
+  float lineY = mix(-.06, 1.1, fl) + swell(uv.x, uTime) * lineAmp;
+  float flood = 1. - sm(lineY - .0025, lineY + .0025, uv.y);
   float r = max(0., u - IMPACT) * 2.1;
   float disc = r > 0. ? 1. - sm(r - .012, r + .012, d) : 0.;
   float m = max(flood, disc);
 
+  // the product's central region keeps its picture: refraction only touches its edges while the water is still moving
+  float pmB = cmask(uv, uP, uPS);
+  float prot = pmB * (1. - sm(.8, .96, u));
   vec2 ub = uv;
-  // refraction beneath the water line
+  // refraction beneath the water line: slow and smooth, what is behind is only bent a little
   float below = max(lineY - uv.y, 0.);
-  float band = exp(-pow(below / .06, 2.)) * lineAmp * step(uv.y, lineY);
-  ub += vec2(sin(uv.y * 70. + uTime * 9.) * .0075, -.013 * sin(uv.x * 30. - uTime * 7.)) * band;
+  float band = exp(-pow(below / .05, 2.)) * lineAmp * flood;
+  ub += vec2(sin(uv.y * 16. + uTime * 3.) * .0035, -.011 * (.65 + .35 * sin(uv.x * 7. - uTime * 2.2))) * band * (1. - prot);
   // the shock ring pushes the picture outward as it passes
   float shock = r > 0. ? exp(-pow((d - r) / .045, 2.)) * (1. - sm(IMPACT, .78, u)) : 0.;
   vec2 dirv = d > 1e-4 ? pc / d : vec2(0.);
-  ub += dirv * vec2(1. / uAsp, 1.) * .028 * shock;
+  ub += dirv * vec2(1. / uAsp, 1.) * .022 * shock * (1. - prot);
   float zoom = 1. + .045 * (1. - sm(IMPACT, .97, u));
   ub = .5 + (ub - .5) / zoom;
-  vec3 b = tx(uB, ub);
+  vec3 b0 = tx(uB, ub);
+  vec3 b = b0;
 
-  // impact flare and caustics inside the water
+  // impact flare and caustics: on the water and around the picture's edge, never on the picture
   float flash = u > IMPACT ? pow(1. - sm(IMPACT, .68, u), 2.) : 0.;
   float cf = caus(pc * 5.5, uTime * 2.2);
-  b += vec3(.5, .8, .95) * cf * exp(-d * 2.6) * flash * 1.1;
-  b += vec3(1., .88, .66) * exp(-d * d * 55.) * flash * 1.9;
+  float edge = exp(-pow((d - .21) / .09, 2.));
+  b += vec3(.5, .8, .95) * cf * exp(-d * 2.6) * flash * .9 * (1. - pmB);
+  b += vec3(1., .88, .66) * (exp(-d * d * 55.) * 1.2 + edge * .45) * flash * (1. - pmB);
   // the shock ring itself, and the wet edge of the water line
   float ringHi = r > 0. ? exp(-pow((d - r) / .011, 2.)) * (1. - sm(IMPACT, .8, u)) : 0.;
   float lineHi = sm(0., .06, fl) * (1. - sm(.94, 1., fl));
-  float mensc = exp(-pow((uv.y - lineY) / .0065, 2.)) * lineHi;
-  float glowW = exp(-below / .05) * step(uv.y, lineY) * lineHi;
+  float dl = uv.y - lineY;
+  float mensc = exp(-pow(dl / .0016, 2.)) * lineHi;          // thin, soft, low highlight (~2 px)
+  float halo = exp(-pow(dl / .0065, 2.)) * lineHi;           // its blur
+  float refr = flood * exp(below / -.03) * lineHi;            // the darker refractive band just below
   vec3 col = mix(a, b, m);
-  col += vec3(.75, .93, 1.) * (ringHi * .45 + mensc * .45);
-  col += vec3(.05, .12, .15) * glowW;
+  col += vec3(.75, .93, 1.) * (ringHi * .3 * (1. - .8 * pmB) + (mensc * .16 + halo * .05) * (1. - .6 * pmB));
+  col += vec3(.04, .10, .13) * flood * exp(below / -.05) * lineHi;
+  col *= 1. - .2 * refr * (1. - .6 * pmB);
   // the air just above the line is wet and darker
-  col *= 1. - .35 * exp(-max(uv.y - lineY, 0.) / .05) * step(lineY, uv.y) * (1. - m) * lineHi;
+  col *= 1. - .12 * exp(-max(dl, 0.) / .05) * step(lineY, uv.y) * (1. - m) * lineHi;
+  // the photo is never lit beyond +25% of itself
+  vec3 src = mix(a0, b0, m);
+  col = mix(col, min(col, min(src * 1.25, max(src, vec3(.94)))), mix(pmA, pmB, m));
   return col;
 }
 
@@ -122,17 +143,17 @@ vec3 w2l(vec2 uv){
   float dr = sm(.30, .88, u);
   float lineAmp = sin(PI * dr);
 
-  // ---- the draining water line: falls from above the screen to below it, uneven, with drips -------
-  float drip = pow(vnoise(uv.x * 14. + 3.), 3.) * .045 + pow(vnoise(uv.x * 6. - 5.), 2.) * .03;
-  float wave = (.012 * sin(uv.x * 15. - uTime * 5.) + .006 * sin(uv.x * 38. + uTime * 8.7) + .025 * sin(uv.x * 4.1 + .4)) * lineAmp;
-  float lineY = mix(1.08, -.07, dr) + wave - drip * lineAmp;
-  float below = 1. - sm(lineY - .004, lineY + .004, uv.y); // 1 = still under water
+  // ---- the draining water line: falls from above the screen to below it, slow and uneven --------
+  float lineY = mix(1.08, -.07, dr) + swell(uv.x + 1.7, -uTime) * 1.15 * lineAmp;
+  float below = 1. - sm(lineY - .003, lineY + .003, uv.y); // 1 = still under water
 
   // ---- A: the (calm) water, its glints gathering into a column --------------------------------
-  float band = exp(-pow(max(lineY - uv.y, 0.) / .05, 2.)) * lineAmp * step(uv.y, lineY);
-  vec2 ua = uv + vec2(sin(uv.y * 64. + uTime * 8.) * .007, -.012 * sin(uv.x * 28. + uTime * 6.)) * band;
-  vec3 a = tx(uA, ua);
-  float glint = sm(.5, .95, luma(a));
+  float pmA = cmask(uv, uP, uPS);
+  float bandA = exp(-pow(max(lineY - uv.y, 0.) / .045, 2.)) * lineAmp * below;
+  vec2 ua = uv + vec2(sin(uv.y * 14. + uTime * 3.) * .003, -.01 * (.65 + .35 * sin(uv.x * 7. + uTime * 2.))) * bandA * (1. - pmA);
+  vec3 a0 = tx(uA, ua);
+  vec3 a = a0;
+  float glint = sm(.5, .95, luma(a0));
   float colx = (uv.x - uP.x) * uAsp;
   float cw = mix(.2, .04, gather);
   float colM = exp(-pow(colx / cw, 2.));
@@ -140,24 +161,47 @@ vec3 w2l(vec2 uv){
   float bot = mix(uP.y - .02, uLens.y, sm(.34, .74, u));
   float vm = sm(bot - .03, bot + .04, uv.y) * (1. - sm(top - .05, top, uv.y));
   float g = gather * (1. - sm(.60, .92, u));
-  float shimmer = .82 + .18 * sin(uv.y * 34. - uTime * 11.) * sin(colx * 90. + uTime * 3.);
+  float shimmer = .85 + .15 * sin(uv.y * 20. - uTime * 8.) * sin(colx * 40. + uTime * 2.);
   vec3 colCol = mix(vec3(.7, .9, 1.), vec3(1., .9, .72), sm(uP.y, uWall.y, uv.y)); // cool at the surface, warm toward the wall
-  // everything but the glints dims; the glints near the column are lifted
-  a *= mix(1., .38, gather);
-  a += a * glint * gather * colM * 1.2;
-  a += colCol * colM * vm * g * shimmer * .7;
-  a += colCol * exp(-pow(colx / (cw * 2.6), 2.)) * vm * g * .12;
+  // the room dims around the product (the product keeps its own light); the glints near the column are lifted
+  a *= mix(mix(1., .38, gather), 1., pmA);
+  a += a * glint * gather * colM * 1.2 * (1. - pmA);
+  // the column of light stays above/below the product; around the picture it only gathers as a soft halo
+  a += colCol * colM * vm * g * shimmer * .42 * (1. - pmA);
+  a += colCol * exp(-pow(colx / (cw * 2.6), 2.)) * vm * g * .1 * (1. - pmA);
+  vec2 dd = abs(uv - uP) / uPS;
+  float rim = exp(-pow(max(max(dd.x, dd.y) - 1., 0.) / .22, 2.)) * (1. - pmA) * gather * (1. - sm(.5, .9, u));
+  a += colCol * rim * .1;
 
   // ---- B: the Light world, behind the water line ----------------------------------------------
-  vec2 ub = uv + vec2(sin(uv.y * 50. - uTime * 7.) * .004, 0.) * exp(-pow(max(uv.y - lineY, 0.) / .05, 2.)) * lineAmp * step(lineY, uv.y);
-  vec3 b = tx(uB, ub);
+  float pmB = cmask(uv, uWall, uWS);
+  vec2 ub = uv + vec2(sin(uv.y * 14. - uTime * 3.) * .003, 0.) * exp(-pow(max(uv.y - lineY, 0.) / .05, 2.)) * lineAmp * step(lineY, uv.y) * (1. - pmB);
+  vec3 b0 = tx(uB, ub);
+  vec3 b = b0;
   float lineHi = sm(0., .06, dr) * (1. - sm(.94, 1., dr));
-  float mensc = exp(-pow((uv.y - lineY) / .0065, 2.)) * lineHi;
-  float glowW = exp(-max(lineY - uv.y, 0.) / .05) * step(uv.y, lineY) * lineHi;
+  float dl = uv.y - lineY;
+  float mensc = exp(-pow(dl / .0016, 2.)) * lineHi;
+  float halo = exp(-pow(dl / .0065, 2.)) * lineHi;
+  float refr = below * exp(dl / .03) * lineHi;              // the darker refractive band under the line (dl < 0 here)
+  // a few soft droplet streaks the water leaves behind on the wall, above the line (no spikes)
+  float st = 0.;
+  for (int i = 0; i < 4; i++) {
+    float fi = float(i);
+    float sx = .15 + .23 * fi + .035 * sin(fi * 5.3);
+    float h = max(dl, 0.);
+    float len = .06 + .035 * fract(fi * .37 + .21);
+    st += exp(-pow((uv.x - sx) / (.009 + .003 * fi), 2.)) * sm(0., .012, h) * exp(-h / len) * (1. - below);
+  }
+  st *= lineAmp * lineHi;
   vec3 col = mix(b, a, below);
-  col += vec3(.75, .93, 1.) * mensc * .45;
-  col += vec3(.05, .12, .15) * glowW;
-  col *= 1. - .3 * exp(-max(uv.y - lineY, 0.) / .045) * step(lineY, uv.y) * lineHi;
+  col = mix(col, col * .88 + vec3(.05, .09, .11), clamp(st, 0., 1.) * (1. - .8 * pmB));
+  col += vec3(.75, .93, 1.) * (mensc * .16 + halo * .05) * (1. - .6 * max(pmA, pmB));
+  col += vec3(.04, .10, .13) * below * exp(dl / .05) * lineHi;
+  col *= 1. - .2 * refr * (1. - .6 * max(pmA, pmB));
+  col *= 1. - .1 * exp(-max(dl, 0.) / .045) * step(lineY, uv.y) * lineHi;
+  // the photo is never lit beyond +25% of itself
+  vec3 src = mix(b0, a0, below);
+  col = mix(col, min(col, min(src * 1.25, max(src, vec3(.94)))), mix(pmB, pmA, below));
   return col;
 }
 
@@ -231,6 +275,8 @@ export class Compositor {
     gl.uniform1i(U.uK, kind);
     gl.uniform2f(U.uP, uvx(o.water.x), uvy(o.water.y));
     gl.uniform2f(U.uWall, uvx(o.wall.x), uvy(o.wall.y));
+    gl.uniform2f(U.uPS, o.water.w / o.W / 2, o.water.h / o.H / 2);
+    gl.uniform2f(U.uWS, o.wall.w / o.W / 2, o.wall.h / o.H / 2);
     const lens = o.wall.lens ?? { x: o.W / 2, y: o.H * 0.7 };
     gl.uniform2f(U.uLens, uvx(lens.x), uvy(lens.y));
     gl.activeTexture(gl.TEXTURE0);
